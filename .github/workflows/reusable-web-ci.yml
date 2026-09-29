@@ -1,0 +1,67 @@
+name: Reusable Web CI
+on:
+  workflow_call:
+    inputs:
+      app_name:
+        required: true
+        type: string
+      app_path:
+        required: true
+        type: string
+      package_manager:
+        type: string
+        default: npm
+      lockfile:
+        type: string
+        default: package-lock.json
+permissions:
+  contents: read
+jobs:
+  verify:
+    name: ${{ inputs.app_name }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      CI: 'true'
+      PACKAGE_MANAGER: ${{ inputs.package_manager }}
+    defaults:
+      run:
+        shell: bash
+        working-directory: ${{ inputs.app_path }}
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          persist-credentials: false
+      - name: Set up pnpm when required
+        if: inputs.package_manager == 'pnpm'
+        uses: pnpm/action-setup@f40ffcd9367d9f12939873eb1018b921a783ffaa # v4
+        with:
+          version: 10
+          run_install: false
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: '22'
+          cache: ${{ inputs.package_manager }}
+          cache-dependency-path: ${{ inputs.app_path }}/${{ inputs.lockfile }}
+      - name: Validate CI contract
+        run: node "$GITHUB_WORKSPACE/.github/scripts/check_contract.mjs" web
+      - name: Install locked dependencies
+        run: |
+          case "$PACKAGE_MANAGER" in
+            npm) npm ci --no-audit --no-fund ;;
+            pnpm) pnpm install --frozen-lockfile ;;
+            *) echo "Unsupported package manager" >&2; exit 1 ;;
+          esac
+      - name: Lint without modifying source
+        run: '"$PACKAGE_MANAGER" run lint'
+      - name: Unit tests
+        run: '"$PACKAGE_MANAGER" run test:unit'
+      - name: Build web application
+        run: '"$PACKAGE_MANAGER" run build'
+      - name: Save production build
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: web-${{ inputs.app_name }}-${{ github.sha }}
+          path: ${{ inputs.app_path }}/dist
+          if-no-files-found: error
+          retention-days: 7

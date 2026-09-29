@@ -1,0 +1,85 @@
+name: Application CI
+# ci/bootstrap only stores configuration. These events apply after source adoption.
+on:
+  pull_request:
+    branches: [main, master]
+  push:
+    branches: [main, master]
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: application-ci-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+jobs:
+  detect-changes:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    outputs:
+      backend: ${{ steps.changes.outputs.backend }}
+      backend_count: ${{ steps.changes.outputs.backend_count }}
+      web: ${{ steps.changes.outputs.web }}
+      web_count: ${{ steps.changes.outputs.web_count }}
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - id: changes
+        name: Detect changed applications (exclude AI)
+        run: python3 .github/scripts/detect_changes.py
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          BASE_SHA: ${{ github.event.pull_request.base.sha || github.event.before }}
+          HEAD_SHA: ${{ github.sha }}
+  backend:
+    needs: detect-changes
+    if: needs.detect-changes.outputs.backend_count != '0'
+    strategy:
+      fail-fast: false
+      max-parallel: 4
+      matrix: ${{ fromJSON(needs.detect-changes.outputs.backend) }}
+    uses: ./.github/workflows/reusable-backend-ci.yml
+    with:
+      service_name: ${{ matrix.name }}
+      service_path: ${{ matrix.path }}
+      package_manager: ${{ matrix.package_manager }}
+      lockfile: ${{ matrix.lockfile }}
+      dockerfile: ${{ matrix.dockerfile }}
+  web:
+    needs: detect-changes
+    if: needs.detect-changes.outputs.web_count != '0'
+    strategy:
+      fail-fast: false
+      matrix: ${{ fromJSON(needs.detect-changes.outputs.web) }}
+    uses: ./.github/workflows/reusable-web-ci.yml
+    with:
+      app_name: ${{ matrix.name }}
+      app_path: ${{ matrix.path }}
+      package_manager: ${{ matrix.package_manager }}
+      lockfile: ${{ matrix.lockfile }}
+  ci-success:
+    name: CI / required
+    if: always()
+    needs: [detect-changes, backend, web]
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Require all selected checks to succeed
+        env:
+          RESULTS: ${{ toJSON(needs) }}
+        run: |
+          python3 - <<'PYTHON'
+          import json, os
+          results = json.loads(os.environ['RESULTS'])
+          detection = results['detect-changes']
+          if detection['result'] != 'success':
+              raise SystemExit(f"Change detection: {detection['result']}")
+          for kind in ['backend', 'web']:
+              count = int(detection['outputs'][kind + '_count'])
+              expected = 'success' if count else 'skipped'
+              actual = results[kind]['result']
+              if actual != expected:
+                  raise SystemExit(f'{kind}: {actual}, expected {expected}')
+          print('All selected CI jobs passed; empty selections are explicitly skipped.')
+          PYTHON
