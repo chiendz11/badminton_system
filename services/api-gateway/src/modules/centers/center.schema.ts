@@ -21,24 +21,24 @@ export const centerTypeDefs = `
         facilities: [String]
         googleMapUrl: String
         isActive: Boolean
-        
+
         logoFileId: String
-        imageFileIds: [String] 
-        
+        imageFileIds: [String]
+
         pricing: PricingInput # 🟢 Quan trọng cho tính tiền
         centerManagerId: String
     }
 
     # --- OBJECT TYPES ---
-    type TimeSlot { 
+    type TimeSlot {
         startTime: String
         endTime: String
-        price: Float 
+        price: Float
     }
-    
-    type Pricing { 
+
+    type Pricing {
         weekday: [TimeSlot]
-        weekend: [TimeSlot] 
+        weekend: [TimeSlot]
     }
 
     type Court {
@@ -59,41 +59,41 @@ export const centerTypeDefs = `
         googleMapUrl: String
         totalCourts: Int
         facilities: [String]
-        
+
         logoFileId: String
-        logoUrl: String 
+        logoUrl: String
         imageFileIds: [String]
         imageUrlList: [String]
-        
+
         avgRating: Float
         bookingCount: Int
         isActive: Boolean
         centerManagerId: String
-        
+
         # 🟢 2 Field quan trọng frontend cần
-        pricing: Pricing 
-        courts: [Court] 
+        pricing: Pricing
+        courts: [Court]
     }
 
     # --- QUERY & MUTATION ---
     type Query {
-        centers: [Center!]! 
+        centers: [Center!]!
         center(centerId: String!): Center
     }
 
     type Mutation {
         createCenter(
-            name: String!, 
-            address: String!, 
-            phone: String!, 
-            description: String, 
-            totalCourts: Int, 
-            facilities: [String], 
-            
+            name: String!,
+            address: String!,
+            phone: String!,
+            description: String,
+            totalCourts: Int,
+            facilities: [String],
+
             logoFileId: String,
-            imageFileIds: [String], 
+            imageFileIds: [String],
             googleMapUrl: String,
-            
+
             pricing: PricingInput, # 🟢 Input lúc tạo
             centerManagerId: String
         ): Center!
