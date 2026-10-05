@@ -1,4 +1,4 @@
-name: Reusable Web CI
+name: Reusable Node CI
 'on':
   workflow_call:
     inputs:
@@ -23,19 +23,36 @@ name: Reusable Web CI
       node_version:
         type: string
         required: true
+      database:
+        type: string
+        default: none
+      prisma:
+        type: boolean
+        default: false
+      docker:
+        type: boolean
+        default: true
+      dockerfile:
+        type: string
+        required: true
+      docker_context:
+        type: string
+        default: .
 permissions:
   contents: read
 jobs:
   verify:
     name: ${{ inputs.component_name }}
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    timeout-minutes: 30
     env:
       CI: 'true'
       PACKAGE_MANAGER: ${{ inputs.package_manager }}
       PACKAGE_MANAGER_VERSION: ${{ inputs.package_manager_version }}
       INSTALL_PATH: ${{ inputs.install_path }}
       LOCKFILE: ${{ inputs.lockfile }}
+      PRISMA: ${{ inputs.prisma }}
+      COMPONENT_NAME: ${{ inputs.component_name }}
     defaults:
       run:
         shell: bash
@@ -45,7 +62,7 @@ jobs:
         with:
           persist-credentials: false
       - name: Validate Node CI contract
-        run: node "$GITHUB_WORKSPACE/.github/scripts/check_node_contract.mjs" web
+        run: node "$GITHUB_WORKSPACE/.github/scripts/check_node_contract.mjs" node
       - name: Set up pnpm
         if: inputs.package_manager == 'pnpm'
         uses: pnpm/action-setup@f40ffcd9367d9f12939873eb1018b921a783ffaa
@@ -66,20 +83,42 @@ jobs:
             *) echo 'Unsupported package manager' >&2; exit 1 ;;
           esac
         working-directory: ${{ inputs.install_path }}
+      - name: Start isolated PostgreSQL for Prisma
+        run: bash "$GITHUB_WORKSPACE/.github/scripts/prisma_database.sh" start
+        if: inputs.prisma
+      - name: Validate and generate Prisma client
+        run: |-
+          "$PACKAGE_MANAGER" run prisma:validate
+          "$PACKAGE_MANAGER" run prisma:generate
+        if: inputs.prisma
       - name: Lint
         run: '"$PACKAGE_MANAGER" run lint'
       - name: Typecheck
         run: '"$PACKAGE_MANAGER" run typecheck'
-      - name: Unit/component tests
+      - name: Unit tests
         run: '"$PACKAGE_MANAGER" run test:unit'
-      - name: Consumer contracts
+        env:
+          NODE_ENV: test
+      - name: Validate consumer/provider contracts
         run: '"$PACKAGE_MANAGER" run test:contract'
-      - name: Build web app
+        env:
+          NODE_ENV: test
+      - name: Apply committed Prisma migrations
+        run: '"$PACKAGE_MANAGER" run prisma:migrate:deploy'
+        if: inputs.prisma
+      - name: Component integration tests
+        run: '"$PACKAGE_MANAGER" run test:integration'
+        env:
+          NODE_ENV: test
+      - name: Build component
         run: '"$PACKAGE_MANAGER" run build'
-      - name: Save web build
-        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+      - name: Docker build and security scan
+        if: inputs.docker
+        uses: ./.github/actions/build-scan
         with:
-          name: web-${{ inputs.component_name }}-${{ github.sha }}
-          path: ${{ inputs.component_path }}/dist
-          if-no-files-found: error
-          retention-days: 7
+          name: ${{ inputs.component_name }}
+          dockerfile: ${{ inputs.dockerfile }}
+          context: ${{ inputs.docker_context }}
+      - name: Clean up isolated PostgreSQL
+        run: bash "$GITHUB_WORKSPACE/.github/scripts/prisma_database.sh" cleanup
+        if: always() && inputs.prisma

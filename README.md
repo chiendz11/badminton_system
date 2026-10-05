@@ -1,22 +1,24 @@
-# badminton_system — CI configuration
+# badminton_system — CI bootstrap
 
-Nhánh `ci/bootstrap` chỉ chứa cấu hình GitHub Actions, script hỗ trợ CI và tài liệu. **Không chứa source ứng dụng, AI service, model hoặc test của repo gốc.**
+`main` là nhánh mặc định; `ci/bootstrap` là nhánh feature chứa cấu hình CI cho kiến trúc mới. Repo hiện chỉ chứa workflow, script và tài liệu CI. Codebase ứng dụng sẽ được tạo sau.
 
-Thiết kế dựa trên cấu trúc của [Badminton_manager_microservices](https://github.com/chiendz11/Badminton_manager_microservices) và code local `Badminton-manager-project-microservices`.
+Thiết kế theo [thảo luận kiến trúc CI mới](https://chatgpt.com/share/6ac2943b-efb4-83ec-b181-e9161879f28d): một deployable/bounded context tương ứng một component, với change detection dựa trên dependency graph.
 
-## Các tệp chính
+## Cấu hình chính
 
-- `.github/workflows/ci.yml`: phát hiện component thay đổi, tạo matrix và tổng hợp kết quả.
-- `.github/workflows/reusable-backend-ci.yml`: dùng chung cho API gateway và các Node backend.
-- `.github/workflows/reusable-web-ci.yml`: dùng chung cho `Frontend` và `Admin`.
-- `.github/scripts/detect_changes.py`: tự nhận diện service, npm/pnpm và Dockerfile; luôn loại `BM/services/ai_service`.
-- `.github/scripts/check_contract.mjs`: kiểm tra các lệnh bắt buộc trước khi cài dependency/chạy CI.
-- [docs/CI.md](docs/CI.md): CI contract, phạm vi, điều kiện áp dụng và bước tiếp theo.
+- `.github/ci/components.yml`: khai báo component, runtime, database, workspace, dependency và golden thresholds.
+- `.github/workflows/ci.yml`: điều phối matrix `node`, `python`, `web`, `contract`, rồi tổng hợp vào `CI / required`.
+- `reusable-node-ci.yml`: Node typecheck, unit/contract/integration, Prisma migration, Docker build và Trivy.
+- `reusable-python-ci.yml`: AI FastAPI, uv lockfile, Ruff/typecheck, API/contract tests, golden evaluation và smoke test.
+- `reusable-web-ci.yml`: React/Vite lint, typecheck, unit/consumer contracts và production build.
+- `reusable-contract-ci.yml`: OpenAPI, AsyncAPI, event/AI-tool JSON Schemas và ví dụ hợp lệ/không hợp lệ.
 
-## Trạng thái
+AI là component Python chính thức. Các module trong `booking_core` được kiểm tra chung theo cùng transaction/deployment boundary.
 
-Đây là **bộ cấu hình để áp dụng vào repo ứng dụng**, không phải một bản sao ứng dụng chạy được. Workflow chỉ tự chạy khi push/PR vào `main` hoặc `master`; push nhánh `ci/bootstrap` không chạy test. Không checkout repo nguồn qua mạng và không dùng GitHub Secrets.
+## Trạng thái bootstrap
 
-Sau khi đưa thư mục `.github` vào repo có source ứng dụng và chuẩn hóa CI contract, workflow sẽ chạy theo thay đổi. Chạy thủ công ngay trên repo chỉ có cấu hình sẽ báo rõ thiếu source, không báo thành công giả.
+Manifest đang để `configuration_only: true`. Khi workflow được chạy, các bước chỉ kiểm tra cú pháp CI, manifest và dependency graph; các application job được bỏ qua và summary ghi rõ chưa chạy kiểm thử ứng dụng. Push nhánh `ci/bootstrap` không tự chạy pipeline.
 
-Không triển khai `integration.yml` xuyên service hoặc `release.yml` trong nhánh đầu tiên. Các bước AWS ECR, GitOps, ArgoCD và EKS thuộc giai đoạn sau.
+Sau khi có codebase theo các path đã khai báo, bổ sung CI contract, lockfile, test thật và Dockerfile, rồi đặt `configuration_only: false`. Xem [docs/CI.md](docs/CI.md) để biết các điều kiện áp dụng.
+
+Targeted integration xuyên service, nightly integration và ECR/GitOps release được triển khai ở giai đoạn tiếp theo. Bộ CI này không checkout repo ứng dụng cũ và không tạo codebase ứng dụng.

@@ -1,0 +1,32 @@
+name: Build and scan component image
+description: Validate Docker build and fail on fixable HIGH/CRITICAL vulnerabilities; no publishing.
+inputs:
+  name:
+    required: true
+    description: Manifest component name
+  dockerfile:
+    required: true
+    description: Repository-relative Dockerfile
+  context:
+    required: true
+    description: Repository-relative Docker build context
+runs:
+  using: composite
+  steps:
+    - name: Build Docker image
+      run: docker build --file "$DOCKERFILE" --tag "$IMAGE_REF" "$BUILD_CONTEXT"
+      shell: bash
+      env:
+        DOCKERFILE: ${{ inputs.dockerfile }}
+        BUILD_CONTEXT: ${{ inputs.context }}
+        IMAGE_REF: badminton/${{ inputs.name }}:${{ github.sha }}
+    - name: Scan image vulnerabilities
+      uses: aquasecurity/trivy-action@57a97c7e7821a5776cebc9bb87c984fa69cba8f1
+      with:
+        scan-type: image
+        image-ref: badminton/${{ inputs.name }}:${{ github.sha }}
+        scanners: vuln
+        format: table
+        exit-code: '1'
+        ignore-unfixed: true
+        severity: HIGH,CRITICAL

@@ -1,85 +1,187 @@
 name: Application CI
-# ci/bootstrap only stores configuration. These events apply after source adoption.
-on:
+'on':
   pull_request:
-    branches: [main, master]
+    branches:
+      - main
   push:
-    branches: [main, master]
+    branches:
+      - main
+  merge_group: {}
   workflow_dispatch:
+    inputs:
+      golden_suite:
+        type: choice
+        description: AI offline evaluation size once source is adopted
+        default: small
+        options:
+          - small
+          - full
 permissions:
   contents: read
 concurrency:
   group: application-ci-${{ github.event.pull_request.number || github.ref }}
   cancel-in-progress: true
 jobs:
+  configuration:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065
+        with:
+          python-version: '3.12'
+      - name: Install manifest parser
+        run: python -m pip install PyYAML==6.0.3
+      - name: Validate manifest and dependency graph
+        run: python .github/scripts/ci_manifest.py
+      - name: Check CI script syntax without running application tests
+        run: |-
+          python - <<'PYTHON'
+          import ast
+          from pathlib import Path
+          for path in Path('.github/scripts').glob('*.py'):
+              ast.parse(path.read_text(), filename=str(path))
+          print('Python CI scripts parse successfully')
+          PYTHON
+          node --check .github/scripts/check_node_contract.mjs
+          bash -n .github/scripts/prisma_database.sh
+      - name: Validate GitHub Actions syntax
+        run: docker run --rm -v "$PWD:/repo:ro" -w /repo rhysd/actionlint:1.7.7 -color
   detect-changes:
+    needs: configuration
     runs-on: ubuntu-latest
     timeout-minutes: 5
     outputs:
-      backend: ${{ steps.changes.outputs.backend }}
-      backend_count: ${{ steps.changes.outputs.backend_count }}
+      mode: ${{ steps.changes.outputs.mode }}
+      affected: ${{ steps.changes.outputs.affected }}
+      node: ${{ steps.changes.outputs.node }}
+      node_count: ${{ steps.changes.outputs.node_count }}
+      python: ${{ steps.changes.outputs.python }}
+      python_count: ${{ steps.changes.outputs.python_count }}
       web: ${{ steps.changes.outputs.web }}
       web_count: ${{ steps.changes.outputs.web_count }}
+      contract: ${{ steps.changes.outputs.contract }}
+      contract_count: ${{ steps.changes.outputs.contract_count }}
     steps:
-      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
         with:
-          fetch-depth: 0
           persist-credentials: false
-      - id: changes
-        name: Detect changed applications (exclude AI)
-        run: python3 .github/scripts/detect_changes.py
+          fetch-depth: 0
+      - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065
+        with:
+          python-version: '3.12'
+      - name: Install manifest parser
+        run: python -m pip install PyYAML==6.0.3
+      - name: Select components using dependency graph
+        run: python .github/scripts/detect_changes.py
+        id: changes
         env:
           EVENT_NAME: ${{ github.event_name }}
           BASE_SHA: ${{ github.event.pull_request.base.sha || github.event.before }}
           HEAD_SHA: ${{ github.sha }}
-  backend:
+  node:
     needs: detect-changes
-    if: needs.detect-changes.outputs.backend_count != '0'
+    if: needs.detect-changes.outputs.mode == 'application' && needs.detect-changes.outputs.node_count != '0'
     strategy:
       fail-fast: false
       max-parallel: 4
-      matrix: ${{ fromJSON(needs.detect-changes.outputs.backend) }}
-    uses: ./.github/workflows/reusable-backend-ci.yml
+      matrix: ${{ fromJSON(needs.detect-changes.outputs.node) }}
+    uses: ./.github/workflows/reusable-node-ci.yml
     with:
-      service_name: ${{ matrix.name }}
-      service_path: ${{ matrix.path }}
+      component_name: ${{ matrix.name }}
+      component_path: ${{ matrix.path }}
+      node_version: ${{ matrix.node_version }}
       package_manager: ${{ matrix.package_manager }}
+      package_manager_version: ${{ matrix.package_manager_version }}
+      install_path: ${{ matrix.install_path }}
       lockfile: ${{ matrix.lockfile }}
+      database: ${{ matrix.database }}
+      prisma: ${{ matrix.prisma }}
+      docker: ${{ matrix.docker }}
       dockerfile: ${{ matrix.dockerfile }}
-  web:
+      docker_context: ${{ matrix.docker_context }}
+  python:
     needs: detect-changes
-    if: needs.detect-changes.outputs.web_count != '0'
+    if: needs.detect-changes.outputs.mode == 'application' && needs.detect-changes.outputs.python_count != '0'
     strategy:
       fail-fast: false
+      max-parallel: 4
+      matrix: ${{ fromJSON(needs.detect-changes.outputs.python) }}
+    uses: ./.github/workflows/reusable-python-ci.yml
+    with:
+      component_name: ${{ matrix.name }}
+      component_path: ${{ matrix.path }}
+      python_version: ${{ matrix.python_version }}
+      uv_version: ${{ matrix.uv_version }}
+      golden_thresholds: ${{ matrix.golden_thresholds }}
+      docker: ${{ matrix.docker }}
+      dockerfile: ${{ matrix.dockerfile }}
+      docker_context: ${{ matrix.docker_context }}
+      golden_suite: ${{ github.event_name == 'workflow_dispatch' && inputs.golden_suite || 'small' }}
+  web:
+    needs: detect-changes
+    if: needs.detect-changes.outputs.mode == 'application' && needs.detect-changes.outputs.web_count != '0'
+    strategy:
+      fail-fast: false
+      max-parallel: 4
       matrix: ${{ fromJSON(needs.detect-changes.outputs.web) }}
     uses: ./.github/workflows/reusable-web-ci.yml
     with:
-      app_name: ${{ matrix.name }}
-      app_path: ${{ matrix.path }}
+      component_name: ${{ matrix.name }}
+      component_path: ${{ matrix.path }}
+      node_version: ${{ matrix.node_version }}
       package_manager: ${{ matrix.package_manager }}
+      package_manager_version: ${{ matrix.package_manager_version }}
+      install_path: ${{ matrix.install_path }}
       lockfile: ${{ matrix.lockfile }}
+  contract:
+    needs: detect-changes
+    if: needs.detect-changes.outputs.mode == 'application' && needs.detect-changes.outputs.contract_count != '0'
+    strategy:
+      fail-fast: false
+      max-parallel: 4
+      matrix: ${{ fromJSON(needs.detect-changes.outputs.contract) }}
+    uses: ./.github/workflows/reusable-contract-ci.yml
+    with:
+      component_name: ${{ matrix.name }}
+      component_path: ${{ matrix.path }}
   ci-success:
     name: CI / required
     if: always()
-    needs: [detect-changes, backend, web]
+    needs:
+      - configuration
+      - detect-changes
+      - node
+      - python
+      - web
+      - contract
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:
-      - name: Require all selected checks to succeed
-        env:
-          RESULTS: ${{ toJSON(needs) }}
-        run: |
+      - name: Aggregate selected checks
+        run: |-
           python3 - <<'PYTHON'
           import json, os
-          results = json.loads(os.environ['RESULTS'])
-          detection = results['detect-changes']
-          if detection['result'] != 'success':
-              raise SystemExit(f"Change detection: {detection['result']}")
-          for kind in ['backend', 'web']:
-              count = int(detection['outputs'][kind + '_count'])
+          needs = json.loads(os.environ['RESULTS'])
+          for job in ['configuration', 'detect-changes']:
+              if needs[job]['result'] != 'success':
+                  raise SystemExit(f"{job}: {needs[job]['result']}")
+          outputs = needs['detect-changes']['outputs']
+          for runtime in ['node', 'python', 'web', 'contract']:
+              count = int(outputs[runtime + '_count'])
               expected = 'success' if count else 'skipped'
-              actual = results[kind]['result']
+              actual = needs[runtime]['result']
               if actual != expected:
-                  raise SystemExit(f'{kind}: {actual}, expected {expected}')
-          print('All selected CI jobs passed; empty selections are explicitly skipped.')
+                  raise SystemExit(f'{runtime}: {actual}, expected {expected}')
+          if outputs['mode'] == 'configuration-only':
+              message = 'CI configuration is valid. Application validation is disabled; no application tests ran.'
+          else:
+              message = 'All affected application and contract checks passed.'
+          print(message)
+          with open(os.environ['GITHUB_STEP_SUMMARY'], 'a') as summary:
+              summary.write('## Required check\n\n' + message + '\n')
           PYTHON
+        env:
+          RESULTS: ${{ toJSON(needs) }}
