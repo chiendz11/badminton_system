@@ -1,5 +1,4 @@
 packages:
   - services/*
   - packages/*
-  - Frontend
-  - Admin
+  - apps/*

@@ -93,7 +93,7 @@ components:
     docker: true
     enabled: false
   booking_core:
-    path: services/booking_core
+    path: services/booking-core
     runtime: node
     database: postgres
     prisma: true
@@ -173,29 +173,14 @@ components:
       critical_field_accuracy: 0.95
     enabled: false
   frontend:
-    path: Frontend
+    path: apps/web
     runtime: web
-    depends_on:
-      - booking_api
-      - auth_contracts
-      - booking_contracts
-      - booking_ui
+    depends_on: []
     docker: false
     enabled: true
   admin:
-    path: Admin
+    path: apps/admin
     runtime: web
-    depends_on:
-      - booking_api
-      - auth_contracts
-      - booking_contracts
-      - booking_ui
+    depends_on: []
     docker: false
     enabled: true
-  booking_ui:
-    path: packages/booking-ui
-    runtime: shared
-    enabled: true
-    depends_on:
-      - booking_contracts
-      - auth_contracts

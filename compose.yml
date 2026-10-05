@@ -19,7 +19,7 @@ services:
   migrate:
     build:
       context: .
-      dockerfile: services/booking_core/Dockerfile
+      dockerfile: services/booking-core/Dockerfile
       target: build
     environment:
       DATABASE_URL: postgresql://booking:booking_dev@postgres:5432/booking
@@ -34,7 +34,7 @@ services:
   api:
     build:
       context: .
-      dockerfile: services/booking_core/Dockerfile
+      dockerfile: services/booking-core/Dockerfile
     environment:
       DATABASE_URL: postgresql://booking:booking_dev@postgres:5432/booking
       JWT_SECRET: local-development-only-change-me-32-chars
@@ -61,24 +61,26 @@ services:
   frontend:
     build:
       context: .
-      dockerfile: Frontend/Dockerfile
+      dockerfile: apps/web/Dockerfile
       args:
-        VITE_ENABLE_DEMO_AUTH: "true"
+        VITE_CLIENT_ID: ${VITE_CLIENT_ID:-}
     ports:
       - 127.0.0.1:8082:80
-    depends_on:
-      api:
-        condition: service_healthy
+    environment:
+      API_GATEWAY_URL: ${API_GATEWAY_URL:-http://host.docker.internal:8080}
+    extra_hosts:
+      - host.docker.internal:host-gateway
   admin:
     build:
       context: .
-      dockerfile: Admin/Dockerfile
+      dockerfile: apps/admin/Dockerfile
       args:
-        VITE_ENABLE_DEMO_AUTH: "true"
+        VITE_CLIENT_ID: ${VITE_CLIENT_ID:-}
     ports:
       - 127.0.0.1:8083:80
-    depends_on:
-      api:
-        condition: service_healthy
+    environment:
+      API_GATEWAY_URL: ${API_GATEWAY_URL:-http://host.docker.internal:8080}
+    extra_hosts:
+      - host.docker.internal:host-gateway
 volumes:
   booking-data: {}

@@ -1,0 +1,447 @@
+{
+  "repository": "https://github.com/chiendz11/Badminton_manager_microservices",
+  "commit": "484d381e873f513ed4faa4413407502112f4885d",
+  "excluded": [
+    "court resale/pass",
+    "payment and checkout",
+    "login, registration, OAuth, token refresh and password flows"
+  ],
+  "files": [
+    {
+      "source": "Frontend/src/App.css",
+      "target": "apps/web/src/shared/styles/App.css"
+    },
+    {
+      "source": "Frontend/src/App.jsx",
+      "target": "apps/web/src/app/App.jsx"
+    },
+    {
+      "source": "Frontend/src/apiV2/booking_service/rest/booking.js",
+      "target": "apps/web/src/features/booking/api/booking_service/rest/booking.js"
+    },
+    {
+      "source": "Frontend/src/apiV2/booking_service/rest/user.api.js",
+      "target": "apps/web/src/features/booking/api/booking_service/rest/user.api.js"
+    },
+    {
+      "source": "Frontend/src/apiV2/center_service/grahql/center.api.js",
+      "target": "apps/web/src/features/centers/api/center_service/grahql/center.api.js"
+    },
+    {
+      "source": "Frontend/src/apiV2/news_service/rest/news.api.js",
+      "target": "apps/web/src/features/news/api/news_service/rest/news.api.js"
+    },
+    {
+      "source": "Frontend/src/apiV2/notification_service/notification.api.js",
+      "target": "apps/web/src/features/notifications/api/notification_service/notification.api.js"
+    },
+    {
+      "source": "Frontend/src/apiV2/rating_service/rest/rating.api.js",
+      "target": "apps/web/src/features/ratings/api/rating_service/rest/rating.api.js"
+    },
+    {
+      "source": "Frontend/src/apiV2/social_service/social.api.js",
+      "target": "apps/web/src/features/social/api/social_service/social.api.js"
+    },
+    {
+      "source": "Frontend/src/apiV2/user_service/rest/users.api.js",
+      "target": "apps/web/src/features/profile/api/user_service/rest/users.api.js"
+    },
+    {
+      "source": "Frontend/src/apis/centers.js",
+      "target": "apps/web/src/features/inventory/api/legacy/centers.js"
+    },
+    {
+      "source": "Frontend/src/apis/contact.js",
+      "target": "apps/web/src/features/contact/api/legacy/contact.js"
+    },
+    {
+      "source": "Frontend/src/components/ChatBox.jsx",
+      "target": "apps/web/src/shared/ui/ChatBox.jsx"
+    },
+    {
+      "source": "Frontend/src/components/EditableInfoCard.jsx",
+      "target": "apps/web/src/features/profile/ui/EditableInfoCard.jsx"
+    },
+    {
+      "source": "Frontend/src/components/FindFriendsTab.jsx",
+      "target": "apps/web/src/features/social/ui/FindFriendsTab.jsx"
+    },
+    {
+      "source": "Frontend/src/components/Footer.jsx",
+      "target": "apps/web/src/shared/ui/Footer.jsx"
+    },
+    {
+      "source": "Frontend/src/components/FriendManagementTab.jsx",
+      "target": "apps/web/src/features/social/ui/FriendManagementTab.jsx"
+    },
+    {
+      "source": "Frontend/src/components/FriendsTab.jsx",
+      "target": "apps/web/src/features/social/ui/FriendsTab.jsx"
+    },
+    {
+      "source": "Frontend/src/components/Header.jsx",
+      "target": "apps/web/src/shared/ui/Header.jsx"
+    },
+    {
+      "source": "Frontend/src/components/HeroBanner.jsx",
+      "target": "apps/web/src/features/home/ui/HeroBanner.jsx"
+    },
+    {
+      "source": "Frontend/src/components/HistoryTab.jsx",
+      "target": "apps/web/src/features/profile/ui/HistoryTab.jsx"
+    },
+    {
+      "source": "Frontend/src/components/HowItWorks.jsx",
+      "target": "apps/web/src/features/home/ui/HowItWorks.jsx"
+    },
+    {
+      "source": "Frontend/src/components/ModalConfirmation.jsx",
+      "target": "apps/web/src/features/booking/ui/ModalConfirmation.jsx"
+    },
+    {
+      "source": "Frontend/src/components/OtherInfoTab.jsx",
+      "target": "apps/web/src/features/profile/ui/OtherInfoTab.jsx"
+    },
+    {
+      "source": "Frontend/src/components/PopularTimeChart.jsx",
+      "target": "apps/web/src/features/profile/ui/PopularTimeChart.jsx"
+    },
+    {
+      "source": "Frontend/src/components/PricingTable.jsx",
+      "target": "apps/web/src/features/booking/ui/PricingTable.jsx"
+    },
+    {
+      "source": "Frontend/src/components/ProfileInfoTab.jsx",
+      "target": "apps/web/src/features/profile/ui/ProfileInfoTab.jsx"
+    },
+    {
+      "source": "Frontend/src/components/Scroll.jsx",
+      "target": "apps/web/src/shared/ui/Scroll.jsx"
+    },
+    {
+      "source": "Frontend/src/components/StatusTab.jsx",
+      "target": "apps/web/src/features/profile/ui/StatusTab.jsx"
+    },
+    {
+      "source": "Frontend/src/components/WeatherDisplay.jsx",
+      "target": "apps/web/src/shared/ui/WeatherDisplay.jsx"
+    },
+    {
+      "source": "Frontend/src/components/bookingTable.jsx",
+      "target": "apps/web/src/features/booking/ui/bookingTable.jsx"
+    },
+    {
+      "source": "Frontend/src/components/datepicker.jsx",
+      "target": "apps/web/src/features/booking/ui/datepicker.jsx"
+    },
+    {
+      "source": "Frontend/src/components/legend.jsx",
+      "target": "apps/web/src/features/booking/ui/legend.jsx"
+    },
+    {
+      "source": "Frontend/src/config/axiosConfig.js",
+      "target": "apps/web/src/shared/api/http.js"
+    },
+    {
+      "source": "Frontend/src/contexts/AuthContext.jsx",
+      "target": "apps/web/src/shared/session/SessionContext.jsx"
+    },
+    {
+      "source": "Frontend/src/index.css",
+      "target": "apps/web/src/shared/styles/index.css"
+    },
+    {
+      "source": "Frontend/src/index.jsx",
+      "target": "apps/web/src/app/main.jsx"
+    },
+    {
+      "source": "Frontend/src/pages/Booking.jsx",
+      "target": "apps/web/src/features/booking/pages/Booking.jsx"
+    },
+    {
+      "source": "Frontend/src/pages/CenterDetailModal.jsx",
+      "target": "apps/web/src/features/centers/pages/CenterDetailModal.jsx"
+    },
+    {
+      "source": "Frontend/src/pages/Centers.jsx",
+      "target": "apps/web/src/features/centers/pages/Centers.jsx"
+    },
+    {
+      "source": "Frontend/src/pages/CoinFlip.jsx",
+      "target": "apps/web/src/features/competition/pages/CoinFlip.jsx"
+    },
+    {
+      "source": "Frontend/src/pages/Competition.jsx",
+      "target": "apps/web/src/features/competition/pages/Competition.jsx"
+    },
+    {
+      "source": "Frontend/src/pages/Contact.jsx",
+      "target": "apps/web/src/features/contact/pages/Contact.jsx"
+    },
+    {
+      "source": "Frontend/src/pages/CustomerTestimonials.jsx",
+      "target": "apps/web/src/features/home/pages/CustomerTestimonials.jsx"
+    },
+    {
+      "source": "Frontend/src/pages/FeatureCards.jsx",
+      "target": "apps/web/src/features/home/pages/FeatureCards.jsx"
+    },
+    {
+      "source": "Frontend/src/pages/Home.jsx",
+      "target": "apps/web/src/features/home/pages/Home.jsx"
+    },
+    {
+      "source": "Frontend/src/pages/News.jsx",
+      "target": "apps/web/src/features/news/pages/News.jsx"
+    },
+    {
+      "source": "Frontend/src/pages/Notifications.jsx",
+      "target": "apps/web/src/features/notifications/pages/Notifications.jsx"
+    },
+    {
+      "source": "Frontend/src/pages/Policy.jsx",
+      "target": "apps/web/src/features/information/pages/Policy.jsx"
+    },
+    {
+      "source": "Frontend/src/pages/Service.jsx",
+      "target": "apps/web/src/features/information/pages/Service.jsx"
+    },
+    {
+      "source": "Frontend/src/pages/TestimonialsSection.jsx",
+      "target": "apps/web/src/features/home/pages/TestimonialsSection.jsx"
+    },
+    {
+      "source": "Frontend/src/pages/UserProfile.jsx",
+      "target": "apps/web/src/features/profile/pages/UserProfile.jsx"
+    },
+    {
+      "source": "Frontend/src/styles/FriendsTab.css",
+      "target": "apps/web/src/shared/styles/FriendsTab.css"
+    },
+    {
+      "source": "Frontend/src/styles/UserProfile.css",
+      "target": "apps/web/src/shared/styles/UserProfile.css"
+    },
+    {
+      "source": "Frontend/src/styles/booking.css",
+      "target": "apps/web/src/shared/styles/booking.css"
+    },
+    {
+      "source": "Frontend/src/styles/centerDetailModal.css",
+      "target": "apps/web/src/shared/styles/centerDetailModal.css"
+    },
+    {
+      "source": "Frontend/src/styles/centers.css",
+      "target": "apps/web/src/shared/styles/centers.css"
+    },
+    {
+      "source": "Frontend/src/styles/chatbox.css",
+      "target": "apps/web/src/shared/styles/chatbox.css"
+    },
+    {
+      "source": "Frontend/src/styles/coinFlip.css",
+      "target": "apps/web/src/shared/styles/coinFlip.css"
+    },
+    {
+      "source": "Frontend/src/styles/competitions.css",
+      "target": "apps/web/src/shared/styles/competitions.css"
+    },
+    {
+      "source": "Frontend/src/styles/contact.css",
+      "target": "apps/web/src/shared/styles/contact.css"
+    },
+    {
+      "source": "Frontend/src/styles/customer-testimonials.css",
+      "target": "apps/web/src/shared/styles/customer-testimonials.css"
+    },
+    {
+      "source": "Frontend/src/styles/featureCards.css",
+      "target": "apps/web/src/shared/styles/featureCards.css"
+    },
+    {
+      "source": "Frontend/src/styles/footer.css",
+      "target": "apps/web/src/shared/styles/footer.css"
+    },
+    {
+      "source": "Frontend/src/styles/global.css",
+      "target": "apps/web/src/shared/styles/global.css"
+    },
+    {
+      "source": "Frontend/src/styles/header.css",
+      "target": "apps/web/src/shared/styles/header.css"
+    },
+    {
+      "source": "Frontend/src/styles/hero-banner.css",
+      "target": "apps/web/src/shared/styles/hero-banner.css"
+    },
+    {
+      "source": "Frontend/src/styles/news.css",
+      "target": "apps/web/src/shared/styles/news.css"
+    },
+    {
+      "source": "Frontend/src/styles/policy.css",
+      "target": "apps/web/src/shared/styles/policy.css"
+    },
+    {
+      "source": "Frontend/src/styles/service.css",
+      "target": "apps/web/src/shared/styles/service.css"
+    },
+    {
+      "source": "Frontend/src/styles/testimonials-section.css",
+      "target": "apps/web/src/shared/styles/testimonials-section.css"
+    },
+    {
+      "source": "Frontend/src/styles/weather.css",
+      "target": "apps/web/src/shared/styles/weather.css"
+    },
+    {
+      "source": "Admin/src/App.jsx",
+      "target": "apps/admin/src/app/App.jsx"
+    },
+    {
+      "source": "Admin/src/apiV2/auth_service/rest/user.api.js",
+      "target": "apps/admin/src/features/users/api/user-status.js"
+    },
+    {
+      "source": "Admin/src/apiV2/booking_service/rest/booking.api.js",
+      "target": "apps/admin/src/features/booking/api/booking_service/rest/booking.api.js"
+    },
+    {
+      "source": "Admin/src/apiV2/center_service/graphql/center.api.js",
+      "target": "apps/admin/src/features/centers/api/center_service/graphql/center.api.js"
+    },
+    {
+      "source": "Admin/src/apiV2/center_service/rest/center.api.js",
+      "target": "apps/admin/src/features/centers/api/center_service/rest/center.api.js"
+    },
+    {
+      "source": "Admin/src/apiV2/inventory_service/rest/inventory.api.js",
+      "target": "apps/admin/src/features/inventory/api/inventory_service/rest/inventory.api.js"
+    },
+    {
+      "source": "Admin/src/apiV2/news_service/rest/news.api.js",
+      "target": "apps/admin/src/features/news/api/news_service/rest/news.api.js"
+    },
+    {
+      "source": "Admin/src/apiV2/rating_service/rest/rating.api.js",
+      "target": "apps/admin/src/features/ratings/api/rating_service/rest/rating.api.js"
+    },
+    {
+      "source": "Admin/src/apiV2/transaction_service/rest/transaction.api.js",
+      "target": "apps/admin/src/features/inventory/api/transaction_service/rest/transaction.api.js"
+    },
+    {
+      "source": "Admin/src/apiV2/user_service/rest/user.api.js",
+      "target": "apps/admin/src/features/users/api/user_service/rest/user.api.js"
+    },
+    {
+      "source": "Admin/src/components/AdminLayout.jsx",
+      "target": "apps/admin/src/shared/ui/AdminLayout.jsx"
+    },
+    {
+      "source": "Admin/src/components/BookingTable.jsx",
+      "target": "apps/admin/src/features/booking/ui/BookingTable.jsx"
+    },
+    {
+      "source": "Admin/src/components/CenterModal.jsx",
+      "target": "apps/admin/src/features/centers/ui/CenterModal.jsx"
+    },
+    {
+      "source": "Admin/src/components/FullscreenNotification.jsx",
+      "target": "apps/admin/src/shared/ui/FullscreenNotification.jsx"
+    },
+    {
+      "source": "Admin/src/components/LoadingSpinner.jsx",
+      "target": "apps/admin/src/shared/ui/LoadingSpinner.jsx"
+    },
+    {
+      "source": "Admin/src/components/legend.jsx",
+      "target": "apps/admin/src/features/booking/ui/legend.jsx"
+    },
+    {
+      "source": "Admin/src/config/axiosConfig.js",
+      "target": "apps/admin/src/shared/api/http.js"
+    },
+    {
+      "source": "Admin/src/constants/roles.js",
+      "target": "apps/admin/src/shared/constants/roles.js"
+    },
+    {
+      "source": "Admin/src/contexts/AuthContext.jsx",
+      "target": "apps/admin/src/shared/session/SessionContext.jsx"
+    },
+    {
+      "source": "Admin/src/image/pic1.jpg",
+      "target": "apps/admin/src/shared/assets/pic1.jpg"
+    },
+    {
+      "source": "Admin/src/image/pig2.jpg",
+      "target": "apps/admin/src/shared/assets/pig2.jpg"
+    },
+    {
+      "source": "Admin/src/image/shop.jpg",
+      "target": "apps/admin/src/shared/assets/shop.jpg"
+    },
+    {
+      "source": "Admin/src/index.css",
+      "target": "apps/admin/src/shared/styles/index.css"
+    },
+    {
+      "source": "Admin/src/index.jsx",
+      "target": "apps/admin/src/app/main.jsx"
+    },
+    {
+      "source": "Admin/src/pages/Account.jsx",
+      "target": "apps/admin/src/features/account/pages/Account.jsx"
+    },
+    {
+      "source": "Admin/src/pages/BillManage.jsx",
+      "target": "apps/admin/src/features/booking/pages/BillManage.jsx"
+    },
+    {
+      "source": "Admin/src/pages/CenterManagement.jsx",
+      "target": "apps/admin/src/features/centers/pages/CenterManagement.jsx"
+    },
+    {
+      "source": "Admin/src/pages/CenterManagerManagement.jsx",
+      "target": "apps/admin/src/features/users/pages/CenterManagerManagement.jsx"
+    },
+    {
+      "source": "Admin/src/pages/CenterStatus.jsx",
+      "target": "apps/admin/src/features/booking/pages/CenterStatus.jsx"
+    },
+    {
+      "source": "Admin/src/pages/CreateFixedBooking.jsx",
+      "target": "apps/admin/src/features/booking/pages/CreateFixedBooking.jsx"
+    },
+    {
+      "source": "Admin/src/pages/Dashboard.jsx",
+      "target": "apps/admin/src/features/dashboard/pages/Dashboard.jsx"
+    },
+    {
+      "source": "Admin/src/pages/Report.jsx",
+      "target": "apps/admin/src/features/reports/pages/Report.jsx"
+    },
+    {
+      "source": "Admin/src/pages/UserManage.jsx",
+      "target": "apps/admin/src/features/users/pages/UserManage.jsx"
+    },
+    {
+      "source": "Admin/src/pages/news.jsx",
+      "target": "apps/admin/src/features/news/pages/news.jsx"
+    },
+    {
+      "source": "Admin/src/pages/ratingManagement.jsx",
+      "target": "apps/admin/src/features/ratings/pages/ratingManagement.jsx"
+    },
+    {
+      "source": "Admin/src/pages/shop.jsx",
+      "target": "apps/admin/src/features/inventory/pages/shop.jsx"
+    },
+    {
+      "source": "Admin/src/pages/stockManagement.jsx",
+      "target": "apps/admin/src/features/inventory/pages/stockManagement.jsx"
+    }
+  ]
+}

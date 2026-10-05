@@ -7,4 +7,4 @@ coverage/
 *.log
 *.tsbuildinfo
 __pycache__/
-services/booking_core/generated/
+services/booking-core/generated/

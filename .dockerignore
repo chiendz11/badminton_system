@@ -5,4 +5,4 @@
 **/.env
 **/.env.*
 !**/.env.example
-services/booking_core/generated/
+services/booking-core/generated/

@@ -1,0 +1,161 @@
+.policy-page {
+  padding: 40px 0 60px;
+  background-color: #f9f9f9;
+  min-height: 100vh;
+}
+
+.policy-header {
+  text-align: center;
+  margin-bottom: 40px;
+  background-color: #2e7d32;
+  padding: 40px 20px;
+  border-radius: 8px;
+  color: white;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+}
+
+.policy-header h1 {
+  margin: 0 0 10px;
+  font-size: 32px;
+  font-weight: 700;
+}
+
+.policy-subtitle {
+  font-size: 16px;
+  opacity: 0.9;
+  margin: 0;
+}
+
+.policy-content {
+  background-color: white;
+  border-radius: 8px;
+  padding: 30px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+}
+
+.policy-section {
+  margin-bottom: 30px;
+  border-bottom: 1px solid #f0f0f0;
+  padding-bottom: 25px;
+}
+
+.policy-section:last-child {
+  margin-bottom: 0;
+  border-bottom: none;
+  padding-bottom: 0;
+}
+
+.policy-section h2 {
+  font-size: 22px;
+  font-weight: 600;
+  color: #2e7d32;
+  margin: 0 0 15px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid #eaeaea;
+}
+
+.policy-section p {
+  margin: 0 0 15px;
+  line-height: 1.6;
+  color: #333;
+}
+
+.policy-list {
+  padding-left: 20px;
+  margin: 15px 0;
+}
+
+.policy-list li {
+  margin-bottom: 10px;
+  position: relative;
+  padding-left: 15px;
+  line-height: 1.5;
+}
+
+.policy-list li::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 8px;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background-color: #2e7d32;
+}
+
+.policy-footer {
+  margin-top: 30px;
+  text-align: center;
+  font-size: 14px;
+  color: #666;
+  padding: 20px;
+  background-color: #f5f5f5;
+  border-radius: 8px;
+}
+
+.policy-footer p {
+  margin: 5px 0;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .policy-page {
+    padding: 20px 0 40px;
+  }
+
+  .policy-header {
+    padding: 30px 15px;
+    margin-bottom: 30px;
+  }
+
+  .policy-header h1 {
+    font-size: 24px;
+  }
+
+  .policy-subtitle {
+    font-size: 14px;
+  }
+
+  .policy-content {
+    padding: 20px;
+  }
+
+  .policy-section h2 {
+    font-size: 20px;
+  }
+}
+
+/* Print styles */
+@media print {
+  .policy-page {
+    background-color: white;
+    padding: 0;
+  }
+
+  .policy-header {
+    background-color: white;
+    color: black;
+    box-shadow: none;
+    padding: 20px 0;
+    margin-bottom: 20px;
+  }
+
+  .policy-content {
+    box-shadow: none;
+    padding: 0;
+  }
+
+  .policy-section h2 {
+    color: black;
+  }
+
+  .policy-list li::before {
+    background-color: black;
+  }
+
+  .policy-footer {
+    background-color: white;
+    border-top: 1px solid #eee;
+    padding: 20px 0;
+  }
+}

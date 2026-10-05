@@ -1,0 +1,153 @@
+/* CSS cho phần Testimonials chính xác như hình mẫu */
+.testimonials-section {
+  position: relative;
+  padding: 60px 0 100px;
+  background: linear-gradient(to right, #4caf50, #2196f3);
+  margin-bottom: -80px; /* Để phần này lấn vào footer */
+  overflow: hidden;
+}
+
+.testimonials-content {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 20px;
+}
+
+.testimonials-section.visible .section-title {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.testimonials-grid {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 40px;
+  margin-top: 40px;
+}
+
+.testimonial-item {
+  flex: 1;
+  min-width: 300px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  color: white;
+  opacity: 0;
+  transition:
+    opacity 1s ease,
+    transform 1s ease;
+}
+
+.left-testimonial {
+  transform: translateX(-100px);
+}
+
+.right-testimonial {
+  transform: translateX(100px);
+}
+
+.testimonials-section.visible .left-testimonial.animate-left {
+  opacity: 1;
+  transform: translateX(0);
+}
+
+.testimonials-section.visible .right-testimonial.animate-right {
+  opacity: 1;
+  transform: translateX(0);
+}
+
+.testimonial-avatar {
+  width: 120px;
+  height: 120px;
+  border-radius: 50%;
+  overflow: hidden;
+  border: 4px solid white;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+  margin-bottom: 15px;
+}
+
+.testimonial-avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.testimonial-name {
+  font-size: 22px;
+  font-weight: 700;
+  margin: 10px 0 5px;
+  color: white;
+}
+
+.testimonial-role {
+  font-size: 16px;
+  margin: 0 0 20px;
+  color: rgba(255, 255, 255, 0.9);
+}
+
+.testimonial-text {
+  max-width: 500px;
+  font-size: 18px;
+  line-height: 1.8;
+}
+
+.testimonial-text p {
+  font-size: 18px;
+  color: white;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+}
+
+/* Phần tích hợp với Footer */
+.testimonials-section + .site-footer {
+  position: relative;
+  z-index: 1;
+  margin-top: -80px; /* Phải giống với margin-bottom của testimonials-section */
+  padding-top: 140px; /* Tăng padding-top để tránh bị che nội dung */
+}
+
+.testimonials-section + .site-footer.footer-visible {
+  transform: translateY(0);
+  opacity: 1;
+}
+
+.testimonials-section + .site-footer.footer-hidden {
+  transform: translateY(100px);
+  opacity: 0;
+}
+
+.section-title {
+  color: white !important;
+  font-size: 27px;
+  font-weight: bold;
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+/* Responsive styles */
+@media (max-width: 992px) {
+  .testimonials-grid {
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .testimonial-item {
+    max-width: 500px;
+  }
+
+  .testimonial-text {
+    max-width: 100%;
+  }
+}
+
+@media (max-width: 768px) {
+  .section-title {
+    font-size: 28px;
+  }
+
+  .testimonial-avatar {
+    width: 100px;
+    height: 100px;
+  }
+}

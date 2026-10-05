@@ -1,0 +1,85 @@
+/* Coin styling */
+.coin-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  position: fixed;
+  left: calc((100% - 380px) / 2);
+  top: 50%;
+  transform: translate(-50%, -50%);
+  width: 200px;
+  height: 200px;
+  z-index: 995;
+  pointer-events: none;
+}
+
+.coin {
+  font-size: 200px;
+  width: 0.1em;
+  height: 1em;
+  background: linear-gradient(#faa504, #141001);
+  margin: auto;
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  animation: rotate_4001510 7s infinite linear;
+  transform-style: preserve-3d;
+}
+
+.coin .side,
+.coin:before,
+.coin:after {
+  content: "";
+  position: absolute;
+  width: 1em;
+  height: 1em;
+  overflow: hidden;
+  border-radius: 50%;
+  right: -0.4em;
+  text-align: center;
+  line-height: 1;
+  transform: rotateY(-90deg);
+  -moz-backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+  backface-visibility: hidden;
+}
+
+.coin .tails,
+.coin:after {
+  left: -0.4em;
+  transform: rotateY(90deg);
+}
+
+.coin:before,
+.coin:after {
+  background: linear-gradient(#faa504, #141001);
+  backface-visibility: hidden;
+  transform: rotateY(90deg);
+}
+
+.coin:after {
+  transform: rotateY(-90deg);
+}
+
+@keyframes rotate_4001510 {
+  100% {
+    transform: rotateY(360deg);
+  }
+}
+
+.svg_back {
+  transform: scaleX(-1);
+}
+
+/* Để coin hiển thị khi có giỏ hàng mở */
+.coin-visible {
+  opacity: 1;
+  transition: opacity 0.3s ease;
+}
+
+.coin-hidden {
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
