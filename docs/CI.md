@@ -4,38 +4,38 @@
 
 `.github/ci/components.yml` thay thế việc scan `BM/services/*`. Mỗi entry mô tả một deployable, một nhóm contract hoặc một shared package. Không suy luận kiến trúc từ `package.json` có sẵn trong codebase cũ.
 
-| Component | Path dự kiến | Runtime / database |
-| --- | --- | --- |
-| api_gateway | services/api_gateway | Node |
-| identity | services/identity_service | Node / PostgreSQL / Prisma |
-| booking_core | services/booking_core | Node / PostgreSQL / Prisma |
-| commerce | services/commerce_service | Node / PostgreSQL / Prisma |
-| social | services/social_service | Node / MongoDB |
-| content | services/content_service | Node / MongoDB |
-| notification | services/notification_service | Node / MongoDB |
-| storage | services/storage_service | Node |
-| ai | services/ai_service | Python / FastAPI |
-| frontend | Frontend | Web |
-| admin | Admin | Web |
+| Component    | Path dự kiến                  | Runtime / database         |
+| ------------ | ----------------------------- | -------------------------- |
+| api_gateway  | services/api_gateway          | Node                       |
+| identity     | services/identity_service     | Node / PostgreSQL / Prisma |
+| booking_core | services/booking_core         | Node / PostgreSQL / Prisma |
+| commerce     | services/commerce_service     | Node / PostgreSQL / Prisma |
+| social       | services/social_service       | Node / MongoDB             |
+| content      | services/content_service      | Node / MongoDB             |
+| notification | services/notification_service | Node / MongoDB             |
+| storage      | services/storage_service      | Node                       |
+| ai           | services/ai_service           | Python / FastAPI           |
+| frontend     | Frontend                      | Web                        |
+| admin        | Admin                         | Web                        |
 
-Identity gộp auth/user. Booking Core chứa center, court, pricing, availability, reservation, booking, payment và passes. Commerce chứa inventory/stock/sales/reporting. Content chứa rating/news. Đây là mapping CI dự kiến, không phải các thư mục/source được tạo bởi nhánh bootstrap.
+Identity gộp auth/user. Booking Core ở nhánh này chứa center, court, pricing, availability, reservation và booking; payment và passes được loại khỏi phạm vi hiện tại. Commerce chứa inventory/stock/sales/reporting. Content chứa rating/news. Đây là mapping CI dự kiến, các bounded context chưa triển khai vẫn là path dự kiến.
 
 Các shared package: `packages/auth-contracts`, `packages/booking-contracts`, `packages/event-contracts`, `packages/observability`. Các nhóm schema: `contracts/identity`, `contracts/booking`, `contracts/commerce`, `contracts/events`, `contracts/ai-tools`, `contracts/gateway`.
 
 `depends_on` biểu diễn dependency của component vào API/event/shared package. Chỉnh graph cùng với dependency thực tế; tránh biểu diễn mọi HTTP call như một cạnh bắt buộc chạy CI khi implementation đổi.
 
-## Bootstrap trước khi có source
+## Triển khai từng component
 
-`configuration_only: true` là trạng thái hiện tại được khai báo rõ trong manifest. Workflow kiểm tra cú pháp script, YAML, manifest và graph; tạo matrix rỗng; summary của `CI / required` ghi rõ không kiểm thử ứng dụng. Không tự tạo test mẫu, source, database hay Docker image để làm CI xanh.
+Trên `ci/bootstrap`, manifest vẫn `configuration_only: true`. Trên `feat/booking-core`, manifest đặt `configuration_only: false` và mỗi component có `enabled` rõ ràng. Hiện bật Booking Core, Frontend, Admin, booking/event schemas và bốn shared packages đã có. Identity/Gateway/Commerce/AI và các component chưa có source để `enabled: false`; không tạo test hoặc code giả để CI xanh.
 
-Khi codebase mới sẵn sàng, đặt `configuration_only: false`. Component được chọn mà thiếu path/lockfile/CI script sẽ fail. Các application gate không dùng `--if-present`, `--passWithNoTests` hoặc `Error: no test specified`.
+Validation kiểm tra tên/path/graph của cả manifest, nhưng chỉ kiểm tra sự tồn tại source/lockfile của component được bật. Change detector chỉ đưa component enabled vào matrix. Shared package được kiểm tra qua consumer đang bật. Khi triển khai bounded context tiếp theo, bổ sung scripts/test/migration thật rồi đặt enabled true và cập nhật dependency.
 
 ## Change detection
 
 - PR: `merge-base` giữa base SHA và commit checkout, rồi `git diff --no-renames` để bao gồm cả path cũ/mới khi đổi tên.
 - Push `main`: so sánh `before` với commit mới.
-- Push đầu tiên, merge queue hoặc chạy thủ công: chọn toàn bộ manifest.
-- Thay đổi `.github/**`: chọn toàn bộ component.
+- Push đầu tiên, merge queue hoặc chạy thủ công: chọn toàn bộ component đã bật.
+- Thay đổi `.github/**`: chọn toàn bộ component đã bật.
 - Đổi file lock hoặc cấu hình workspace: chọn các component dùng install root đó.
 - Đổi contract/shared package: chọn component đó, rồi mở rộng reverse dependency graph cho đến khi không còn consumer mới.
 - Đổi implementation bên trong deployable: chọn deployable đó. Ví dụ `services/booking_core/src/modules/pricing/**` chạy toàn `booking_core`, không tạo job pricing riêng.
@@ -47,7 +47,7 @@ Matrix tách thành `node`, `python`, `web`, `contract`. Shared package được
 
 ## Node/Web workspace
 
-Cấu hình mặc định là pnpm monorepo: Node 22, pnpm 10.25.0, install root `.`, root `pnpm-lock.yaml`. Đây là contract cho codebase sắp tạo. Nếu chọn package độc lập hoặc npm, override `install_path`, `package_manager`, `package_manager_version`, `lockfile` trong component. Root `packageManager` phải khớp phiên bản pnpm trong manifest. Docker mặc định build với context root để truy cập shared package; override `docker_context`/`dockerfile` nếu cần.
+Cấu hình mặc định là pnpm monorepo: Node 22, pnpm 10.25.0, install root `.`, root `pnpm-lock.yaml`. Đây là cấu hình workspace hiện đang dùng trên feat/booking-core. Nếu chọn package độc lập hoặc npm, override `install_path`, `package_manager`, `package_manager_version`, `lockfile` trong component. Root `packageManager` phải khớp phiên bản pnpm trong manifest. Docker mặc định build với context root để truy cập shared package; override `docker_context`/`dockerfile` nếu cần.
 
 Node và Web bắt buộc có package scripts:
 
@@ -120,8 +120,8 @@ Với `request.schema.json`, thêm `request.schema.examples.json`:
 
 ```json
 {
-  "valid": [{"duration_minutes": 120}],
-  "invalid": [{"duration_minutes": "two hours"}]
+  "valid": [{ "duration_minutes": 120 }],
+  "invalid": [{ "duration_minutes": "two hours" }]
 }
 ```
 
@@ -135,16 +135,15 @@ Node/Python component có `docker: true` dùng composite `.github/actions/build-
 
 ## Git local và bước tiếp theo
 
-Thư mục ứng dụng cũ đã có `origin` trỏ tới `chiendz11/badminton_system`; remote cũ được giữ dưới tên `legacy-upstream`. Nhánh CI được checkout bằng Git worktree riêng ở `/data/Dev/newBTL/badminton_system`, cùng metadata Git với thư mục ứng dụng cũ. Các thay đổi ứng dụng đang có được giữ nguyên; commit CI chỉ lấy file CI và tài liệu.
-
-Để tiếp tục sửa CI tại local:
+Checkout độc lập ở `/data/Dev/newBTL/badminton-system` (dấu hyphen), chỉ có `origin` tới `chiendz11/badminton_system`. Worktree cũ dùng underscore và hai remote của source repo đã được gỡ theo yêu cầu; không dùng đường dẫn đó nữa.
 
 ```bash
-cd /data/Dev/newBTL/badminton_system
+cd /data/Dev/newBTL/badminton-system
+git switch feat/booking-core
 git status
-git push origin ci/bootstrap
+git push origin feat/booking-core
 ```
 
-Sau khi xây codebase mới: cập nhật path/dependency thực tế trong manifest, commit lockfiles và CI contract/test thật, tắt configuration-only rồi mở PR vào `main`. `main` vẫn là default branch. Targeted cross-service `integration.yml` được thêm sau khi các scenario thật tồn tại; phạm vi từng scenario khai báo các deployable cần dùng, không dựng cả hệ thống cho mọi PR. Broader integration/nightly và `release.yml` (ECR/SBOM/GitOps) là giai đoạn sau.
+`main` vẫn là default branch. Workflow tự chạy cho PR vào main, push main, merge queue hoặc workflow_dispatch; push feature đơn thuần không tự chạy. Nhánh feature này có test/backend/Web/Docker thật, khác trạng thái CI-only của ci/bootstrap. Kết quả local và runtime nằm trong hướng dẫn Booking Core; Trivy là gate của Actions và sẽ quét lại trên CI. Xem [VALIDATION.md](VALIDATION.md) cho kết quả local.
 
-Nguồn yêu cầu: [thảo luận CI cho kiến trúc mới](https://chatgpt.com/share/6ac2943b-efb4-83ec-b181-e9161879f28d). Các cấu hình được chuẩn bị cho codebase sắp tạo; không thực thi test/build ứng dụng trong lần cập nhật bootstrap này.
+Targeted cross-service/nightly integration và ECR/GitOps release sẽ thêm khi scenario thật tồn tại. Nguồn kiến trúc CI: [thảo luận CI mới](https://chatgpt.com/share/6ac2943b-efb4-83ec-b181-e9161879f28d).

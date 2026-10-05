@@ -1,0 +1,10 @@
+node_modules/
+dist/
+coverage/
+.env
+.env.*
+!.env.example
+*.log
+*.tsbuildinfo
+__pycache__/
+services/booking_core/generated/

@@ -1,0 +1,129 @@
+generator client {
+  provider = "prisma-client-js"
+  output = "../generated/client"
+}
+datasource db {
+  provider = "postgresql"
+  url = env("DATABASE_URL")
+}
+enum DayType {
+  WEEKDAY
+  WEEKEND
+}
+enum ReservationStatus {
+  HELD
+  CONFIRMED
+  EXPIRED
+  CANCELLED
+}
+enum BookingStatus {
+  CONFIRMED
+  CANCELLED
+}
+enum BookingType {
+  DAILY
+  FIXED
+}
+model Center {
+  id String @id @default(uuid()) @db.Uuid
+  managerId String
+  name String
+  address String
+  phone String
+  description String @default("")
+  facilities String[]
+  isActive Boolean @default(true)
+  openMinute Int @default(300)
+  closeMinute Int @default(1440)
+  timezone String @default("Asia/Ho_Chi_Minh")
+  createdAt DateTime @default(now()) @db.Timestamptz(3)
+  updatedAt DateTime @updatedAt @db.Timestamptz(3)
+  courts Court[]
+  pricing PricingBand[]
+  reservations Reservation[]
+  @@index([managerId])
+}
+model Court {
+  id String @id @default(uuid()) @db.Uuid
+  centerId String @db.Uuid
+  center Center @relation(fields:[centerId],references:[id])
+  name String
+  surface String @default("thảm")
+  isActive Boolean @default(true)
+  allocations SlotAllocation[]
+  @@unique([centerId,name])
+}
+model PricingBand {
+  id String @id @default(uuid()) @db.Uuid
+  centerId String @db.Uuid
+  center Center @relation(fields:[centerId],references:[id],onDelete:Cascade)
+  dayType DayType
+  startMinute Int
+  endMinute Int
+  pricePerHour Int
+  @@unique([centerId,dayType,startMinute])
+}
+model Reservation {
+  id String @id @default(uuid()) @db.Uuid
+  centerId String @db.Uuid
+  center Center @relation(fields:[centerId],references:[id])
+  userId String
+  userName String
+  date String
+  status ReservationStatus @default(HELD)
+  expiresAt DateTime @db.Timestamptz(3)
+  idempotencyKey String
+  fingerprint String
+  selections Json
+  totalPrice Int
+  basePrice Int @default(0)
+  discountPercent Int @default(0)
+  discountAmount Int @default(0)
+  createdAt DateTime @default(now()) @db.Timestamptz(3)
+  allocations SlotAllocation[]
+  booking Booking?
+  @@unique([userId,idempotencyKey])
+  @@index([centerId,date,status])
+  @@index([status,expiresAt])
+}
+model SlotAllocation {
+  id String @id @default(uuid()) @db.Uuid
+  courtId String @db.Uuid
+  court Court @relation(fields:[courtId],references:[id])
+  reservationId String @db.Uuid
+  reservation Reservation @relation(fields:[reservationId],references:[id],onDelete:Cascade)
+  startsAt DateTime @db.Timestamptz(3)
+  endsAt DateTime @db.Timestamptz(3)
+  @@index([reservationId])
+  @@index([courtId,startsAt])
+  @@index([courtId,endsAt])
+}
+model Booking {
+  id String @id @default(uuid()) @db.Uuid
+  reservationId String @unique @db.Uuid
+  reservation Reservation @relation(fields:[reservationId],references:[id])
+  status BookingStatus @default(CONFIRMED)
+  type BookingType @default(DAILY)
+  seriesId String? @db.Uuid
+  series BookingSeries? @relation(fields:[seriesId],references:[id])
+  createdAt DateTime @default(now()) @db.Timestamptz(3)
+  cancelledAt DateTime? @db.Timestamptz(3)
+}
+model BookingSeries {
+  id String @id @default(uuid()) @db.Uuid
+  createdBy String
+  idempotencyKey String
+  fingerprint String
+  bookings Booking[]
+  @@unique([createdBy,idempotencyKey])
+}
+model OutboxEvent {
+  id String @id @default(uuid()) @db.Uuid
+  type String
+  aggregateId String @db.Uuid
+  payload Json
+  createdAt DateTime @default(now()) @db.Timestamptz(3)
+  publishedAt DateTime? @db.Timestamptz(3)
+  attempts Int @default(0)
+  @@index([publishedAt,createdAt])
+}

@@ -1,0 +1,8 @@
+.git
+**/node_modules
+**/dist
+**/coverage
+**/.env
+**/.env.*
+!**/.env.example
+services/booking_core/generated/

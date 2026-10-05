@@ -25,7 +25,7 @@ def changed_files():
 
 
 def affected_components(config, files, full):
-    components = config['components']
+    components = {name: item for name, item in config['components'].items() if item.get('enabled', True)}
     if full or any(fnmatch.fnmatchcase(file, pattern) for file in files for pattern in config.get('global_paths', [])):
         return set(components)
     selected = {name for name, component in components.items() if any(file == component['path'] or file.startswith(component['path'] + '/') for file in files)}
