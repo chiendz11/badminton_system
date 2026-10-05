@@ -70,16 +70,26 @@ export class CentersService {
   async createCenter(actor: Actor, data: CenterDto) {
     if (actor.role !== "super_admin")
       throw new ForbiddenException("Chỉ admin hệ thống được tạo trung tâm");
-    const { pricePerHour, ...fields } = data;
-    const bands: PricingBand[] = ["WEEKDAY", "WEEKEND"].map((dayType) => ({
-      dayType: dayType as PricingBand["dayType"],
-      startMinute: data.openMinute,
-      endMinute: data.closeMinute,
-      pricePerHour,
-    }));
+    const { pricePerHour, totalCourts, pricingBands, ...fields } = data;
+    const bands: PricingBand[] =
+      pricingBands ??
+      ["WEEKDAY", "WEEKEND"].map((dayType) => ({
+        dayType: dayType as PricingBand["dayType"],
+        startMinute: data.openMinute,
+        endMinute: data.closeMinute,
+        pricePerHour,
+      }));
     validateBands(bands, data.openMinute, data.closeMinute);
     const center = await this.prisma.center.create({
-      data: { ...fields, pricing: { create: bands } },
+      data: {
+        ...fields,
+        pricing: { create: bands },
+        courts: {
+          create: Array.from({ length: totalCourts }, (_, index) => ({
+            name: `Sân ${index + 1}`,
+          })),
+        },
+      },
       include: CENTER_INCLUDE,
     });
     this.telemetry.event("center_created", {
@@ -103,7 +113,68 @@ export class CentersService {
         throw new ConflictException(
           "Trung tâm còn lịch giữ chỗ hoặc booking tương lai",
         );
-      return tx.center.update({ where: { id }, data, include: CENTER_INCLUDE });
+      const { totalCourts, pricingBands, managerId, ...fields } = data;
+      if (managerId !== undefined && actor.role !== "super_admin")
+        throw new ForbiddenException(
+          "Chỉ admin hệ thống được phân công quản lý",
+        );
+      if (pricingBands)
+        validateBands(pricingBands, center.openMinute, center.closeMinute);
+      if (totalCourts !== undefined) {
+        const active = center.courts
+          .filter((c) => c.isActive)
+          .sort((a, b) =>
+            a.name.localeCompare(b.name, "vi", { numeric: true }),
+          );
+        if (totalCourts < active.length) {
+          const closing = active.slice(totalCourts).map((c) => c.id);
+          if (
+            await tx.slotAllocation.count({
+              where: {
+                courtId: { in: closing },
+                endsAt: { gt: this.clock.now() },
+              },
+            })
+          )
+            throw new ConflictException(
+              "Không thể giảm số sân đang có lịch tương lai",
+            );
+          await tx.court.updateMany({
+            where: { id: { in: closing } },
+            data: { isActive: false },
+          });
+        } else if (totalCourts > active.length) {
+          let remaining = totalCourts - active.length;
+          const inactive = center.courts
+            .filter((c) => !c.isActive)
+            .slice(0, remaining);
+          await tx.court.updateMany({
+            where: { id: { in: inactive.map((c) => c.id) } },
+            data: { isActive: true },
+          });
+          remaining -= inactive.length;
+          const names = new Set(center.courts.map((c) => c.name));
+          for (let number = 1; remaining > 0; number++) {
+            const name = `Sân ${number}`;
+            if (!names.has(name)) {
+              await tx.court.create({ data: { centerId: id, name } });
+              names.add(name);
+              remaining--;
+            }
+          }
+        }
+      }
+      return tx.center.update({
+        where: { id },
+        data: {
+          ...fields,
+          ...(managerId !== undefined ? { managerId } : {}),
+          ...(pricingBands
+            ? { pricing: { deleteMany: {}, create: pricingBands } }
+            : {}),
+        },
+        include: CENTER_INCLUDE,
+      });
     });
     this.telemetry.event("center_updated", {
       centerId: id,

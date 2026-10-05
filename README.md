@@ -7,6 +7,7 @@ Nhánh `feat/booking-core` xây Booking Core và lấy lại giao diện khách 
 ```text
 apps/web/               # giao diện khách hàng
 apps/admin/             # giao diện quản lý
+services/api-gateway/   # adapter REST/GraphQL của UI gốc
 services/booking-core/  # NestJS bounded context
 packages/               # contracts, observability dùng chung
 contracts/              # schema HTTP/event
@@ -24,26 +25,26 @@ Web/Admin tách `app`, `features/{pages,ui,api}`, `shared`; Booking Core tách m
 - Frontend/Admin giữ JSX, CSS, ảnh và API client từ repo gốc: trang chủ, trung tâm, booking, hồ sơ/bạn bè, thông báo, tin tức, dịch vụ, kho, báo cáo, đánh giá, quản lý người dùng. Loại bỏ pass sân, payment/checkout và login/password/OAuth/refresh-token.
 - Unit/integration/consumer-provider contract tests; JSON logs có request ID, Prometheus metrics, health/readiness và alert mẫu.
 
-Phạm vi này không có pass sân hoặc payment. UI booking gốc gọi API giữ chỗ rồi ở lại bảng lịch; không chuyển sang payment và không coi giữ chỗ là booking confirmed. Identity, gateway và các bounded context khác chưa triển khai; chỉ bật CI cho những component thực sự có source.
+Phạm vi này không có pass sân hoặc payment. UI gốc → API Gateway → Booking Core đã nối cho catalogue trung tâm, lịch trống, đặt/xác nhận/hủy, lịch sử/thống kê và lịch cố định. Gateway giữ REST/GraphQL của client gốc, xác minh JWT rồi chuyển bearer token tới Core. Identity và backend của kho/news/rating/social/notification chưa triển khai; các màn hình đó vẫn được giữ theo yêu cầu.
 
 ## Chạy local bằng Docker
 
 ```bash
 cd /data/Dev/newBTL/badminton-system
 git switch feat/booking-core
-API_GATEWAY_URL=http://host.docker.internal:8080 docker compose up --build -d
+docker compose up --build -d
 ```
 
-Compose tạo database riêng, áp dụng migration đã commit và seed một trung tâm/4 sân demo. PostgreSQL bind localhost:5432; API localhost:3000; giao diện khách hàng [localhost:8082](http://localhost:8082), Admin [localhost:8083](http://localhost:8083). Cổng 8082/8083 tránh xung đột với k3d đang dùng 8080. Đây là cấu hình phát triển với dữ liệu và secret mẫu. **UI gốc cần gateway cũ hoặc gateway tương thích**, cấu hình bằng `API_GATEWAY_URL`; không tự nối `/api/...` và `/graphql` vào Booking Core `/api/v1/...`. Không có màn hình hoặc nút đăng nhập demo. Xem [docs/LEGACY_UI.md](docs/LEGACY_UI.md) để cấu hình gateway và nhận session từ host.
+Compose tạo database riêng, áp dụng migration đã commit và seed một trung tâm/4 sân demo. PostgreSQL bind localhost:5432; API localhost:3000; gateway localhost:8081; giao diện khách hàng [localhost:8082](http://localhost:8082), Admin [localhost:8083](http://localhost:8083). Cổng 8082/8083 tránh xung đột với k3d đang dùng 8080. Đây là cấu hình phát triển với dữ liệu và secret mẫu. Compose chạy gateway mới và tự nối Nginx của hai app tới gateway, gateway tới Core. Không có màn hình hoặc nút đăng nhập demo. Xem [docs/LEGACY_UI.md](docs/LEGACY_UI.md) để cấu hình gateway và nhận session từ host.
 
 ```bash
-docker compose logs -f api
+docker compose logs -f api gateway
 docker compose down
 ```
 
 `down` giữ dữ liệu trong volume. Chỉ dùng `down -v` khi muốn xóa database local này.
 
-Hướng dẫn Node/pnpm, API và cấu hình triển khai ở [docs/BOOKING_CORE.md](docs/BOOKING_CORE.md). Hướng dẫn metrics/logs ở [docs/MONITORING.md](docs/MONITORING.md).
+Hợp đồng gateway và cấu hình ở [docs/API_GATEWAY.md](docs/API_GATEWAY.md). Hướng dẫn Node/pnpm, API và cấu hình triển khai ở [docs/BOOKING_CORE.md](docs/BOOKING_CORE.md). Hướng dẫn metrics/logs ở [docs/MONITORING.md](docs/MONITORING.md).
 
 ## Kiểm tra
 

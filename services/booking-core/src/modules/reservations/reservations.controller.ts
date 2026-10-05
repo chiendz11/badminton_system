@@ -1,5 +1,7 @@
 import {
   Body,
+  Get,
+  Query,
   Controller,
   Delete,
   Headers,
@@ -16,6 +18,7 @@ import { AuthRequest } from "../../common/auth/auth.types";
 import { BookingsCommandService } from "../bookings/bookings-command.service";
 import { ReservationDto } from "./dto/reservation.dto";
 import { ReservationsService } from "./reservations.service";
+import { ListDto } from "../../common/http/list.dto";
 const uuid = new ParseUUIDPipe({ version: "4" });
 @Controller("api/v1/reservations")
 @UseGuards(AuthGuard)
@@ -25,6 +28,9 @@ export class ReservationsController {
     @Inject(BookingsCommandService)
     private readonly bookings: BookingsCommandService,
   ) {}
+  @Get() held(@Req() req: AuthRequest, @Query() query: ListDto) {
+    return this.service.held(req.actor, query.centerId);
+  }
   @Post() reserve(
     @Req() req: AuthRequest,
     @Body() data: ReservationDto,

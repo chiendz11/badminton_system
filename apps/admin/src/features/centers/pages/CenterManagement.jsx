@@ -6,7 +6,7 @@ import {
   getCenterInfoByIdGQL,
   deleteCenterGQL,
 } from "../api/center_service/graphql/center.api.js";
-import { getAllUsers } from "../../users/api/user_service/rest/user.api.js";
+import { centerManagers as hostCenterManagers } from "../../../shared/session/booking-directory.js";
 import LoadingSpinner from "../../../shared/ui/LoadingSpinner.jsx";
 import { ROLES } from "../../../shared/constants/roles.js";
 import {
@@ -46,7 +46,7 @@ const CenterManagement = () => {
   const loadData = async () => {
     try {
       setLoading(true);
-      const usersRes = await getAllUsers({ role: "CENTER_MANAGER" });
+      const usersRes = { success: true, data: hostCenterManagers() };
       if (usersRes.success && Array.isArray(usersRes.data))
         setCenterManagers(usersRes.data);
       else setCenterManagers([]);

@@ -62,7 +62,9 @@ const AdminBillList = () => {
           if (admin.centerId) {
             setSelectedCenterId(admin.centerId);
           } else {
-            const myCenter = centerList.find((c) => c.managerId === admin.id);
+            const myCenter = centerList.find(
+              (c) => c.centerManagerId === admin.userId,
+            );
             if (myCenter) setSelectedCenterId(myCenter.centerId);
           }
         }

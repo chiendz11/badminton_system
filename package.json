@@ -12,10 +12,11 @@
     "typecheck": "pnpm -r typecheck",
     "lint": "pnpm -r lint",
     "test:unit": "pnpm -r test:unit",
-    "test:integration": "pnpm --filter @badminton/booking-core test:integration",
+    "test:integration": "pnpm --filter @badminton/booking-core test:integration && pnpm --filter @badminton/api-gateway test:integration",
     "test:contract": "pnpm -r test:contract",
     "demo:tokens": "pnpm --filter @badminton/booking-core demo:tokens",
-    "format": "prettier --write packages services apps contracts docs monitoring *.json *.yml *.yaml"
+    "format": "prettier --write packages services apps contracts docs monitoring *.json *.yml *.yaml",
+    "dev:gateway": "pnpm --filter @badminton/api-gateway dev"
   },
   "devDependencies": {
     "@types/node": "^22.18.0",

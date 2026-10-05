@@ -53,7 +53,7 @@ const getStatusText = (status) => {
     case "paid":
       return "Hoàn thành";
     case "confirmed":
-      return "Hoàn thành";
+      return "Đã xác nhận";
     case "pending":
       return "Đang giữ chỗ";
     case "cancelled":

@@ -6,7 +6,7 @@ import {
   getAvailableCourts,
   createFixedBookings,
 } from "../api/booking_service/rest/booking.api.js";
-import { getAllUsers } from "../../users/api/user_service/rest/user.api.js";
+import { bookingCustomers } from "../../../shared/session/booking-directory.js";
 import { getAllCentersGQL } from "../../centers/api/center_service/graphql/center.api.js";
 
 // Icons & UI
@@ -38,7 +38,7 @@ const CreateFixedBooking = () => {
 
   const [startDate, setStartDate] = useState(() => {
     const d = new Date();
-    d.setUTCHours(0, 0, 0, 0);
+    d.setHours(0, 0, 0, 0);
     return d;
   });
 
@@ -64,10 +64,11 @@ const CreateFixedBooking = () => {
   });
 
   const dropdownRef = useRef(null);
+  const fixedRequestKey = useRef(null);
 
   // --- CONSTANTS ---
   const today = new Date();
-  today.setUTCHours(0, 0, 0, 0);
+  today.setHours(0, 0, 0, 0);
   const endDate = new Date(startDate);
   endDate.setDate(startDate.getDate() + 30);
 
@@ -93,7 +94,7 @@ const CreateFixedBooking = () => {
       try {
         const [centersData, usersRes] = await Promise.all([
           getAllCentersGQL(),
-          getAllUsers({ limit: 2000 }),
+          Promise.resolve({ data: bookingCustomers() }),
         ]);
         setCenters(centersData || []);
         setAllUsers(usersRes.data || []);
@@ -154,7 +155,7 @@ const CreateFixedBooking = () => {
       setLoadingCourts(true);
       try {
         const normalizedDate = new Date(startDate);
-        normalizedDate.setUTCHours(0, 0, 0, 0);
+        normalizedDate.setHours(0, 0, 0, 0);
         const res = await getAvailableCourts({
           centerId: selectedCenter,
           startDate: normalizedDate,
@@ -318,6 +319,7 @@ const CreateFixedBooking = () => {
       return;
     }
 
+    fixedRequestKey.current = null;
     setPreviewTotal(totalEstimated); // Set state tổng tiền
     setBookingsToCreate(bookings);
     setIsModalOpen(true);
@@ -331,11 +333,16 @@ const CreateFixedBooking = () => {
       // Hoặc cứ để đó nếu server ignore fields lạ.
       const cleanBookings = bookingsToCreate.map(({ price, ...rest }) => rest);
 
-      const res = await createFixedBookings({
-        userId: selectedUser.userId || selectedUser._id,
-        centerId: selectedCenter,
-        bookings: cleanBookings,
-      });
+      const res = await createFixedBookings(
+        {
+          userId: selectedUser.userId || selectedUser._id,
+          userName: selectedUser.name || selectedUser.username,
+          centerId: selectedCenter,
+          bookings: cleanBookings,
+        },
+        (fixedRequestKey.current ||= crypto.randomUUID()),
+      );
+      fixedRequestKey.current = null;
 
       // Nếu server trả về tổng tiền thực tế, dùng nó, nếu không dùng số client tính
       const finalTotal = Array.isArray(res)
@@ -475,7 +482,7 @@ const CreateFixedBooking = () => {
                   selected={startDate}
                   onChange={(date) => {
                     const d = new Date(date);
-                    d.setUTCHours(0, 0, 0, 0);
+                    d.setHours(0, 0, 0, 0);
                     setStartDate(d);
                   }}
                   dateFormat="dd/MM/yyyy"

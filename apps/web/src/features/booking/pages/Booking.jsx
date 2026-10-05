@@ -42,8 +42,9 @@ function calculateTotal(slots, userPoints) {
   const totalHours = slots.length;
 
   let discount = 0;
-  if (totalHours >= 2) discount += 0.05; // Giảm 5% nếu đặt >= 2h
-  if (userPoints > 4000) discount += 0.1; // Giảm 10% nếu VIP
+  if (new Set(slots.map((slot) => slot.courtId)).size >= 2) discount += 0.05; // Ước tính theo số sân như Core; quote thực lấy từ server.
+  if (userPoints >= 4000) discount += 0.1;
+  else if (userPoints >= 2000) discount += 0.05;
 
   const discountedAmount = totalAmount * (1 - discount);
   return {
@@ -216,6 +217,7 @@ const BookingSchedule = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const datePickerRef = useRef(null);
+  const bookingRequestKey = useRef(null);
 
   // --- EFFECTS ---
 
@@ -327,6 +329,7 @@ const BookingSchedule = () => {
   // --- HANDLERS ---
 
   const handleDateChange = (newDate) => {
+    bookingRequestKey.current = null;
     setBaseMapping({});
     setDisplayMapping({});
     setSelectedSlots([]);
@@ -336,7 +339,8 @@ const BookingSchedule = () => {
   };
 
   const toggleBookingStatus = (rowIndex, colIndex) => {
-    if (!initialMappingLoaded) return;
+    if (!initialMappingLoaded || isSubmitting) return;
+    bookingRequestKey.current = null;
     const court = courts[rowIndex];
     if (!court) return;
 
@@ -434,12 +438,15 @@ const BookingSchedule = () => {
         console.log("courtBookingDetails:", courtBookingDetails);
 
         // ✅ BƯỚC 2: GỌI API
-        const response = await confirmBookingToDB({
-          centerId,
-          bookDate: selectedDate,
-          userName: name || "Guest", // Fallback nếu name bị null
-          courtBookingDetails: courtBookingDetails,
-        });
+        const response = await confirmBookingToDB(
+          {
+            centerId,
+            bookDate: selectedDate,
+            userName: name || "Guest", // Fallback nếu name bị null
+            courtBookingDetails: courtBookingDetails,
+          },
+          (bookingRequestKey.current ||= crypto.randomUUID()),
+        );
 
         // Backend của bạn trả về { message, booking, ... } hoặc trực tiếp object
         // Tùy vào controller trả về gì, nhưng thường là response.booking hoặc response
@@ -448,9 +455,10 @@ const BookingSchedule = () => {
         console.log("Booking response from server:", booking);
 
         if (booking && booking._id) {
+          bookingRequestKey.current = null;
           setSelectedSlots([]);
           await fetchBookingStatus();
-          alert(`Giữ chỗ thành công! Mã đơn: ${booking._id}`);
+          alert(`Đặt sân thành công! Mã đơn: ${booking._id}`);
         }
       } catch (error) {
         console.error("Lỗi khi xác nhận booking:", error);
@@ -486,6 +494,9 @@ const BookingSchedule = () => {
             setSelectedSlots(newSelectedSlots);
           }
 
+          bookingRequestKey.current = null;
+          setSelectedSlots([]);
+          await fetchBookingStatus();
           setShowModal(false);
         } else {
           alert(
@@ -688,19 +699,23 @@ const BookingSchedule = () => {
               </div>
               <div className="divider"></div>
               <div className="discount-info">
-                {totalHours >= 2 && (
+                {new Set(selectedSlots.map((slot) => slot.courtId)).size >=
+                  2 && (
                   <p data-testid="discount-2-hours">
-                    Đã giảm 5% (đặt từ 2 giờ trở lên):{" "}
+                    Đã giảm 5% (đặt từ 2 sân trở lên):{" "}
                     <span className="text-green-600">
                       -{formatMoney(originalAmount * 0.05)}
                     </span>
                   </p>
                 )}
-                {userPoints > 4000 && (
+                {userPoints >= 2000 && (
                   <p data-testid="discount-points">
-                    Đã giảm 10% (điểm thành viên trên 4000):{" "}
+                    Đã giảm {userPoints >= 4000 ? 10 : 5}% (điểm thành viên):{" "}
                     <span className="text-green-600">
-                      -{formatMoney(originalAmount * 0.1)}
+                      -
+                      {formatMoney(
+                        originalAmount * (userPoints >= 4000 ? 0.1 : 0.05),
+                      )}
                     </span>
                   </p>
                 )}
@@ -749,14 +764,14 @@ const BookingSchedule = () => {
         <ModalConfirmation
           isLoading={isSubmitting}
           onAction={handleModalAction}
-          title="Xác nhận giữ chỗ"
+          title="Xác nhận đặt sân"
           message={
             <>
               Giá dự kiến là{" "}
               <span className="font-bold text-yellow-500">
                 {totalAmount.toLocaleString("vi-VN")} đ
               </span>
-              . Bạn có chắc chắn muốn giữ chỗ cho các khung giờ đã chọn?{" "}
+              . Bạn có chắc chắn muốn đặt các khung giờ đã chọn?{" "}
               <span role="img" aria-label="thinking">
                 🧐
               </span>

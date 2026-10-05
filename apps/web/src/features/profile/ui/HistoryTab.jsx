@@ -75,8 +75,7 @@ const HistoryTab = ({
 
         const mappedHistory = (data.bookingHistory || []).map((item) => ({
           ...item,
-          // Map 'confirmed' -> 'paid' để UI hiển thị màu xanh
-          status: item.status === "confirmed" ? "paid" : item.status,
+          status: item.status,
 
           createdAt: item.createdAt || new Date().toISOString(),
         }));
@@ -168,7 +167,7 @@ const HistoryTab = ({
         getBookingHistory(userId, { page: 1, limit: limit }).then((data) => {
           const mapped = (data.bookingHistory || []).map((item) => ({
             ...item,
-            status: item.status === "confirmed" ? "paid" : item.status,
+            status: item.status,
             createdAt: item.createdAt || new Date().toISOString(),
           }));
           setHistory(mapped);
@@ -403,7 +402,9 @@ const HistoryTab = ({
                       <td>{booking.paymentMethod}</td>
                       <td>
                         <div className="action-buttons">
-                          {booking.status === "pending" && (
+                          {(booking.status === "pending" ||
+                            (booking.status === "confirmed" &&
+                              Date.parse(booking.startsAt) > Date.now())) && (
                             <>
                               <button
                                 className="cancel-btn"
@@ -421,7 +422,8 @@ const HistoryTab = ({
                           )}
 
                           {(booking.status === "paid" ||
-                            booking.status === "confirmed") && (
+                            (booking.status === "confirmed" &&
+                              Date.parse(booking.endsAt) <= Date.now())) && (
                             <button
                               className="delete-btn"
                               title="Xóa"

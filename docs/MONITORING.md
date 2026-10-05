@@ -1,4 +1,4 @@
-# Monitoring Booking Core
+# Monitoring Booking Core và API Gateway
 
 ## Metrics và health
 
@@ -37,11 +37,13 @@ booking_core_outbox_pending
 
 Outbox publisher chưa triển khai nên backlog sẽ tăng khi booking được tạo/hủy. Chỉ đặt alert backlog sau khi có publisher và thống nhất SLO phát event.
 
+Gateway (8081) có `/health/live`, `/health/ready` (gọi readiness của Core), `/metrics` bảo vệ bởi monitoring token riêng. Compose dùng `local-gateway-monitoring-only`. Metrics `api_gateway_http_requests_total` và `api_gateway_http_duration_seconds` có method/route template/status; không chứa URL raw, actor hoặc booking ID trong labels. Prometheus sample thêm job `api-gateway`; mount thêm `/run/secrets/gateway_metrics_token`. Gateway lỗi kết nối Core trả 502, timeout trả 504. Gateway không tự retry mutation; client retry với cùng Idempotency-Key.
+
 ## JSON logs và correlation
 
-Pino ghi một JSON record mỗi dòng ra stdout: service, level, time, msg. HTTP log có requestId, method, route, status, durationMs và actorId nếu guard đã xác thực. Mutation log có action, reservation/booking/center ID khi phù hợp. Không ghi body, query string, Authorization hoặc cookie; credential fields của logger được redact. Xem local: `docker compose logs -f api`.
+Pino ghi một JSON record mỗi dòng ra stdout: service, level, time, msg. HTTP log có requestId, method, route, status, durationMs và actorId nếu guard đã xác thực. Mutation log có action, reservation/booking/center ID khi phù hợp. Không ghi body, query string, Authorization hoặc cookie; credential fields của logger được redact. Xem local: `docker compose logs -f api gateway`.
 
-Browser gửi X-Request-Id; API chấp nhận chuỗi an toàn 8–64 ký tự hoặc cấp UUID mới, trả header này và body lỗi. AsyncLocalStorage truyền requestId vào mutation logs và correlationId trong outbox. Frontend log warning API lỗi với status/requestId, không log token. Request ID không phải tracing phân tán và không phải Prometheus label.
+Gateway nhận hoặc cấp X-Request-Id, chuyển sang Core trên mọi upstream request và trả lại browser; API chấp nhận chuỗi an toàn 8–64 ký tự hoặc cấp UUID mới, trả header này và body lỗi. AsyncLocalStorage truyền requestId vào mutation logs và correlationId trong outbox. Frontend log warning API lỗi với status/requestId, không log token. Request ID không phải tracing phân tán và không phải Prometheus label.
 
 Để nối Loki/ELK, thu stdout JSON bằng agent của môi trường. Dùng service/env làm label; requestId/actorId/bookingId là field để tìm kiếm, không phải label index. Không log secret/DATABASE_URL; tuân theo retention/access policy khi dùng actor ID.
 

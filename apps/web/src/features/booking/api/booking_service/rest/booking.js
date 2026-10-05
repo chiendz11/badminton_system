@@ -30,12 +30,10 @@ export const getBookingStatusFromBookingId = async (bookingId) => {
   }
 };
 
-export const confirmBookingToDB = async ({
-  centerId,
-  bookDate,
-  userName,
-  courtBookingDetails,
-}) => {
+export const confirmBookingToDB = async (
+  { centerId, bookDate, userName, courtBookingDetails },
+  idempotencyKey = crypto.randomUUID(),
+) => {
   try {
     const response = await axiosInstance.post(
       "/api/booking/pending/pendingBookingToDB",

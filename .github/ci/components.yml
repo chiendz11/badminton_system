@@ -64,21 +64,19 @@ components:
     path: contracts/gateway
     runtime: contract
     depends_on: []
-    enabled: false
+    enabled: true
   api_gateway:
-    path: services/api_gateway
+    path: services/api-gateway
     runtime: node
     database: none
     depends_on:
-      - identity_api
+      - booking_core
       - booking_api
-      - commerce_api
       - gateway_api
       - auth_contracts
-      - booking_contracts
       - observability
     docker: true
-    enabled: false
+    enabled: true
   identity:
     path: services/identity_service
     runtime: node
@@ -175,12 +173,14 @@ components:
   frontend:
     path: apps/web
     runtime: web
-    depends_on: []
+    depends_on:
+      - gateway_api
     docker: false
     enabled: true
   admin:
     path: apps/admin
     runtime: web
-    depends_on: []
+    depends_on:
+      - gateway_api
     docker: false
     enabled: true

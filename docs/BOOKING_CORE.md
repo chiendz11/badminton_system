@@ -31,15 +31,16 @@ Reservation đi từ `HELD` sang `CONFIRMED`, `CANCELLED` hoặc `EXPIRED`. Conf
 
 Backend nhận JWT HS256: `sub`, `role` (`user`, `center_manager`, `super_admin`), `name` tùy chọn, `loyaltyPoints` tùy chọn; kiểm tra issuer/audience và thời hạn nếu có. Identity phải cấp token có `exp`, ký bằng secret cùng cấu hình. Không tin `x-user-id`/role headers. User chỉ thấy/hủy booking của mình; manager chỉ quản lý trung tâm được gán; super_admin tạo trung tâm và quản lý mọi trung tâm.
 
-`DevelopmentModule` chỉ đăng ký `POST /api/v1/dev/session` khi `NODE_ENV=development` và `ENABLE_DEMO_AUTH=true`; trả token demo có hạn 1 giờ. Production chặn demo và secret mẫu, yêu cầu METRICS_TOKEN. UI đã được lấy lại từ repo gốc và không còn auth UI. Host cung cấp session theo [LEGACY_UI.md](LEGACY_UI.md). Client gốc dùng gateway `/api/...`/`/graphql`; chưa có adapter nối hợp đồng đó với Booking Core v1. `demo:tokens` là công cụ CLI phát triển backend, không phải luồng đăng nhập trên UI.
+`DevelopmentModule` chỉ đăng ký `POST /api/v1/dev/session` khi `NODE_ENV=development` và `ENABLE_DEMO_AUTH=true`; trả token demo có hạn 1 giờ. Production chặn demo và secret mẫu, yêu cầu METRICS_TOKEN. UI đã được lấy lại từ repo gốc và không còn auth UI. Host cung cấp session theo [LEGACY_UI.md](LEGACY_UI.md). Client gốc dùng gateway `/api/...`/`/graphql`; adapter đã nối với Booking Core v1 theo [API_GATEWAY.md](API_GATEWAY.md). `demo:tokens` là công cụ CLI phát triển backend, không phải luồng đăng nhập trên UI.
 
 ## Chạy bằng Node
 
-Dùng Node 22 và pnpm 10.25.0. Khi máy chưa có pnpm, có thể dùng `npx --yes --package=node@22 --package=pnpm@10.25.0 -- pnpm ...` thay cho `pnpm ...`.
+Cài và chọn Node 22 bằng công cụ quản lý phiên bản của máy, rồi cài pnpm 10.25.0.
 
 ```bash
 pnpm install --frozen-lockfile
 cp services/booking-core/.env.example services/booking-core/.env
+cp services/api-gateway/.env.example services/api-gateway/.env
 cp apps/web/.env.example apps/web/.env
 cp apps/admin/.env.example apps/admin/.env
 docker compose up -d postgres
@@ -49,7 +50,7 @@ pnpm --filter @badminton/booking-core seed
 pnpm dev:core
 ```
 
-Hai terminal khác: `pnpm dev:web` (5173), `pnpm dev:admin` (5174). Vite proxy `/api`, `/graphql` và socket đến `DEV_API_GATEWAY_URL` (mặc định 8080). Các màn hình gốc không gọi trực tiếp Booking Core 3000. Shared packages build qua `prepare` khi install; sau khi sửa package dùng `pnpm --filter './packages/**' build`. Seed idempotent, không reset giá/booking đã sửa.
+Chạy thêm `pnpm dev:gateway` (8081), `pnpm dev:web` (5173), `pnpm dev:admin` (5174) ở các terminal riêng. Vite proxy `/api`, `/graphql` và socket đến `DEV_API_GATEWAY_URL` (mặc định 8081). Các màn hình gốc không gọi trực tiếp Booking Core 3000. Shared packages build qua `prepare` khi install; sau khi sửa package dùng `pnpm --filter './packages/**' build`. Seed idempotent, không reset giá/booking đã sửa.
 
 ## API chính
 
@@ -67,10 +68,10 @@ Contract: `contracts/booking/openapi.json`; DTO và example schemas đi cùng, e
 | `POST/PATCH /api/v1/centers[/:id]`, `POST/PATCH .../courts[/:courtId]`, `PUT .../pricing` | Quản lý centre/court/giá              |
 | `GET /api/v1/centers/:id/bookings`                                                        | Lịch của trung tâm, chỉ manager/admin |
 
-Date là lịch VN thực sự tồn tại, body không chấp nhận field thừa. Idempotency-Key 8–128 ký tự chữ/số/underscore/hyphen; replay cùng nội dung trả cùng kết quả, đổi nội dung trả 409. Lỗi có `requestId`, không trả stack/secret. Manager nhập user ID/name khi tạo lịch cố định, chờ Identity directory.
+Date là lịch VN thực sự tồn tại, body không chấp nhận field thừa. Idempotency-Key 8–128 ký tự chữ/số/underscore/hyphen; replay cùng nội dung trả cùng kết quả, đổi nội dung trả 409. Lỗi có `requestId`, không trả stack/secret. Core nhận external user ID/name khi quản lý tạo lịch cố định; Admin nhận directory từ host. Fixed DTO hỗ trợ `occurrences` với sân/giờ khác nhau theo ngày, tối đa 60 ngày và 8 sân/ngày; toàn chuỗi vẫn một transaction. `GET /api/v1/bookings` là danh sách quản lý theo quyền centre, `GET /api/v1/bookings/:id` kiểm tra owner/manager, `DELETE /api/v1/bookings/:id` chỉ chủ booking được ẩn history, giữ audit/outbox. `GET /api/v1/reservations` chỉ trả hold chưa hết hạn của actor. Migration gateway compatibility thêm centre map/file metadata và hiddenAt; không migrate dữ liệu MongoDB cũ.
 
 ## Triển khai tiếp
 
-Compose commit là local development. Để triển khai cần tạo PostgreSQL/secret riêng, chạy migration job, seed chỉ khi cần dữ liệu demo, tắt ENABLE_DEMO_AUTH, dùng NODE_ENV=production, JWT_SECRET mạnh khớp Identity, issuer/audience đúng, METRICS_TOKEN riêng và CORS_ORIGINS cụ thể. API runtime image chạy user `node`, chỉ mang Prisma Client đã generate; Prisma CLI/npm/yarn không nằm trong runtime image. Migration/seed dùng build target riêng; frontend/admin không có demo auth. Nginx template nhận `API_GATEWAY_URL` khi container start và proxy gateway gốc/tương thích; cấu hình runtime upstream riêng theo môi trường.
+Compose commit là local development. Để triển khai cần tạo PostgreSQL/secret riêng, chạy migration job, seed chỉ khi cần dữ liệu demo, tắt ENABLE_DEMO_AUTH, dùng NODE_ENV=production, JWT_SECRET mạnh khớp Identity, issuer/audience đúng, METRICS_TOKEN riêng và CORS_ORIGINS cụ thể. API runtime image chạy user `node`, chỉ mang Prisma Client đã generate; Prisma CLI/npm/yarn không nằm trong runtime image. Migration/seed dùng build target riêng; frontend/admin không có demo auth. Nginx template nhận `API_GATEWAY_URL` khi container start và proxy gateway adapter của workspace; cấu hình runtime upstream riêng theo môi trường.
 
-Không bật lại AI/Identity/Gateway/Commerce CI cho đến khi có source, lockfile và test thật. Không có payment, pass, hoàn tiền, tích điểm sau thanh toán hoặc migration dữ liệu cũ trong phạm vi nhánh này.
+Không bật lại AI/Identity/Commerce CI cho đến khi có source, lockfile và test thật. Không có payment, pass, hoàn tiền, tích điểm sau thanh toán hoặc migration dữ liệu cũ trong phạm vi nhánh này.

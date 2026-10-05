@@ -1,0 +1,4 @@
+ALTER TABLE "Center" ADD COLUMN "googleMapUrl" TEXT,
+  ADD COLUMN "logoFileId" TEXT,
+  ADD COLUMN "imageFileIds" TEXT[] NOT NULL DEFAULT ARRAY[]::TEXT[];
+ALTER TABLE "Booking" ADD COLUMN "hiddenAt" TIMESTAMPTZ(3);

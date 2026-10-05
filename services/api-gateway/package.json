@@ -1,0 +1,42 @@
+{
+  "name": "@badminton/api-gateway",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "tsx watch src/main.ts",
+    "start": "node dist/main.js",
+    "build": "tsc -p tsconfig.build.json",
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint src test",
+    "test:unit": "vitest run test/unit",
+    "test:contract": "vitest run test/contract",
+    "test:integration": "pnpm --filter @badminton/booking-core prisma:generate && pnpm --filter @badminton/booking-core build && vitest run test/integration"
+  },
+  "dependencies": {
+    "@badminton/auth-contracts": "workspace:*",
+    "@badminton/observability": "workspace:*",
+    "express": "^5.1.0",
+    "graphql": "^16.12.0",
+    "cors": "^2.8.5",
+    "dotenv": "^17.2.3",
+    "helmet": "^8.1.0",
+    "jsonwebtoken": "^9.0.2",
+    "prom-client": "^15.1.3",
+    "zod": "^3.25.76"
+  },
+  "devDependencies": {
+    "@types/express": "^5.0.3",
+    "@types/cors": "^2.8.19",
+    "@types/jsonwebtoken": "^9.0.10",
+    "@types/supertest": "^6.0.3",
+    "supertest": "^7.1.4",
+    "vitest": "^3.2.4",
+    "tsx": "^4.23.0",
+    "@nestjs/testing": "^11.1.6",
+    "@testcontainers/postgresql": "^11.5.1",
+    "reflect-metadata": "^0.2.2"
+  },
+  "files": [
+    "dist"
+  ]
+}

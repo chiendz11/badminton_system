@@ -32,7 +32,10 @@ export const getAllBookingsForAdmin = async (params) => {
 // ==========================================
 // ✅ HÀM MỚI: TẠO LỊCH CỐ ĐỊNH
 // ==========================================
-export const createFixedBookings = async (payload) => {
+export const createFixedBookings = async (
+  payload,
+  idempotencyKey = crypto.randomUUID(),
+) => {
   try {
     // Payload gửi lên sẽ có dạng:
     // {
@@ -44,6 +47,7 @@ export const createFixedBookings = async (payload) => {
     const response = await axiosInstance.post(
       "/api/booking/create-fixed-bookings",
       payload,
+      { headers: { "Idempotency-Key": idempotencyKey } },
     );
     return response.data;
   } catch (error) {

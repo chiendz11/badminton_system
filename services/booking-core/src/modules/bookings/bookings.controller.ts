@@ -1,5 +1,6 @@
 import {
   Body,
+  Delete,
   Controller,
   Get,
   Headers,
@@ -31,11 +32,14 @@ export class BookingsController {
     @Inject(FixedBookingsService)
     private readonly fixedBookings: FixedBookingsService,
   ) {}
+  @Get() all(@Req() req: AuthRequest, @Query() query: ListDto) {
+    return this.service.listBookings(req.actor, query, undefined, true);
+  }
   @Get("me") mine(@Req() req: AuthRequest, @Query() query: ListDto) {
     return this.service.listBookings(req.actor, query);
   }
-  @Get("me/stats") stats(@Req() req: AuthRequest) {
-    return this.service.stats(req.actor);
+  @Get("me/stats") stats(@Req() req: AuthRequest, @Query() query: ListDto) {
+    return this.service.stats(req.actor, query.period);
   }
   @Post("fixed") fixed(
     @Req() req: AuthRequest,
@@ -43,6 +47,12 @@ export class BookingsController {
     @Headers("idempotency-key") key?: string,
   ) {
     return this.fixedBookings.fixed(req.actor, data, key);
+  }
+  @Get(":id") get(@Req() req: AuthRequest, @Param("id", uuid) id: string) {
+    return this.service.get(req.actor, id);
+  }
+  @Delete(":id") hide(@Req() req: AuthRequest, @Param("id", uuid) id: string) {
+    return this.commands.hide(req.actor, id);
   }
   @Post(":id/cancel") @HttpCode(200) cancel(
     @Req() req: AuthRequest,

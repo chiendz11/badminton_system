@@ -1,6 +1,11 @@
 import type { Actor } from "@badminton/auth-contracts";
 import { discountedQuote } from "@badminton/booking-contracts";
-import { ConflictException, Inject, Injectable } from "@nestjs/common";
+import {
+  BadRequestException,
+  ConflictException,
+  Inject,
+  Injectable,
+} from "@nestjs/common";
 import { Prisma } from "../../../generated/client";
 import { assertCenterManager } from "../../common/auth/center-access";
 import { quoteSlots } from "../../common/domain/booking-quote";
@@ -32,18 +37,31 @@ export class FixedBookingsService {
   ) {}
   async fixed(actor: Actor, data: FixedBookingDto, key?: string) {
     const idem = idempotencyKey(key),
-      dates = fixedDates(
+      rangeDates = fixedDates(
         data.startDate,
         data.endDate,
         data.weekdays,
         this.clock.now(),
       ),
+      occurrences = data.occurrences
+        ?.map((item) => ({
+          date: item.date,
+          selections: canonicalSelections(item.selections),
+        }))
+        .sort((a, b) => a.date.localeCompare(b.date)),
+      dates = occurrences?.map((item) => item.date) ?? rangeDates,
       details = canonicalSelections(data.selections),
       hash = fingerprint({
         ...data,
         weekdays: [...data.weekdays].sort(),
         selections: details,
+        occurrences,
       });
+    if (
+      new Set(dates).size !== dates.length ||
+      dates.some((date) => !rangeDates.includes(date))
+    )
+      throw new BadRequestException("Ngày trong chuỗi cố định không hợp lệ");
     const result = await this.transactions.run("fixed", async (tx) => {
       await this.transactions.lock(tx, `fixed:${actor.userId}:${idem}`);
       await this.transactions.lock(tx, data.centerId);
@@ -75,7 +93,13 @@ export class FixedBookingsService {
         }),
         bookings: FullBooking[] = [];
       for (const date of dates) {
-        const selections = quoteSlots(center, this.clock.now(), date, details);
+        const selections = quoteSlots(
+          center,
+          this.clock.now(),
+          date,
+          occurrences?.find((item) => item.date === date)?.selections ??
+            details,
+        );
         const reservation = await tx.reservation.create({
           data: {
             centerId: data.centerId,

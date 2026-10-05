@@ -6,7 +6,7 @@
 
 | Component    | Path dự kiến                  | Runtime / database         |
 | ------------ | ----------------------------- | -------------------------- |
-| api_gateway  | services/api_gateway          | Node                       |
+| api_gateway  | services/api-gateway          | Node                       |
 | identity     | services/identity_service     | Node / PostgreSQL / Prisma |
 | booking_core | services/booking-core         | Node / PostgreSQL / Prisma |
 | commerce     | services/commerce_service     | Node / PostgreSQL / Prisma |
@@ -26,7 +26,7 @@ Các shared package: `packages/auth-contracts`, `packages/booking-contracts`, `p
 
 ## Triển khai từng component
 
-Trên `ci/bootstrap`, manifest vẫn `configuration_only: true`. Trên `feat/booking-core`, manifest đặt `configuration_only: false` và mỗi component có `enabled` rõ ràng. Hiện bật Booking Core, Frontend, Admin, booking/event schemas và ba shared packages đã có. Web/Admin đã dùng client gốc nên không khai báo dependency vào custom Booking Core contracts; contract tests của app kiểm tra gateway URLs/payload/envelope gốc. Package UI tự dựng đã được bỏ. Identity/Gateway/Commerce/AI và các component chưa có source để `enabled: false`; không tạo test hoặc code giả để CI xanh.
+Trên `ci/bootstrap`, manifest vẫn `configuration_only: true`. Trên `feat/booking-core`, manifest đặt `configuration_only: false` và mỗi component có `enabled` rõ ràng. Hiện có 10 component enabled: Booking Core, API Gateway, Frontend, Admin, booking/event/gateway schemas và ba shared packages đã có. Web/Admin đã dùng client gốc nên không khai báo dependency vào custom Booking Core contracts; contract tests của app kiểm tra gateway URLs/payload/envelope gốc. Package UI tự dựng đã được bỏ. Web/Admin phụ thuộc gateway API contract. Gateway còn phụ thuộc booking_core vì integration chạy Core thật và compile Core; đổi implementation Core sẽ kiểm tra gateway integration. Identity/Commerce/AI và các component chưa có source để `enabled: false`; không tạo test hoặc code giả để CI xanh.
 
 Validation kiểm tra tên/path/graph của cả manifest, nhưng chỉ kiểm tra sự tồn tại source/lockfile của component được bật. Change detector chỉ đưa component enabled vào matrix. Shared package được kiểm tra qua consumer đang bật. Khi triển khai bounded context tiếp theo, bổ sung scripts/test/migration thật rồi đặt enabled true và cập nhật dependency.
 
@@ -38,7 +38,7 @@ Validation kiểm tra tên/path/graph của cả manifest, nhưng chỉ kiểm t
 - Thay đổi `.github/**`: chọn toàn bộ component đã bật.
 - Đổi file lock hoặc cấu hình workspace: chọn các component dùng install root đó.
 - Đổi contract/shared package: chọn component đó, rồi mở rộng reverse dependency graph cho đến khi không còn consumer mới.
-- Đổi implementation bên trong deployable: chọn deployable đó. Ví dụ `services/booking-core/src/modules/pricing/**` chạy toàn `booking_core`, không tạo job pricing riêng.
+- Đổi implementation bên trong deployable: chọn deployable đó. Ví dụ `services/booking-core/src/modules/pricing/**` chạy toàn `booking_core`, không tạo job pricing riêng; gateway integration cũng chạy vì sử dụng Core thật.
 - Chỉ đổi tài liệu: matrix ứng dụng rỗng. Chỉ đổi `packages/booking-contracts/**` sẽ không kéo Content/Social/Commerce nếu graph không khai báo dependency này.
 - `contracts/booking/**` chọn Booking Core, Gateway, AI và các web consumer đã khai báo, cùng schema job của nhóm Booking.
 - `contracts/events/**` chọn các producer/consumer đã khai báo, gồm Notification.
@@ -68,6 +68,8 @@ prisma:migrate:deploy   # prisma migrate deploy, áp dụng migration đã commi
 ```
 
 Node workflow tạo PostgreSQL 16 tạm với port ngẫu nhiên chỉ bind localhost, đặt `DATABASE_URL` dành riêng cho CI, validate/generate Prisma, rồi chạy lint/typecheck/unit/contract, áp dụng migration và integration. Container được dọn ở bước `always()`, kể cả khi test/migration fail. CI không dùng `db push` để thay migration.
+
+Gateway khai báo database none vì không sở hữu DB; integration script generate/build Core và Testcontainers PostgreSQL riêng, khởi động Nest Core thật rồi gọi qua HTTP. Matrix hiện Node 2, Web 2, Contract 3, Python 0.
 
 MongoDB/Redis/RabbitMQ hoặc dependency khác do integration test của từng component khởi tạo/dọn bằng Testcontainers. Không kết nối database thật. Database metadata `mongodb` không tự bật thêm container chung cho tất cả job.
 

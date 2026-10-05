@@ -26,7 +26,11 @@ Router chỉ ghép các màn hình và lazy-load để giảm bundle ban đầu.
 
 `SessionProvider` nhận profile có sẵn từ host, không gọi auth, không tự tạo user/role/token. HTTP transport đọc bearer token và client ID từ integration đó. Session/role trên browser chỉ hỗ trợ render; gateway/backend phải xác minh token và quyền. Bỏ UI login/guard redirect không làm cho API protected trở thành public. Chi tiết và giới hạn integration ở [LEGACY_UI.md](LEGACY_UI.md).
 
-ESLint áp dụng `no-undef`, `rules-of-hooks`, `exhaustive-deps` ở mức error cho JSX; kiểm tra dependency direction của shared/features. API URL không đổi sang `/api/v1`. Các callback fetch dùng `useCallback` theo bộ lọc thật, constants không đổi theo render đặt ngoài component. Backend module refactor được giữ; không tạo business endpoint mới trong lần khôi phục UI này.
+ESLint áp dụng `no-undef`, `rules-of-hooks`, `exhaustive-deps` ở mức error cho JSX; kiểm tra dependency direction của shared/features. API URL không đổi sang `/api/v1`. Các callback fetch dùng `useCallback` theo bộ lọc thật, constants không đổi theo render đặt ngoài component. Backend module refactor được giữ; gateway giữ API gốc của client và Core bổ sung read model/ẩn history cùng centre metadata cần cho adapter.
+
+## API Gateway
+
+`services/api-gateway` giữ Express middleware/router từ kiến trúc cũ theo hợp đồng Booking Core. `configs` validate môi trường; `middleware` xác minh JWT/phân quyền, errors, logs/metrics; `clients/booking-core.client.ts` là upstream HTTP duy nhất; `modules/booking` chuyển lịch/giờ/response; `modules/centers` giữ SDL GraphQL và adapter centre; `routes` chỉ ghép handlers. Gateway không có database, không chứa quote hoặc quyền sở hữu transaction. Các invariant và kiểm tra owner/centre nằm tại Core. Federation được thay bằng resolver gọi REST Core trực tiếp. Xem [API_GATEWAY.md](API_GATEWAY.md).
 
 ## Booking Core
 
@@ -73,6 +77,6 @@ Các policy common không import module, infrastructure hoặc generated client;
 4. Thêm case bảo vệ invariant/hành vi thực; chạy các test bị ảnh hưởng, lint/typecheck/build.
 5. Khi thêm deployable, cập nhật manifest, workspace và Docker context cùng source; component chưa có code/test tiếp tục `enabled: false`.
 
-Lệnh local không đổi: `pnpm dev:core`, `pnpm dev:web`, `pnpm dev:admin`, `docker compose up --build -d`. Main vẫn là default branch; code nằm trên feat/booking-core. Identity thật, customer directory và outbox publisher là các integration tiếp theo, được ghi rõ trong BOOKING_CORE/MONITORING. Không có payment hoặc pass sân trong nhánh này.
+Lệnh local không đổi: `pnpm dev:core`, `pnpm dev:gateway`, `pnpm dev:web`, `pnpm dev:admin`, `docker compose up --build -d`. Main vẫn là default branch; code nằm trên feat/booking-core. Identity thật, customer directory và outbox publisher là các integration tiếp theo, được ghi rõ trong BOOKING_CORE/MONITORING. Không có payment hoặc pass sân trong nhánh này.
 
 Tham khảo mô hình [module của NestJS](https://docs.nestjs.com/modules) và [quy tắc hook của React](https://react.dev/reference/eslint-plugin-react-hooks/lints/rules-of-hooks). Cây thư mục là lựa chọn cho workspace này, không phải yêu cầu rằng mọi dự án production phải dùng cùng một cây.

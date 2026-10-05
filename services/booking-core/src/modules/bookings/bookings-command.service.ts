@@ -1,6 +1,7 @@
 import type { Actor } from "@badminton/auth-contracts";
 import {
   ConflictException,
+  ForbiddenException,
   GoneException,
   Inject,
   Injectable,
@@ -76,6 +77,43 @@ export class BookingsCommandService {
         actorId: actor.userId,
       });
     return bookingView(result.booking!);
+  }
+  async hide(actor: Actor, id: string) {
+    return this.transactions.run("hide", async (tx) => {
+      const row = await tx.booking.findUnique({
+        where: { id },
+        include: { reservation: { include: { center: true } } },
+      });
+      if (!row) throw new NotFoundException("Không tìm thấy booking");
+      await this.transactions.lock(tx, row.reservation.centerId);
+      const current = await tx.booking.findUniqueOrThrow({
+        where: { id },
+        include: { reservation: { include: { center: true } } },
+      });
+      if (current.reservation.userId !== actor.userId)
+        throw new ForbiddenException("Chỉ chủ booking được ẩn lịch sử");
+      if (
+        current.status === "CONFIRMED" &&
+        (current.reservation.selections as unknown as QuoteSelection[]).some(
+          (s) =>
+            s.slots.some(
+              (minute) =>
+                slotTime(current.reservation.date, minute + 60) >
+                this.clock.now(),
+            ),
+        )
+      )
+        throw new ConflictException(
+          "Hãy hủy booking tương lai trước khi xóa khỏi lịch sử",
+        );
+      return bookingView(
+        await tx.booking.update({
+          where: { id },
+          data: { hiddenAt: this.clock.now() },
+          include: { reservation: { include: { center: true } } },
+        }),
+      );
+    });
   }
   async cancel(actor: Actor, id: string) {
     const initial = await this.prisma.booking.findUnique({

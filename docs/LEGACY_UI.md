@@ -11,7 +11,7 @@ Nguồn: [Badminton_manager_microservices, commit 484d381e](https://github.com/c
 
 Bỏ route/component/API pass sân; payment/PayOS/QR/checkout; login/register/OAuth/refresh/logout/reset/change-password. Manager còn danh sách, sửa hồ sơ, khóa/mở khóa và xem phân công; tạo tài khoản kèm mật khẩu thuộc Identity nên không giữ card tạo manager mới. Shop giữ lịch sử bán hàng, không có modal thu tiền. Dịch vụ giữ catalogue và giỏ chọn sản phẩm, không có checkout. Giá/đơn giá/báo cáo/lịch sử vẫn hiển thị dữ liệu nghiệp vụ gốc. Widget ChatBox ở footer còn dữ liệu bạn bè/tin nhắn mẫu của nguồn gốc; các tab social trong profile dùng API riêng. Các trung tâm mẫu và nội dung quảng bá trong một số màn hình cũng được giữ, không coi đó là dữ liệu production.
 
-Booking giữ bảng giờ 05:00–24:00, chọn sân/giờ và modal gốc. Modal xác nhận gọi `POST /api/booking/pending/pendingBookingToDB`, hiển thị mã **giữ chỗ**, refresh lịch và ở lại bảng. Không gọi payment, không giả lập xác nhận booking đã hoàn tất. Các nút hủy/xóa lịch sử vẫn dùng PATCH/DELETE gốc. Booking fixed dùng API admin gốc.
+Booking giữ bảng giờ 05:00–24:00, chọn sân/giờ và modal gốc. Modal xác nhận gọi `POST /api/booking/pending/pendingBookingToDB`; gateway giữ chỗ rồi xác nhận trực tiếp tại Core và trả booking confirmed thật, refresh lịch và ở lại bảng. Không gọi payment. Client giữ Idempotency-Key khi retry chưa biết kết quả; giá cuối lấy từ Core. History giữ nút hủy cho booking confirmed chưa bắt đầu, nút xóa cho booking đã hủy/đã kết thúc; xóa chỉ ẩn khỏi lịch sử cá nhân. Các nút hủy/xóa lịch sử vẫn dùng PATCH/DELETE gốc. Booking fixed dùng API admin gốc.
 
 ## Gateway và session
 
@@ -22,13 +22,14 @@ Chạy Vite:
 ```bash
 cp apps/web/.env.example apps/web/.env
 cp apps/admin/.env.example apps/admin/.env
-# Sửa DEV_API_GATEWAY_URL thành gateway thật (dùng cho proxy local).
+# DEV_API_GATEWAY_URL mặc định http://localhost:8081 (gateway mới).
 # VITE_API_GATEWAY_URL để trống nếu dùng proxy, hoặc đặt URL có CORS.
+pnpm dev:gateway
 pnpm dev:web
 pnpm dev:admin
 ```
 
-Docker Nginx proxy `/api/`, `/graphql`, `/socket.io/` và SPA routes. `API_GATEWAY_URL` là runtime upstream, ví dụ `http://host.docker.internal:8080` nếu gateway chạy trên host; Compose thêm host-gateway. `VITE_API_GATEWAY_URL`/`VITE_CLIENT_ID` là build config nếu cần; CORS/session phải được gateway cấu hình tương ứng. `VITE_SOCKET_URL` và `VITE_SOCIAL_SOCKET_URL` cấu hình socket. Weather widget chỉ gọi OpenWeather khi có `VITE_OPENWEATHER_API_KEY`; đã bỏ key hardcode từ nguồn cũ. Ảnh/fonts remote từ UI gốc vẫn cần kết nối mạng.
+Docker Nginx proxy `/api/`, `/graphql`, `/socket.io/` và SPA routes. `API_GATEWAY_URL` là runtime upstream, mặc định `http://gateway:8081` trong Compose; `http://host.docker.internal:8081` nếu gateway chạy trên host. `VITE_API_GATEWAY_URL`/`VITE_CLIENT_ID` là build config nếu cần; CORS/session phải được gateway cấu hình tương ứng. `VITE_SOCKET_URL` và `VITE_SOCIAL_SOCKET_URL` cấu hình socket. Weather widget chỉ gọi OpenWeather khi có `VITE_OPENWEATHER_API_KEY`; đã bỏ key hardcode từ nguồn cũ. Ảnh/fonts remote từ UI gốc vẫn cần kết nối mạng.
 
 Không tích hợp đăng nhập trong hai app này. Host/Identity integration có thể cung cấp trước khi entrypoint chạy:
 
@@ -43,6 +44,17 @@ window.__BADMINTON_SESSION__ = {
 
 ## Ranh giới với Booking Core mới
 
-`services/booking-core` vẫn có hợp đồng v1, PostgreSQL và bảo vệ invariant đã triển khai trước đó. API này **chưa tương thích trực tiếp** với gateway REST/GraphQL của UI gốc. Không trỏ gateway URL vào cổng 3000 của Booking Core rồi coi đó là đã nối xong; đường dẫn, envelope, ID và đơn vị slot khác nhau. Muốn dùng UI gốc với Booking Core cần gateway adapter có hợp đồng gốc, xác minh actor và chuyển ID/đơn vị giờ. Chưa triển khai adapter hay backend kho/news/rating/social/notification trong lần khôi phục này.
+`services/api-gateway` chuyển REST/GraphQL gốc sang Core v1, đổi giờ sang phút và đổi response envelope; không dùng booking/center service cũ hoặc federation cũ. Booking Core sở hữu PostgreSQL, phân quyền và transaction; gateway không đọc/ghi DB. Chi tiết route và provenance ở [API_GATEWAY.md](API_GATEWAY.md).
 
-Consumer tests kiểm tra client gốc bằng Axios adapter giả lập; browser smoke dùng responses giả lập. Chúng xác minh UI và request của client, không chứng minh tất cả legacy services đang chạy hoặc toàn hệ thống đã deploy. Integration test Postgres kiểm tra Booking Core độc lập. Xem [VALIDATION.md](VALIDATION.md).
+Để chọn khách tạo lịch cố định và phân công manager mà không nhập Identity APIs vào gateway, host cấp directory trước entrypoint Admin:
+
+```js
+window.__BADMINTON_BOOKING_CUSTOMERS__ = customersFromIdentity;
+window.__BADMINTON_CENTER_MANAGERS__ = managersFromIdentity;
+```
+
+Khách có `userId` (hoặc `_id`), `name`/`username`, `phone_number`, `email`; manager có `userId`, `name`, `role`, `isActive`. Không cung cấp directory thì dropdown trống; catalogue vẫn tải. Đây là dữ liệu để chọn/render, không cấp quyền server. Gateway không xác minh sự tồn tại của khách trong Identity; Core lưu external user ID/name do manager được phân quyền chọn. Discount loyalty khi đặt hộ cần bổ sung Identity lookup sau.
+
+Kho/news/rating/social/notification/users và upload/download ảnh thuộc backend khác, gateway mới trả 404. File ID ảnh của centre chỉ lưu metadata; `logoUrl`, `imageUrlList`, `avgRating`, `bookingCount` không được giả lập từ service chưa có. Socket/social chưa nối. Các màn hình này giữ source và giao diện, chưa có backend hoạt động trên Compose mới.
+
+Unit/consumer tests có mock ở ranh giới riêng; gateway integration dùng Core và PostgreSQL thật. Browser smoke mới kiểm tra đặt/hủy/ẩn lịch sử, lịch cố định và sửa centre qua Nginx → gateway → Core thật. Xem [VALIDATION.md](VALIDATION.md).

@@ -355,6 +355,20 @@
             }
           }
         }
+      },
+      "get": {
+        "summary": "Read bookings/active reservations with actor scope",
+        "responses": {
+          "200": {
+            "description": "Success"
+          },
+          "401": {
+            "description": "Bearer required"
+          },
+          "403": {
+            "description": "Actor scope denied"
+          }
+        }
       }
     },
     "/reservations/{id}/confirm": {
@@ -637,6 +651,74 @@
           }
         }
       }
+    },
+    "/bookings": {
+      "get": {
+        "summary": "Read bookings/active reservations with actor scope",
+        "responses": {
+          "200": {
+            "description": "Success"
+          },
+          "401": {
+            "description": "Bearer required"
+          },
+          "403": {
+            "description": "Actor scope denied"
+          }
+        }
+      }
+    },
+    "/bookings/{id}": {
+      "get": {
+        "summary": "Read bookings/active reservations with actor scope",
+        "responses": {
+          "200": {
+            "description": "Success"
+          },
+          "401": {
+            "description": "Bearer required"
+          },
+          "403": {
+            "description": "Actor scope denied"
+          }
+        },
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ]
+      },
+      "delete": {
+        "summary": "Hide completed/cancelled owner history; preserve audit rows",
+        "responses": {
+          "200": {
+            "description": "Success"
+          },
+          "401": {
+            "description": "Bearer required"
+          },
+          "403": {
+            "description": "Actor scope denied"
+          }
+        },
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ]
+      }
     }
   },
   "components": {
@@ -651,7 +733,11 @@
       "CreateReservation": {
         "title": "CreateReservation",
         "type": "object",
-        "required": ["centerId", "date", "selections"],
+        "required": [
+          "centerId",
+          "date",
+          "selections"
+        ],
         "additionalProperties": false,
         "properties": {
           "centerId": {
@@ -668,7 +754,10 @@
             "maxItems": 8,
             "items": {
               "type": "object",
-              "required": ["courtId", "slots"],
+              "required": [
+                "courtId",
+                "slots"
+              ],
               "additionalProperties": false,
               "properties": {
                 "courtId": {
@@ -722,7 +811,12 @@
             "format": "date"
           },
           "status": {
-            "enum": ["HELD", "CONFIRMED", "EXPIRED", "CANCELLED"]
+            "enum": [
+              "HELD",
+              "CONFIRMED",
+              "EXPIRED",
+              "CANCELLED"
+            ]
           },
           "expiresAt": {
             "type": "string",
@@ -736,7 +830,12 @@
             "type": "array",
             "items": {
               "type": "object",
-              "required": ["courtId", "courtName", "slots", "price"],
+              "required": [
+                "courtId",
+                "courtName",
+                "slots",
+                "price"
+              ],
               "properties": {
                 "courtId": {
                   "type": "string",
@@ -807,7 +906,12 @@
             "type": "array",
             "items": {
               "type": "object",
-              "required": ["courtId", "courtName", "slots", "price"],
+              "required": [
+                "courtId",
+                "courtName",
+                "slots",
+                "price"
+              ],
               "properties": {
                 "courtId": {
                   "type": "string",
@@ -846,10 +950,16 @@
             "type": "string"
           },
           "status": {
-            "enum": ["CONFIRMED", "CANCELLED"]
+            "enum": [
+              "CONFIRMED",
+              "CANCELLED"
+            ]
           },
           "type": {
-            "enum": ["DAILY", "FIXED"]
+            "enum": [
+              "DAILY",
+              "FIXED"
+            ]
           },
           "createdAt": {
             "type": "string",

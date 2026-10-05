@@ -4,7 +4,7 @@ import { loadEnv } from "vite";
 import react from "@vitejs/plugin-react";
 export default defineConfig(({ mode }) => {
   const env = loadEnv(mode, process.cwd(), "");
-  const gateway = env.DEV_API_GATEWAY_URL || "http://localhost:8080";
+  const gateway = env.DEV_API_GATEWAY_URL || "http://localhost:8081";
   return {
     plugins: [react()],
     resolve: {

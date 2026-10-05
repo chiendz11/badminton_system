@@ -12,6 +12,6 @@ RUN pnpm --filter @badminton/frontend build
 FROM nginx:1.28-alpine
 COPY --from=build /app/apps/web/dist /usr/share/nginx/html
 COPY apps/web/nginx.conf /etc/nginx/templates/default.conf.template
-ENV API_GATEWAY_URL=http://host.docker.internal:8080
+ENV API_GATEWAY_URL=http://gateway:8081
 ENV NGINX_ENVSUBST_FILTER=API_GATEWAY_URL
 EXPOSE 80

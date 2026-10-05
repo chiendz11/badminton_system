@@ -32,6 +32,19 @@ export class ReservationsService {
     @Inject(SlotAllocationService)
     private readonly allocations: SlotAllocationService,
   ) {}
+  async held(actor: Actor, centerId?: string) {
+    const items = await this.prisma.reservation.findMany({
+      where: {
+        userId: actor.userId,
+        status: "HELD",
+        expiresAt: { gt: this.clock.now() },
+        ...(centerId ? { centerId } : {}),
+      },
+      orderBy: { createdAt: "desc" },
+      take: 5,
+    });
+    return { items };
+  }
   async reserve(actor: Actor, data: ReservationDto, key?: string) {
     const idem = idempotencyKey(key),
       details = canonicalSelections(data.selections),

@@ -55,22 +55,25 @@ async function select() {
   );
 }
 describe("upstream booking flow", () => {
-  it("holds hourly slots using the original payload and stays on the original grid without payment navigation", async () => {
+  it("confirms hourly slots using the original payload and stays on the original grid", async () => {
     confirmBookingToDB.mockResolvedValue({
-      booking: { _id: "booking-1", expiresAt: "2030-01-07T00:05:00+07:00" },
+      booking: { _id: "booking-1", bookingStatus: "confirmed" },
     });
     await select();
     await waitFor(() =>
-      expect(confirmBookingToDB).toHaveBeenCalledWith({
-        centerId: "center-1",
-        bookDate: "2030-01-07",
-        userName: "Khách",
-        courtBookingDetails: [{ courtId: "court-1", timeslots: [5] }],
-      }),
+      expect(confirmBookingToDB).toHaveBeenCalledWith(
+        {
+          centerId: "center-1",
+          bookDate: "2030-01-07",
+          userName: "Khách",
+          courtBookingDetails: [{ courtId: "court-1", timeslots: [5] }],
+        },
+        expect.any(String),
+      ),
     );
     await waitFor(() =>
       expect(window.alert).toHaveBeenCalledWith(
-        "Giữ chỗ thành công! Mã đơn: booking-1",
+        "Đặt sân thành công! Mã đơn: booking-1",
       ),
     );
     expect(screen.getByTestId("booking-page")).toBeInTheDocument();

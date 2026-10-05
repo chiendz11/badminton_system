@@ -6,10 +6,13 @@ import {
   Registry,
   collectDefaultMetrics,
 } from "prom-client";
-export function createLogger(destination?: pino.DestinationStream) {
+export function createLogger(
+  destination?: pino.DestinationStream,
+  service = "booking-core",
+) {
   const options: pino.LoggerOptions = {
     level: process.env.LOG_LEVEL || "info",
-    base: { service: "booking-core" },
+    base: { service },
     redact: {
       paths: [
         "authorization",

@@ -155,7 +155,7 @@ const Header = () => {
                             }}
                             onError={(e) => {
                               e.target.onerror = null;
-                              e.target.src = "/default-avatar.png";
+                              e.target.src = "/images/user_avatar.png";
                             }}
                           />
                           <span className="text-base font-medium max-w-[150px] truncate">

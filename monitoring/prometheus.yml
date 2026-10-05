@@ -10,3 +10,10 @@ scrape_configs:
       credentials_file: /run/secrets/booking_metrics_token
     static_configs:
       - targets: ["api:3000"]
+  - job_name: api-gateway
+    metrics_path: /metrics
+    authorization:
+      type: Bearer
+      credentials_file: /run/secrets/gateway_metrics_token
+    static_configs:
+      - targets: ["gateway:8081"]
