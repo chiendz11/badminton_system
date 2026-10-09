@@ -35,6 +35,11 @@
   color: var(--text-color);
 }
 
+/* Chừa chỗ cho header cố định trên trang history/statistics được tách. */
+.profile-container.booking-history-page {
+  margin-top: 160px;
+}
+
 /* --- MÀN HÌNH LOADING BAN ĐẦU (IsLoading) --- */
 .profile-loading {
   display: flex;

@@ -8,7 +8,7 @@
 | ----------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------- |
 | `BM/services/center_service`: center/court/pricing, ownership                 | `services/booking-core/src/modules/{centers,courts,pricing}` và Prisma                                |
 | `BM/services/booking_service`: daily/fixed booking, hold, giờ trống, discount | `src/modules/{availability,reservations,bookings}`, `src/common/domain`, `packages/booking-contracts` |
-| `Frontend/src/pages/Booking.jsx`, `components/bookingTable.jsx`               | `apps/web/src/features/{centers,booking,profile}`                                                     |
+| `Frontend/src/pages/Booking.jsx`, `components/bookingTable.jsx`               | `apps/web/src/features/{centers,booking}`                                                     |
 | `Admin/src/pages/CreateFixedBooking.jsx` và quản lý center/court              | `apps/admin/src/features/{centers,booking}`                                                           |
 
 Backend được viết lại theo Nest/Prisma/TypeScript, giữ nghiệp vụ liên quan, không sao chép cả microservice tree. Web/Admin lấy lại JSX/CSS/ảnh và client từ repo gốc theo LEGACY_UI.md. Không di chuyển dữ liệu MongoDB hoặc thông tin khách hàng thật. Seed là dữ liệu tổng hợp. Repo cũ và các thay đổi local của nó được giữ nguyên.

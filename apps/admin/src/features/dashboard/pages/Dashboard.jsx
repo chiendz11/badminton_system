@@ -10,16 +10,8 @@ import LoadingSpinner from "../../../shared/ui/LoadingSpinner.jsx";
 import {
   MdOutlineSportsSoccer,
   MdOutlineSpaceDashboard,
-  MdShoppingCart,
   MdReceipt,
-  MdAccountCircle,
-  MdOutlineBarChart,
-  MdStorage,
   MdCalendarToday,
-  MdPeopleAlt,
-  MdOutlineNewspaper,
-  MdOutlineStar,
-  MdExitToApp,
   MdBusiness,
 } from "react-icons/md";
 
@@ -30,24 +22,10 @@ const getFeatureIcon = (title) => {
       return <MdOutlineSpaceDashboard size={30} />;
     case "Quản lý trung tâm":
       return <MdBusiness size={30} />;
-    case "Bán hàng":
-      return <MdShoppingCart size={30} />;
     case "Quản lý Đơn hàng/Hóa đơn":
       return <MdReceipt size={30} />;
-    case "Quản lý Tài khoản":
-      return <MdAccountCircle size={30} />;
-    case "Báo cáo doanh thu":
-      return <MdOutlineBarChart size={30} />;
-    case "Quản lý kho":
-      return <MdStorage size={30} />;
     case "Tạo Lịch cố định":
       return <MdCalendarToday size={30} />;
-    case "Quản lý khách hàng":
-      return <MdPeopleAlt size={30} />;
-    case "Quản lý tin tức":
-      return <MdOutlineNewspaper size={30} />;
-    case "Quản lý đánh giá":
-      return <MdOutlineStar size={30} />;
     default:
       return <MdOutlineSportsSoccer size={30} />;
   }
@@ -73,7 +51,6 @@ const PRIMARY_COLOR = "#10B981";
 const BACKGROUND_COLOR = "#F0FFF4";
 const CARD_BG_COLOR = "#FFFFFF";
 const TEXT_COLOR = "#1F2937";
-const LOGOUT_COLOR = "#EF4444";
 
 const featureCardStyle = {
   background: CARD_BG_COLOR,
@@ -117,38 +94,14 @@ const DashboardAdmin = () => {
         roles: ["super_admin", "center_manager"],
       },
       {
-        title: "Bán hàng",
-        path: "/shop",
-        roles: ["super_admin", "center_manager"],
-      },
-      {
         title: "Quản lý Đơn hàng/Hóa đơn",
         path: "/admin-bill-list",
         roles: ["super_admin", "center_manager"],
       },
       {
-        title: "Quản lý Tài khoản",
-        path: "/account",
-        roles: ["super_admin", "center_manager"],
-      },
-      { title: "Báo cáo doanh thu", path: "/report", roles: ["super_admin"] },
-      { title: "Quản lý kho", path: "/stock", roles: ["super_admin"] },
-      {
         title: "Tạo Lịch cố định",
         path: "/create-fixed-booking",
-        roles: ["super_admin"],
-      },
-      {
-        title: "Quản lý khách hàng",
-        path: "/users-manage",
-        roles: ["super_admin"],
-      },
-      { title: "Quản lý tin tức", path: "/news", roles: ["super_admin"] },
-      { title: "Quản lý đánh giá", path: "/ratings", roles: ["super_admin"] },
-      {
-        title: "Quản lý Center Manager",
-        path: "/center-manager-management",
-        roles: ["super_admin"],
+        roles: ["super_admin", "center_manager"],
       },
     ];
 

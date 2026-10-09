@@ -5,27 +5,16 @@ import { SessionContext } from "../../../shared/session/SessionContext.jsx";
 // Components
 import Header from "../../../shared/ui/Header.jsx";
 import Footer from "../../../shared/ui/Footer.jsx";
-import ModalConfirmation from "../../booking/ui/ModalConfirmation.jsx";
-import ProfileInfoTab from "../ui/ProfileInfoTab.jsx";
+import ModalConfirmation from "../ui/ModalConfirmation.jsx";
 import StatsTab from "../ui/StatusTab.jsx"; // Đảm bảo file này tồn tại (tên là StatusTab.jsx hoặc StatsTab.jsx)
 import HistoryTab from "../ui/HistoryTab.jsx";
-
-// Tabs phụ
-import FriendsTab from "../../social/ui/FriendsTab.jsx";
-import FindFriendsTab from "../../social/ui/FindFriendsTab.jsx";
-import OtherInfoTab from "../ui/OtherInfoTab.jsx";
-import FriendManagementTab from "../../social/ui/FriendManagementTab.jsx";
 
 // API V2 Imports (Theo cấu trúc thư mục mới)
 import {
   cancelBooking,
   deleteBooking,
-} from "../../booking/api/booking_service/rest/booking.js";
-import { getUserStatistics } from "../../booking/api/booking_service/rest/user.api.js";
-import {
-  updateMyProfile,
-  fetchUserInfo,
-} from "../api/user_service/rest/users.api.js";
+} from "../api/booking_service/rest/booking.js";
+import { getUserStatistics } from "../api/booking_service/rest/user.api.js";
 
 // Styles
 import "../../../shared/styles/UserProfile.css";
@@ -65,40 +54,29 @@ const getStatusText = (status) => {
   }
 };
 
-const UserProfile = () => {
+const MyBookings = () => {
   const navigate = useNavigate();
-  const { user, setUser } = useContext(SessionContext);
+  const { user } = useContext(SessionContext);
   const [searchParams] = useSearchParams();
 
   // --- 1. TAB STATE MANAGEMENT ---
   const [activeTab, setActiveTab] = useState(() => {
     const tabFromUrl = searchParams.get("tab");
-    const validTabs = [
-      "info",
-      "stats",
-      "history",
-      "friends",
-      "find",
-      "other-info",
-      "friends-manage",
-    ];
+    const validTabs = ["stats", "history"];
     if (tabFromUrl && validTabs.includes(tabFromUrl)) {
       return tabFromUrl;
     }
-    return localStorage.getItem("activeTab") || "info";
+    const saved = localStorage.getItem("bookingActiveTab");
+    return ["stats", "history"].includes(saved) ? saved : "history";
   });
 
   // --- 2. GLOBAL UI STATES ---
   const [isLoading, setIsLoading] = useState(true);
-  const [isUpdating, setIsUpdating] = useState(false);
   const [refreshHistoryTrigger, setRefreshHistoryTrigger] = useState(0);
 
   // Modal State
   const [showActionModal, setShowActionModal] = useState(false);
   const [actionConfig, setActionConfig] = useState(null);
-
-  // --- 3. PROFILE & PASSWORD STATES ---
-  const [editMode, setEditMode] = useState("profile");
 
   // --- 4. STATISTICS STATES (QUAN TRỌNG) ---
   const [statisticsData, setStatisticsData] = useState(null); // Chứa toàn bộ data aggregate
@@ -107,13 +85,6 @@ const UserProfile = () => {
   const [chartFilter, setChartFilter] = useState("all");
   const [animateStats, setAnimateStats] = useState(false);
 
-  // Constants & Utils
-  const centerName =
-    localStorage.getItem("centerName") || "Tên Trung Tâm Mặc Định";
-  const slotGroupsFromLS = JSON.parse(
-    localStorage.getItem("slotGroups") || "[]",
-  );
-  const totalAmountLS = Number(localStorage.getItem("totalAmount")) || 0;
   const DEFAULT_AVATAR_URL =
     "https://res.cloudinary.com/dm4uxmmtg/image/upload/v1762859721/badminton_app/avatars/default_user_avatar.png";
 
@@ -125,15 +96,7 @@ const UserProfile = () => {
   // Sync URL -> Tab State
   useEffect(() => {
     const tabFromUrl = searchParams.get("tab");
-    const validTabs = [
-      "info",
-      "stats",
-      "history",
-      "friends",
-      "find",
-      "other-info",
-      "friends-manage",
-    ];
+    const validTabs = ["stats", "history"];
     if (tabFromUrl && validTabs.includes(tabFromUrl)) {
       setActiveTab(tabFromUrl);
     }
@@ -141,7 +104,7 @@ const UserProfile = () => {
 
   // Sync Tab State -> LocalStorage
   useEffect(() => {
-    localStorage.setItem("activeTab", activeTab);
+    localStorage.setItem("bookingActiveTab", activeTab);
   }, [activeTab]);
 
   // Initial Page Loading Simulation
@@ -181,27 +144,7 @@ const UserProfile = () => {
 
   // --- HANDLERS ---
 
-  const handleUpdateField = async (field, newValue) => {
-    if (!newValue || (typeof newValue === "string" && newValue.trim() === ""))
-      return;
-
-    setIsUpdating(true);
-    try {
-      const updatePayload = { [field]: newValue };
-      await updateMyProfile(updatePayload);
-      // Cập nhật context ngay lập tức để UI phản hồi nhanh
-      setUser((prev) => ({ ...prev, ...updatePayload }));
-    } catch (error) {
-      alert("Cập nhật thất bại: " + error.message);
-      // Revert lại data cũ từ server nếu lỗi
-      const originalUser = await fetchUserInfo();
-      if (originalUser?.user) setUser(originalUser.user);
-    } finally {
-      setIsUpdating(false);
-    }
-  };
-
-  // --- Action Modal Handlers (Cancel/Delete/Pay) ---
+  // --- Action Modal Handlers (Cancel/Delete) ---
   const promptAction = (actionType, params) => {
     let title, message;
     switch (actionType) {
@@ -219,8 +162,6 @@ const UserProfile = () => {
     setActionConfig({ type: actionType, ...params, title, message });
     setShowActionModal(true);
   };
-
-  const promptCancelBooking = (orderId) => promptAction("cancel", { orderId });
 
   const handleActionModal = async (action) => {
     setShowActionModal(false);
@@ -261,14 +202,7 @@ const UserProfile = () => {
   return (
     <>
       <Header />
-      <div className="relative profile-container">
-        {isUpdating && (
-          <div className="loading-overlay">
-            <div className="spinner"></div>
-          </div>
-        )}
-
-        {/* PROFILE HEADER SECTION */}
+      <div className="relative profile-container booking-history-page">
         <div className="profile-header">
           <div className="header-content">
             <div className="avatar-container">
@@ -276,48 +210,17 @@ const UserProfile = () => {
                 src={getAvatarImagePath(user?.avatar_url)}
                 alt="Avatar"
                 className="user-avatar"
-                onError={(e) => {
-                  e.target.onerror = null;
-                  e.target.src = DEFAULT_AVATAR_URL;
-                }}
               />
-              <div className="level-badge">{user?.level || "Member"}</div>
             </div>
             <div className="user-info">
-              <h1>{user?.name}</h1>
-              <div className="user-details">
-                <div>
-                  <i className="fas fa-phone"></i> {user?.phone_number}
-                </div>
-                <div>
-                  <i className="fas fa-envelope"></i> {user?.email}
-                </div>
-              </div>
-            </div>
-            <div className="membership-info">
-              <div className="points-container">
-                <span className="points-value">{user?.points || 0}</span> điểm
-              </div>
+              <h1>{user?.name || "Lịch đặt sân"}</h1>
+              <p>Lịch đặt sân của tôi</p>
             </div>
           </div>
         </div>
 
         {/* TABS NAVIGATION */}
         <div className="profile-tabs">
-          <button
-            className={`tab-btn ${activeTab === "info" ? "active" : ""}`}
-            onClick={() => handleSwitchTab("info")}
-          >
-            <i className="fas fa-user"></i>
-            <span>Thông tin</span>
-          </button>
-          <button
-            className={`tab-btn ${activeTab === "other-info" ? "active" : ""}`}
-            onClick={() => handleSwitchTab("other-info")}
-          >
-            <i className="fas fa-id-card"></i>
-            <span>Hồ sơ mở rộng</span>
-          </button>
           <button
             className={`tab-btn ${activeTab === "stats" ? "active" : ""}`}
             onClick={() => handleSwitchTab("stats")}
@@ -332,67 +235,13 @@ const UserProfile = () => {
             <i className="fas fa-history"></i>
             <span>Lịch sử</span>
           </button>
-          <button
-            className={`tab-btn ${activeTab === "friends-manage" ? "active" : ""}`}
-            onClick={() => handleSwitchTab("friends-manage")}
-          >
-            <i className="fas fa-user-friends"></i>
-            <span>Bạn bè</span>
-          </button>
-          <button
-            className={`tab-btn ${activeTab === "friends" ? "active" : ""}`}
-            onClick={() => handleSwitchTab("friends")}
-          >
-            <i className="fas fa-comment-dots"></i>
-            <span>Tin nhắn</span>
-          </button>
-          <button
-            className={`tab-btn ${activeTab === "find" ? "active" : ""}`}
-            onClick={() => handleSwitchTab("find")}
-          >
-            <i className="fas fa-search-plus"></i>
-            <span>Tìm bạn</span>
-          </button>
         </div>
 
         {/* TAB CONTENT AREA */}
         <div className="profile-content">
-          {/* 1. Tab Thông tin */}
-          {activeTab === "info" && (
-            <ProfileInfoTab
-              user={user}
-              editMode={editMode}
-              setEditMode={setEditMode}
-
-              // Handlers
-
-              handleUpdateField={handleUpdateField}
-              // Booking Context props (nếu cần hiển thị lịch sử mini bên trong tab info)
-              bookingHistory={[]}
-              centerName={centerName}
-              slotGroupsFromLS={slotGroupsFromLS}
-              totalAmountLS={totalAmountLS}
-              navigate={navigate}
-              promptCancelBooking={promptCancelBooking}
-              getStatusClass={getStatusClass}
-              getStatusText={getStatusText}
-            />
-          )}
-
-          {/* 2. Tab Hồ sơ mở rộng */}
-          {activeTab === "other-info" && (
-            <OtherInfoTab user={user} onUpdate={handleUpdateField} />
-          )}
-
-          {/* 3. Tab Bạn bè */}
-          {activeTab === "friends-manage" && (
-            <FriendManagementTab user={user} />
-          )}
-
           {/* 4. Tab Thống kê (Sử dụng Data Aggregate) */}
           {activeTab === "stats" && (
             <StatsTab
-              user={user}
               statisticsData={statisticsData} // Prop quan trọng: Truyền data tổng xuống
               statsPeriod={statsPeriod}
               setStatsPeriod={setStatsPeriod}
@@ -414,10 +263,6 @@ const UserProfile = () => {
               getStatusText={getStatusText}
             />
           )}
-
-          {/* 6. Tab Chat & Tìm bạn */}
-          {activeTab === "friends" && <FriendsTab currentUser={user} />}
-          {activeTab === "find" && <FindFriendsTab currentUser={user} />}
         </div>
       </div>
 
@@ -435,4 +280,4 @@ const UserProfile = () => {
   );
 };
 
-export default UserProfile;
+export default MyBookings;

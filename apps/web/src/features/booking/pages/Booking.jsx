@@ -19,7 +19,6 @@ import {
   getPendingMapping,
   confirmBookingToDB,
 } from "../api/booking_service/rest/booking.js";
-import { fetchUserInfo } from "../../profile/api/user_service/rest/users.api.js";
 
 import "../../../shared/styles/booking.css";
 
@@ -181,7 +180,7 @@ function applyDisplayLogic(
 const BookingSchedule = () => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
-  const { user, setUser } = useContext(SessionContext);
+  const { user } = useContext(SessionContext);
   const userId = user?._id;
   const userPoints = user?.points || 0;
   const name = user?.name || "Người dùng";

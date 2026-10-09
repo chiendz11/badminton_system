@@ -2,7 +2,6 @@ import React from "react";
 import PopularTimeChart from "./PopularTimeChart.jsx";
 
 const StatsTab = ({
-  user,
   statisticsData, // Dữ liệu tổng hợp từ 1 API (Overview, Monthly, Frequent, TimeStats)
   statsPeriod,
   setStatsPeriod,
@@ -24,7 +23,6 @@ const StatsTab = ({
       totalChange: 0,
       completedChange: 0,
       cancelledChange: 0,
-      pointsChange: 0,
     },
     monthlyStats = [],
     frequentCenters = [],
@@ -174,27 +172,6 @@ const StatsTab = ({
                   {Math.abs(Math.round(comparison.cancelledChange))}% so với kỳ
                   trước
                 </span>
-              </div>
-            </div>
-
-            {/* CARD 4: ĐIỂM THÀNH VIÊN */}
-            <div
-              className={`stats-card-enhanced ${animateStats ? "animate" : ""}`}
-              style={{ animationDelay: "0.3s" }}
-            >
-              <div className="stats-card-header">
-                <div className="stats-icon-enhanced points">
-                  <i className="fas fa-medal"></i>
-                </div>
-                {renderTrend(comparison.pointsChange)}
-              </div>
-              <div className="stats-card-body">
-                <h4>Điểm hiện tại</h4>
-                {/* Sử dụng user.points (tổng tích lũy) thay vì điểm trong kỳ để hiển thị số dư thực tế */}
-                <div className="stats-value">{user?.points || 0}</div>
-              </div>
-              <div className="stats-card-footer">
-                <span>Tích lũy từ hoạt động đặt sân</span>
               </div>
             </div>
           </div>

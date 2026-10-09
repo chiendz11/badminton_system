@@ -16,7 +16,6 @@ export default defineConfig(({ mode }) => {
       proxy: {
         "/api": gateway,
         "/graphql": gateway,
-        "/socket.io": { target: gateway, ws: true },
       },
     },
     build: {

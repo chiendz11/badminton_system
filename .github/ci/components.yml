@@ -25,31 +25,16 @@ components:
     runtime: shared
     depends_on: []
     enabled: true
-  event_contracts:
-    path: packages/event-contracts
-    runtime: shared
-    depends_on: []
-    enabled: false
   observability:
     path: packages/observability
     runtime: shared
     depends_on: []
     enabled: true
-  identity_api:
-    path: contracts/identity
-    runtime: contract
-    depends_on: []
-    enabled: false
   booking_api:
     path: contracts/booking
     runtime: contract
     depends_on: []
     enabled: true
-  commerce_api:
-    path: contracts/commerce
-    runtime: contract
-    depends_on: []
-    enabled: false
   events:
     path: contracts/events
     runtime: contract
@@ -78,19 +63,6 @@ components:
       - ai_tools
     docker: true
     enabled: true
-  identity:
-    path: services/identity_service
-    runtime: node
-    database: postgres
-    prisma: true
-    depends_on:
-      - identity_api
-      - events
-      - auth_contracts
-      - event_contracts
-      - observability
-    docker: true
-    enabled: false
   booking_core:
     path: services/booking-core
     runtime: node
@@ -104,57 +76,6 @@ components:
       - observability
     docker: true
     enabled: true
-  commerce:
-    path: services/commerce_service
-    runtime: node
-    database: postgres
-    prisma: true
-    depends_on:
-      - commerce_api
-      - events
-      - auth_contracts
-      - event_contracts
-      - observability
-    docker: true
-    enabled: false
-  social:
-    path: services/social_service
-    runtime: node
-    database: mongodb
-    depends_on:
-      - identity_api
-      - auth_contracts
-      - observability
-    docker: true
-    enabled: false
-  content:
-    path: services/content_service
-    runtime: node
-    database: mongodb
-    depends_on:
-      - auth_contracts
-      - observability
-    docker: true
-    enabled: false
-  notification:
-    path: services/notification_service
-    runtime: node
-    database: mongodb
-    depends_on:
-      - events
-      - event_contracts
-      - observability
-    docker: true
-    enabled: false
-  storage:
-    path: services/storage_service
-    runtime: node
-    database: none
-    depends_on:
-      - auth_contracts
-      - observability
-    docker: true
-    enabled: false
   ai:
     path: services/ai-service
     runtime: python

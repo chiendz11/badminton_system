@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback, useRef } from "react";
-import { getBookingHistory } from "../../booking/api/booking_service/rest/user.api.js";
+import { getBookingHistory } from "../api/booking_service/rest/user.api.js";
 // Import API GraphQL
 import { getAllCentersGQL } from "../../centers/api/center_service/grahql/center.api.js";
 
@@ -221,24 +221,12 @@ const HistoryTab = ({
                   <input
                     type="radio"
                     name="status"
-                    value="paid"
-                    checked={filterStatus === "paid"}
+                    value="confirmed"
+                    checked={filterStatus === "confirmed"}
                     onChange={(e) => setFilterStatus(e.target.value)}
                   />
                   <span>
-                    <i className="fas fa-check-circle"></i> Hoàn thành
-                  </span>
-                </label>
-                <label className="filter-chip warning">
-                  <input
-                    type="radio"
-                    name="status"
-                    value="pending"
-                    checked={filterStatus === "pending"}
-                    onChange={(e) => setFilterStatus(e.target.value)}
-                  />
-                  <span>
-                    <i className="fas fa-clock"></i> Đang giữ chỗ
+                    <i className="fas fa-check-circle"></i> Đã xác nhận
                   </span>
                 </label>
                 <label className="filter-chip danger">
@@ -354,7 +342,6 @@ const HistoryTab = ({
                   <th>Sân-Giờ</th>
                   <th>Ngày</th>
                   <th>Giá tiền</th>
-                  <th>Phương thức</th>
                   <th>Thao tác</th>
                 </tr>
               </thead>
@@ -362,7 +349,7 @@ const HistoryTab = ({
                 {loading ? (
                   <tr>
                     <td
-                      colSpan="9"
+                      colSpan="7"
                       style={{ textAlign: "center", padding: "20px" }}
                     >
                       Đang tải dữ liệu...
@@ -399,7 +386,6 @@ const HistoryTab = ({
                       <td className="booking-price">
                         {booking.price.toLocaleString("vi-VN")} đ
                       </td>
-                      <td>{booking.paymentMethod}</td>
                       <td>
                         <div className="action-buttons">
                           {(booking.status === "pending" ||
@@ -421,9 +407,8 @@ const HistoryTab = ({
                             </>
                           )}
 
-                          {(booking.status === "paid" ||
-                            (booking.status === "confirmed" &&
-                              Date.parse(booking.endsAt) <= Date.now())) && (
+                          {(booking.status === "confirmed" &&
+                            Date.parse(booking.endsAt) <= Date.now()) && (
                             <button
                               className="delete-btn"
                               title="Xóa"
@@ -457,7 +442,7 @@ const HistoryTab = ({
                 ) : (
                   <tr>
                     <td
-                      colSpan="9"
+                      colSpan="7"
                       style={{
                         textAlign: "center",
                         padding: "20px",

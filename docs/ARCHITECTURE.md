@@ -16,21 +16,21 @@ apps/{web,admin}/
       ui/                   # layout, header/footer, modal/spinner dùng chung
       styles/               # CSS gốc + Tailwind 3/PostCSS
       session/              # profile được host cung cấp; không triển khai login
-      api/                  # Axios transport, socket configuration
+      api/                  # Axios transport và bearer từ host
       assets/               # ảnh import trong Admin
   public/                   # ảnh/static assets gốc của Frontend
   test/{unit,contract}/
 ```
 
-Router chỉ ghép các màn hình và lazy-load để giảm bundle ban đầu. Các màn hình gốc cùng state của chúng được giữ lại; không viết lại UI thành form mới. API adapter nằm trong feature, dùng Axios transport chung của từng ứng dụng. Tên package vẫn `@badminton/frontend`/`@badminton/admin` và đường dẫn trang vẫn như nguồn cũ. Typo/case của import được sửa để build trên Linux. Giữ source JSX thay vì chuyển toàn bộ sang TypeScript chỉ vì đổi folder; `allowJs` giúp TypeScript kiểm tra phần tooling/tests, `checkJs: false` không có nghĩa JSX đã được kiểm tra kiểu đầy đủ.
+Router chỉ ghép các màn hình và lazy-load để giảm bundle ban đầu. Các màn hình Booking Core gốc cùng state của chúng được giữ lại; không viết lại UI thành form mới. API adapter nằm trong feature, dùng Axios transport chung của từng ứng dụng. Tên package vẫn `@badminton/frontend`/`@badminton/admin`; đường dẫn booking/centre giữ như nguồn cũ, history/statistics tách sang `/my-bookings`. Typo/case của import được sửa để build trên Linux. Giữ source JSX thay vì chuyển toàn bộ sang TypeScript chỉ vì đổi folder; `allowJs` giúp TypeScript kiểm tra phần tooling/tests, `checkJs: false` không có nghĩa JSX đã được kiểm tra kiểu đầy đủ.
 
 `SessionProvider` nhận profile có sẵn từ host, không gọi auth, không tự tạo user/role/token. HTTP transport đọc bearer token và client ID từ integration đó. Session/role trên browser chỉ hỗ trợ render; gateway/backend phải xác minh token và quyền. Bỏ UI login/guard redirect không làm cho API protected trở thành public. Chi tiết và giới hạn integration ở [LEGACY_UI.md](LEGACY_UI.md).
 
-ESLint áp dụng `no-undef`, `rules-of-hooks`, `exhaustive-deps` ở mức error cho JSX; kiểm tra dependency direction của shared/features. API URL không đổi sang `/api/v1`. Các callback fetch dùng `useCallback` theo bộ lọc thật, constants không đổi theo render đặt ngoài component. Backend module refactor được giữ; gateway giữ API gốc của client và Core bổ sung read model/ẩn history cùng centre metadata cần cho adapter.
+ESLint áp dụng `no-undef`, `rules-of-hooks`, `exhaustive-deps` ở mức error cho JSX; kiểm tra dependency direction của shared/features. API booking/centre URL không đổi sang `/api/v1`; client của các miền khác đã xóa. Các callback fetch dùng `useCallback` theo bộ lọc thật, constants không đổi theo render đặt ngoài component. Backend module refactor được giữ; gateway giữ API gốc của client và Core bổ sung read model/ẩn history cùng centre metadata cần cho adapter.
 
 ## API Gateway
 
-`services/api-gateway` giữ Express middleware/router từ kiến trúc cũ theo hợp đồng Booking Core. `configs` validate môi trường; `middleware` xác minh JWT/phân quyền, errors, logs/metrics; `clients/booking-core.client.ts` là upstream HTTP duy nhất; `modules/booking` chuyển lịch/giờ/response; `modules/centers` giữ SDL GraphQL và adapter centre; `routes` chỉ ghép handlers. Gateway không có database, không chứa quote hoặc quyền sở hữu transaction. Các invariant và kiểm tra owner/centre nằm tại Core. Federation được thay bằng resolver gọi REST Core trực tiếp. Xem [API_GATEWAY.md](API_GATEWAY.md).
+`services/api-gateway` giữ Express middleware/router từ kiến trúc cũ theo hợp đồng Booking Core. `configs` validate môi trường; `middleware` xác minh JWT/phân quyền, errors, logs/metrics; `clients/booking-core.client.ts` gọi Core, route AI gọi HTTP service AI; `modules/booking` chuyển lịch/giờ/response; `modules/centers` giữ SDL GraphQL và adapter centre; `routes` chỉ ghép handlers. Gateway không có database, không chứa quote hoặc quyền sở hữu transaction. Các invariant và kiểm tra owner/centre nằm tại Core. Federation được thay bằng resolver gọi REST Core trực tiếp. Xem [API_GATEWAY.md](API_GATEWAY.md).
 
 ## Booking Core
 
@@ -84,3 +84,7 @@ Tham khảo mô hình [module của NestJS](https://docs.nestjs.com/modules) và
 ## AI service
 
 `services/ai-service/app` tách schemas/auth/config, provider adapter, domain constraint policy, workflow LangGraph, tools/Core HTTP client, persistence conversation/checkpoint và observability. Alembic nằm ngoài app và chạy trước runtime. AI chỉ sở hữu transcript/state/checkpoint/trace, không đọc hoặc ghi DB Booking Core. `apps/web/src/features/assistant` chứa TypeScript chat page và API client; route chat bổ sung vào router/header hiện có. Policy consent, quote và idempotency được thực thi tại backend. Xem [AI_SERVICE.md](AI_SERVICE.md) cho graph, công nghệ và lý thuyết.
+
+## Phạm vi Booking Core + AI
+
+Web chỉ có features `home`, `centers`, `booking`, `assistant`; Admin chỉ có `dashboard`, `centers`, `booking`. History/statistics chuyển từ profile gốc vào booking; không giữ profile CRUD hoặc social tabs. Form centre không có Storage upload, modal/card centre không có Rating API. Source mappings được cập nhật trong legacy-ui-provenance.json; AI chat phát triển theo kế hoạch hội thoại, các màn hình Booking Core dùng bố cục của nguồn gốc.

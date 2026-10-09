@@ -5,9 +5,10 @@ import {
   createFixedBookings,
   getAvailableCourts,
 } from "../../src/features/booking/api/booking_service/rest/booking.api.js";
-import { getAllCentersGQL } from "../../src/features/centers/api/center_service/graphql/center.api.js";
-import { getInventoryList } from "../../src/features/inventory/api/inventory_service/rest/inventory.api.js";
-import { updateUserStatus } from "../../src/features/users/api/user-status.js";
+import {
+  getAllCentersGQL,
+  updateCenterGQL,
+} from "../../src/features/centers/api/center_service/graphql/center.api.js";
 const requests: any[] = [];
 beforeEach(() => {
   requests.length = 0;
@@ -59,15 +60,20 @@ describe("upstream admin API contracts", () => {
     expect(JSON.parse(requests[0].data)).toEqual(payload);
     expect(JSON.parse(requests[1].data).timeslots).toEqual(["17:00", "18:00"]);
   });
-  it("keeps existing GraphQL and inventory routes instead of calling Booking Core v1 from unrelated screens", async () => {
+  it("keeps the original centre GraphQL query through the gateway", async () => {
     await getAllCentersGQL();
-    await getInventoryList("center-1");
     expect(requests[0].url).toBe("/graphql");
-    expect(requests[1].url).toBe("/api/inventories/center/center-1");
+    expect(requests).toHaveLength(1);
   });
-  it("retains account activation management without importing login or password clients", async () => {
-    await updateUserStatus("user-1", false);
-    expect(requests[0].url).toBe("/api/users/user-1/status");
-    expect(JSON.parse(requests[0].data)).toEqual({ isActive: false });
+  it("updates centre data without sending absent media fields that would clear stored metadata", async () => {
+    await updateCenterGQL("center-1", { name: "Tên mới", totalCourts: 4 });
+    expect(requests[0].url).toBe("/graphql");
+    const payload = JSON.parse(requests[0].data);
+    expect(payload.variables).toMatchObject({
+      centerId: "center-1",
+      data: { name: "Tên mới", totalCourts: 4 },
+    });
+    expect(payload.variables.data).not.toHaveProperty("logoFileId");
+    expect(payload.variables.data).not.toHaveProperty("imageFileIds");
   });
 });

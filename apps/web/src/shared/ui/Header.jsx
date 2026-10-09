@@ -104,49 +104,9 @@ const Header = () => {
                     Trợ lý đặt sân
                   </Link>
                 </li>
-                <li>
-                  <Link to="/news" onClick={closeMenu} className={navLinkClass}>
-                    Tin Tức
-                  </Link>
-                </li>
-                <li>
-                  <Link
-                    to="/policy"
-                    onClick={closeMenu}
-                    className={navLinkClass}
-                  >
-                    Chính Sách
-                  </Link>
-                </li>
-                <li>
-                  {
-                    <Link
-                      to="/contact"
-                      onClick={closeMenu}
-                      className={navLinkClass}
-                    >
-                      Liên Hệ
-                    </Link>
-                  }
-                </li>
-
                 {/* --- PHẦN NÚT THÔNG BÁO & USER --- */}
                 {user ? (
                   <>
-                    {/* [NEW] NÚT THÔNG BÁO */}
-                    <li className="relative mx-1">
-                      <Link
-                        to="/notifications" // Dẫn tới trang thông báo (bạn tự tạo route này nhé)
-                        onClick={closeMenu}
-                        className="relative text-white hover:text-yellow-300 transition-colors px-2 py-2 flex items-center"
-                      >
-                        <i className="fas fa-bell text-xl"></i>
-
-                        {/* Dấu chấm đỏ báo hiệu có thông báo mới (Logic giả định) */}
-                        <span className="absolute top-1 right-1 block h-2.5 w-2.5 rounded-full bg-red-600 border border-white"></span>
-                      </Link>
-                    </li>
-
                     {/* USER DROPDOWN */}
                     <li className="relative ml-2">
                       <div className="relative inline-block group">
@@ -178,12 +138,12 @@ const Header = () => {
                             <button
                               onClick={() => {
                                 setIsDropdownOpen(false);
-                                navigate("/profile");
+                                navigate("/my-bookings");
                               }}
                               className="flex items-center gap-3 w-full px-4 py-3 text-left text-gray-800 text-sm hover:bg-yellow-300 transition-colors font-medium"
                             >
                               <i className="fas fa-user text-lg"></i>
-                              <span>Thông tin cá nhân</span>
+                              <span>Lịch đặt sân của tôi</span>
                             </button>
                           </div>
                         )}

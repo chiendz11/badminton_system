@@ -43,40 +43,6 @@ const Centers = () => {
     },
   ];
 
-  // Dữ liệu giải đấu sắp diễn ra
-  const upcomingTournaments = [
-    {
-      id: 1,
-      name: "Giải Cầu Lông Mở Rộng ĐẤT SÂN 247",
-      date: "20/07/2025",
-      location: "Nhà thi đấu Đại học Bách Khoa Hà Nội",
-      image: "/images/tournaments/tournament1.jpg",
-      participants: 120,
-      registrationDeadline: "10/05/2025",
-      prize: "50.000.000 VNĐ",
-    },
-    {
-      id: 2,
-      name: "Cúp Cầu Lông Hà Nội Open 2025",
-      date: "15/08/2025",
-      location: "Nhà thi đấu Trịnh Hoài Đức",
-      image: "/images/tournaments/tournament2.jpg",
-      participants: 200,
-      registrationDeadline: "01/06/2025",
-      prize: "100.000.000 VNĐ",
-    },
-    {
-      id: 3,
-      name: "Giải Cầu Lông Sinh Viên Toàn Quốc 2025",
-      date: "10/12/2025",
-      location: "Nhà thi đấu Đại học Quốc Gia Hà Nội",
-      image: "/images/tournaments/tournament3.jpg",
-      participants: 150,
-      registrationDeadline: "25/06/2025",
-      prize: "80.000.000 VNĐ",
-    },
-  ];
-
   const openModal = (center) => {
     setSelectedCenter(center);
     setModalOpen(true);
@@ -161,22 +127,6 @@ const Centers = () => {
     } catch (error) {
       alert("Lỗi kiểm tra booking pending: " + error.message);
     }
-  };
-
-  const renderRatingStars = (rating) => {
-    const stars = [];
-    const fullStars = Math.floor(rating || 0);
-    const hasHalfStar = (rating || 0) % 1 >= 0.5;
-    for (let i = 1; i <= 5; i++) {
-      if (i <= fullStars) {
-        stars.push(<i key={i} className="fas fa-star"></i>);
-      } else if (i === fullStars + 1 && hasHalfStar) {
-        stars.push(<i key={i} className="fas fa-star-half-alt"></i>);
-      } else {
-        stars.push(<i key={i} className="far fa-star"></i>);
-      }
-    }
-    return stars;
   };
 
   const renderFacilities = (facilities) => {
@@ -286,15 +236,6 @@ const Centers = () => {
                     <h2 data-testid={`center-name-${center._id}`}>
                       {center.name}
                     </h2>
-                    <div
-                      className="center-rating"
-                      data-testid={`center-rating-${center._id}`}
-                    >
-                      <div className="stars">
-                        {renderRatingStars(center.avgRating)}
-                      </div>
-                      <span>{center.avgRating || 0}/5</span>
-                    </div>
                   </div>
                   <div
                     className="center-booking-stats"
@@ -354,102 +295,6 @@ const Centers = () => {
             ))}
           </div>
         )}
-
-        <div className="upcoming-tournaments-section">
-          <div className="section-header">
-            <h2>Giải Đấu Sắp Diễn Ra</h2>
-            <p>Đăng ký tham gia các giải đấu cầu lông hấp dẫn</p>
-          </div>
-
-          <div className="tournaments-container">
-            {upcomingTournaments.map((tournament) => (
-              <div
-                key={tournament.id}
-                className="tournament-card"
-                data-testid={`tournament-card-${tournament.id}`}
-              >
-                <div className="tournament-image">
-                  <img
-                    src={tournament.image}
-                    alt={tournament.name}
-                    data-testid={`tournament-image-${tournament.id}`}
-                  />
-                  <div
-                    className="tournament-date-badge"
-                    data-testid={`tournament-date-badge-${tournament.id}`}
-                  >
-                    <i className="fas fa-calendar-alt"></i> {tournament.date}
-                  </div>
-                </div>
-                <div className="tournament-content">
-                  <h3 data-testid={`tournament-name-${tournament.id}`}>
-                    {tournament.name}
-                  </h3>
-                  <div className="tournament-details">
-                    <div
-                      className="tournament-detail-item"
-                      data-testid={`tournament-location-${tournament.id}`}
-                    >
-                      <i className="fas fa-map-marker-alt"></i>
-                      <span>{tournament.location}</span>
-                    </div>
-                    <div
-                      className="tournament-detail-item"
-                      data-testid={`tournament-participants-${tournament.id}`}
-                    >
-                      <i className="fas fa-users"></i>
-                      <span>{tournament.participants} người tham gia</span>
-                    </div>
-                    <div
-                      className="tournament-detail-item"
-                      data-testid={`tournament-registration-deadline-${tournament.id}`}
-                    >
-                      <i className="fas fa-stopwatch"></i>
-                      <span>
-                        Hạn đăng ký: {tournament.registrationDeadline}
-                      </span>
-                    </div>
-                    <div
-                      className="tournament-detail-item"
-                      data-testid={`tournament-prize-${tournament.id}`}
-                    >
-                      <i className="fas fa-trophy"></i>
-                      <span>Giải thưởng: {tournament.prize}</span>
-                    </div>
-                  </div>
-                  <div className="tournament-actions">
-                    <Link
-                      to="/competition"
-                      className="view-tournament-btn"
-                      data-testid={`view-tournament-button-${tournament.id}`}
-                    >
-                      <span>Xem Chi Tiết</span>
-                      <i className="fas fa-angle-right"></i>
-                    </Link>
-                    <button
-                      className="register-tournament-btn"
-                      data-testid={`register-tournament-button-${tournament.id}`}
-                    >
-                      <i className="fas fa-edit"></i>
-                      <span>Chờ thông báo</span>
-                    </button>
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-
-          <div className="view-all-tournaments">
-            <Link
-              to="/competition"
-              className="view-all-btn"
-              data-testid="view-all-tournaments-button"
-            >
-              <span>Xem Tất Cả Giải Đấu</span>
-              <i className="fas fa-arrow-right"></i>
-            </Link>
-          </div>
-        </div>
 
         <div className="partners-section">
           <div className="section-header">

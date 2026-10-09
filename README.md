@@ -1,6 +1,6 @@
 # badminton_system — Booking Core và AI
 
-Nhánh `feat/booking-core` xây Booking Core và lấy lại giao diện khách hàng/quản lý từ repo gốc trên nền CI của `ci/bootstrap`. `main` vẫn là default branch. Nghiệp vụ được chuyển từ [Badminton_manager_microservices](https://github.com/chiendz11/Badminton_manager_microservices/tree/484d381e873f513ed4faa4413407502112f4885d), theo transaction boundary mới. Chi tiết nguồn và thay đổi ở [docs/BOOKING_CORE.md](docs/BOOKING_CORE.md).
+Nhánh `feat/booking-core` xây Booking Core và giữ giao diện Booking Core khách hàng/quản lý từ repo gốc trên nền CI của `ci/bootstrap`. `main` vẫn là default branch. Nghiệp vụ được chuyển từ [Badminton_manager_microservices](https://github.com/chiendz11/Badminton_manager_microservices/tree/484d381e873f513ed4faa4413407502112f4885d), theo transaction boundary mới. Chi tiết nguồn và thay đổi ở [docs/BOOKING_CORE.md](docs/BOOKING_CORE.md).
 
 ## Cấu trúc workspace
 
@@ -23,11 +23,11 @@ Web/Admin tách `app`, `features/{pages,ui,api}`, `shared`; Booking Core tách m
 - Lịch trống theo giờ Việt Nam; chọn nhiều sân/giờ, giữ chỗ có thời hạn, xác nhận trực tiếp, lịch sử và hủy booking trước khi bắt đầu.
 - Quản lý tạo lịch cố định theo khoảng ngày/thứ trong tuần; kiểm tra lịch trống trên mọi ngày; tạo cả chuỗi trong một transaction.
 - PostgreSQL advisory lock và exclusion constraint ngăn hai booking chiếm cùng sân/giờ; idempotency tránh tạo trùng khi retry; giá được chốt lúc giữ chỗ.
-- Frontend/Admin giữ JSX, CSS, ảnh và API client từ repo gốc: trang chủ, trung tâm, booking, hồ sơ/bạn bè, thông báo, tin tức, dịch vụ, kho, báo cáo, đánh giá, quản lý người dùng. Loại bỏ pass sân, payment/checkout và login/password/OAuth/refresh-token.
+- Frontend/Admin giữ JSX, CSS và bố cục booking/centre/history/statistics từ repo gốc; chỉ giữ UI Booking Core và trang AI. Xóa màn hình/API client kho, bán hàng, news, rating, social, notification, profile/users CRUD và Storage upload; không có pass/payment/login.
 - Trợ lý đặt sân tiếng Việt nhiều lượt tại `/booking-assistant`: giữ ngữ cảnh, lập/tìm lại kế hoạch, chọn sân rồi xác nhận cuối. Slot 60 phút; 2 tiếng cần 2 slot liên tiếp cùng sân. Xem [docs/AI_SERVICE.md](docs/AI_SERVICE.md) về công nghệ, lý thuyết và provider thật/offline.
 - Unit/integration/consumer-provider contract tests; JSON logs có request ID, Prometheus metrics, health/readiness và alert mẫu.
 
-Phạm vi này không có pass sân hoặc payment. UI gốc → API Gateway → Booking Core đã nối cho catalogue trung tâm, lịch trống, đặt/xác nhận/hủy, lịch sử/thống kê và lịch cố định. Gateway giữ REST/GraphQL của client gốc, xác minh JWT rồi chuyển bearer token tới Core. Identity và backend của kho/news/rating/social/notification chưa triển khai; các màn hình đó vẫn được giữ theo yêu cầu.
+Phạm vi này không có pass sân hoặc payment. UI gốc → API Gateway → Booking Core đã nối cho catalogue trung tâm, lịch trống, đặt/xác nhận/hủy, lịch sử/thống kê và lịch cố định. Gateway giữ REST/GraphQL của client gốc, xác minh JWT rồi chuyển bearer token tới Core. UI và API client ngoài Booking Core/AI đã được bỏ theo phạm vi mới. Session JWT và directory khách/manager do host cấp; không triển khai Identity service. Gateway vẫn là cổng nối hai service.
 
 ## Chạy local bằng Docker
 

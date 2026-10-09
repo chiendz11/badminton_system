@@ -13,26 +13,21 @@ function header(session) {
   );
 }
 describe("upstream customer navigation without excluded flows", () => {
-  it("keeps the original brand and public destinations, with no login or resale controls", () => {
+  it("keeps the original brand and booking/AI destinations only", () => {
     header(null);
     expect(
       screen.getByText("247", { exact: false, selector: "a.logo" }),
     ).toBeInTheDocument();
-    for (const name of [
-      "Trang Chủ",
-      "Đặt Sân",
-      "Tin Tức",
-      "Chính Sách",
-      "Liên Hệ",
-    ])
+    for (const name of ["Trang Chủ", "Đặt Sân", "Trợ lý đặt sân"])
       expect(screen.getByRole("link", { name })).toBeInTheDocument();
     expect(screen.queryByText(/Đăng Nhập|Pass Sân/i)).not.toBeInTheDocument();
+    expect(
+      screen.queryByText(/Tin Tức|Chính Sách|Liên Hệ/i),
+    ).not.toBeInTheDocument();
   });
   it("accepts a profile supplied by the host without implementing a login flow", () => {
     header({ profile: { userId: "customer-1", name: "Khách hàng" } });
     expect(screen.getByText("Khách hàng")).toBeInTheDocument();
-    expect(
-      document.querySelector('a[href="/notifications"]'),
-    ).toBeInTheDocument();
+    expect(document.querySelector('a[href="/notifications"]')).toBeNull();
   });
 });

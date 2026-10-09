@@ -108,7 +108,6 @@ const CENTER_SUMMARY_FRAGMENT = `
     phone
     isActive
     centerManagerId
-    avgRating
     totalCourts
 
     # Media

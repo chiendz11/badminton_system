@@ -4,29 +4,21 @@
 
 `.github/ci/components.yml` thay thế việc scan `BM/services/*`. Mỗi entry mô tả một deployable, một nhóm contract hoặc một shared package. Không suy luận kiến trúc từ `package.json` có sẵn trong codebase cũ.
 
-| Component    | Path dự kiến                  | Runtime / database         |
-| ------------ | ----------------------------- | -------------------------- |
-| api_gateway  | services/api-gateway          | Node                       |
-| identity     | services/identity_service     | Node / PostgreSQL / Prisma |
-| booking_core | services/booking-core         | Node / PostgreSQL / Prisma |
-| commerce     | services/commerce_service     | Node / PostgreSQL / Prisma |
-| social       | services/social_service       | Node / MongoDB             |
-| content      | services/content_service      | Node / MongoDB             |
-| notification | services/notification_service | Node / MongoDB             |
-| storage      | services/storage_service      | Node                       |
-| ai           | services/ai-service           | Python / FastAPI           |
-| frontend     | apps/web                      | Web                        |
-| admin        | apps/admin                    | Web                        |
+| Component | Path | Runtime/database |
+| --- | --- | --- |
+| api_gateway | services/api-gateway | Node / không có DB |
+| booking_core | services/booking-core | Node / PostgreSQL / Prisma |
+| ai | services/ai-service | Python / FastAPI / PostgreSQL hội thoại |
+| frontend | apps/web | Web |
+| admin | apps/admin | Web |
 
-Identity gộp auth/user. Booking Core ở nhánh này chứa center, court, pricing, availability, reservation và booking; payment và passes được loại khỏi phạm vi hiện tại. Commerce chứa inventory/stock/sales/reporting. Content chứa rating/news. Đây là mapping CI dự kiến, các bounded context chưa triển khai vẫn là path dự kiến.
-
-Các shared package: `packages/auth-contracts`, `packages/booking-contracts`, `packages/event-contracts`, `packages/observability`. Các nhóm schema: `contracts/identity`, `contracts/booking`, `contracts/commerce`, `contracts/events`, `contracts/ai-tools`, `contracts/gateway`.
+Phạm vi hiện tại chỉ có Booking Core và AI, với API Gateway làm adapter. Manifest bỏ các placeholder Identity/Commerce/Social/Content/Notification/Storage chưa triển khai. Có 12 component, tất cả enabled: 5 deployable/apps, 4 contract groups và 3 shared packages. Các shared package là auth-contracts, booking-contracts, observability; schema groups là booking, events, ai-tools, gateway.
 
 `depends_on` biểu diễn dependency của component vào API/event/shared package. Chỉnh graph cùng với dependency thực tế; tránh biểu diễn mọi HTTP call như một cạnh bắt buộc chạy CI khi implementation đổi.
 
 ## Triển khai từng component
 
-Trên `ci/bootstrap`, manifest vẫn `configuration_only: true`. Trên `feat/booking-core`, manifest đặt `configuration_only: false` và mỗi component có `enabled` rõ ràng. Hiện có 12 component enabled: Booking Core, API Gateway, Frontend, Admin, AI, booking/event/gateway/ai-tools schemas và ba shared packages đã có. Web/Admin đã dùng client gốc nên không khai báo dependency vào custom Booking Core contracts; contract tests của app kiểm tra gateway URLs/payload/envelope gốc. Package UI tự dựng đã được bỏ. Web/Admin phụ thuộc gateway API contract. Gateway còn phụ thuộc booking_core vì integration chạy Core thật và compile Core; đổi implementation Core sẽ kiểm tra gateway integration. Identity/Commerce và các component chưa có source để `enabled: false`; không tạo test hoặc code giả để CI xanh.
+Trên `ci/bootstrap`, manifest vẫn `configuration_only: true`. Trên `feat/booking-core`, manifest đặt `configuration_only: false` và mỗi component có `enabled` rõ ràng. Hiện có 12 component enabled: Booking Core, API Gateway, Frontend, Admin, AI, booking/event/gateway/ai-tools schemas và ba shared packages đã có. Web/Admin đã dùng client gốc nên không khai báo dependency vào custom Booking Core contracts; contract tests của app kiểm tra gateway URLs/payload/envelope gốc. Package UI tự dựng đã được bỏ. Web/Admin phụ thuộc gateway API contract. Gateway còn phụ thuộc booking_core vì integration chạy Core thật và compile Core; đổi implementation Core sẽ kiểm tra gateway integration. Các miền khác không còn entry trong manifest của nhánh này; không tạo test/code giả cho miền ngoài phạm vi.
 
 Validation kiểm tra tên/path/graph của cả manifest, nhưng chỉ kiểm tra sự tồn tại source/lockfile của component được bật. Change detector chỉ đưa component enabled vào matrix. Shared package được kiểm tra qua consumer đang bật. Khi triển khai bounded context tiếp theo, bổ sung scripts/test/migration thật rồi đặt enabled true và cập nhật dependency.
 
@@ -41,7 +33,7 @@ Validation kiểm tra tên/path/graph của cả manifest, nhưng chỉ kiểm t
 - Đổi implementation bên trong deployable: chọn deployable đó. Ví dụ `services/booking-core/src/modules/pricing/**` chạy toàn `booking_core`, không tạo job pricing riêng; gateway integration cũng chạy vì sử dụng Core thật.
 - Chỉ đổi tài liệu: matrix ứng dụng rỗng. Chỉ đổi `packages/booking-contracts/**` sẽ không kéo Content/Social/Commerce nếu graph không khai báo dependency này.
 - `contracts/booking/**` chọn Booking Core, Gateway, AI và các web consumer đã khai báo, cùng schema job của nhóm Booking.
-- `contracts/events/**` chọn các producer/consumer đã khai báo, gồm Notification.
+- `contracts/events/**` chọn các producer/consumer đã khai báo, hiện chỉ có Booking Core.
 
 Matrix tách thành `node`, `python`, `web`, `contract`. Shared package được kiểm tra thông qua component tiêu thụ; nếu sau này có package độc lập cần job riêng, phải mở rộng runtime/contract rõ ràng. Manifest kiểm tra tên/path, dependency không tồn tại, path trùng/lồng nhau và cycle.
 

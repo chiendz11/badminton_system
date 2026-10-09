@@ -16,8 +16,8 @@ const HeroBanner = () => {
       cta: "Khám Phá Ngay",
     },
     {
-      title: "Thanh Toán Dễ Dàng - Đặt Lịch Linh Hoạt",
-      subtitle: "Nhiều khung giờ và ưu đãi đặc biệt dành cho thành viên",
+      title: "Đặt Lịch Linh Hoạt Mỗi Ngày",
+      subtitle: "Chọn khung giờ phù hợp và xác nhận lịch đặt sân",
       cta: "Tham Gia Ngay",
     },
   ];

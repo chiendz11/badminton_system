@@ -5,95 +5,8 @@ import {
   createCenterGQL,
   updateCenterGQL,
 } from "../api/center_service/graphql/center.api.js";
-import { uploadImageREST } from "../api/center_service/rest/center.api.js";
 import LoadingSpinner from "../../../shared/ui/LoadingSpinner.jsx";
-import { MdClose, MdCloudUpload, MdAutoFixHigh } from "react-icons/md";
-
-// --- Helper: Image Upload Box ---
-const ImageUploadBox = ({
-  label,
-  images,
-  onAdd,
-  onRemove,
-  isMultiple = false,
-}) => (
-  <div style={{ marginBottom: "15px" }}>
-    <label style={{ fontWeight: "600", display: "block", marginBottom: "8px" }}>
-      {label}
-    </label>
-    <div style={{ display: "flex", gap: "10px", flexWrap: "wrap" }}>
-      {images.map((img, idx) => (
-        <div
-          key={idx}
-          style={{ position: "relative", width: "100px", height: "100px" }}
-        >
-          <img
-            src={img.preview || img.url}
-            alt="Preview"
-            style={{
-              width: "100%",
-              height: "100%",
-              objectFit: "cover",
-              borderRadius: "8px",
-              border: "1px solid #ddd",
-            }}
-          />
-          <button
-            type="button"
-            onClick={() => onRemove(idx)}
-            style={{
-              position: "absolute",
-              top: -5,
-              right: -5,
-              background: "red",
-              color: "white",
-              borderRadius: "50%",
-              border: "none",
-              width: "20px",
-              height: "20px",
-              cursor: "pointer",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-            }}
-          >
-            ×
-          </button>
-        </div>
-      ))}
-
-      {(isMultiple || images.length === 0) && (
-        <label
-          style={{
-            width: "100px",
-            height: "100px",
-            border: "2px dashed #ccc",
-            borderRadius: "8px",
-            display: "flex",
-            flexDirection: "column",
-            alignItems: "center",
-            justifyContent: "center",
-            cursor: "pointer",
-            color: "#666",
-            background: "#FAFAFA",
-          }}
-        >
-          <MdCloudUpload size={24} />
-          <span style={{ fontSize: "0.7rem", marginTop: "4px" }}>
-            {isMultiple ? "Thêm ảnh" : "Chọn ảnh"}
-          </span>
-          <input
-            type="file"
-            accept="image/*"
-            multiple={isMultiple}
-            onChange={(e) => onAdd(e.target.files)}
-            style={{ display: "none" }}
-          />
-        </label>
-      )}
-    </div>
-  </div>
-);
+import { MdClose, MdAutoFixHigh } from "react-icons/md";
 
 // --- Helper: TimeSlot Row (Giữ nguyên) ---
 const TimeSlotRow = ({ slot, onChange, onRemove }) => (
@@ -162,11 +75,7 @@ const CenterModal = ({
   const { admin } = useContext(SessionContext);
   const [formData, setFormData] = useState({});
 
-  // State quản lý ảnh: Mỗi item có dạng { file: File|null, preview: string, id: string|null, url: string|null }
-  const [logoImage, setLogoImage] = useState([]);
-  const [galleryImages, setGalleryImages] = useState([]);
-
-  const [isUploading, setIsUploading] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
 
   // 1. Logic lọc Managers (Giữ nguyên)
   const availableManagers = useMemo(() => {
@@ -198,7 +107,7 @@ const CenterModal = ({
       .sort((a, b) => a.name.localeCompare(b.name));
   }, [centerManagers, center, allCenters, admin]);
 
-  // 2. Effect Load Data (ĐÃ FIX ĐỂ HIỂN THỊ ẢNH)
+  // 2. Load dữ liệu trung tâm và bảng giá khi mở form
   useEffect(() => {
     if (isOpen) {
       if (center && !isCreating) {
@@ -211,46 +120,6 @@ const CenterModal = ({
             : "",
           centerManagerId: center.centerManagerId || "",
         });
-
-        // -----------------------------------------------------------
-        // FIX LOGIC HIỂN THỊ ẢNH
-        // Cần map đúng Url và FileId từ API trả về
-        // -----------------------------------------------------------
-
-        // 1. Load Logo
-        if (center.logoUrl && center.logoFileId) {
-          // Lưu ý: center.logoFileId lấy từ GraphQL (resolver đã map từ logo_file_id)
-          setLogoImage([
-            {
-              url: center.logoUrl,
-              id: center.logoFileId, // ID ảnh cũ
-              file: null, // Không có file vật lý mới
-              preview: center.logoUrl, // Dùng URL làm preview
-            },
-          ]);
-        } else {
-          setLogoImage([]);
-        }
-
-        // 2. Load Gallery
-        // GraphQL trả về: imageUrlList (mảng url) và imageFileIds (mảng id)
-        // Hai mảng này phải có độ dài bằng nhau và thứ tự tương ứng
-        if (
-          center.imageUrlList &&
-          center.imageFileIds &&
-          center.imageUrlList.length > 0
-        ) {
-          const mappedImages = center.imageUrlList.map((url, index) => ({
-            url: url,
-            id: center.imageFileIds[index], // Lấy ID tương ứng ở vị trí index
-            file: null,
-            preview: url,
-          }));
-          // Lọc bỏ những item bị lỗi (không có id hoặc url)
-          setGalleryImages(mappedImages.filter((img) => img.id && img.url));
-        } else {
-          setGalleryImages([]);
-        }
       } else {
         // Reset form khi tạo mới
         setFormData({
@@ -265,8 +134,6 @@ const CenterModal = ({
           facilitiesString: "",
           pricing: defaultPricing,
         });
-        setLogoImage([]);
-        setGalleryImages([]);
       }
     }
   }, [center, isOpen, isCreating]);
@@ -326,23 +193,6 @@ const CenterModal = ({
     setFormData((prev) => ({ ...prev, pricing: newPricing }));
   };
 
-  // UI Handlers cho Ảnh
-  const handleAddImages = (files, type) => {
-    const newImages = Array.from(files).map((file) => ({
-      file,
-      preview: URL.createObjectURL(file), // Tạo link blob để preview ảnh mới chọn
-      id: null,
-      url: null,
-    }));
-    if (type === "logo") setLogoImage(newImages.slice(0, 1));
-    else setGalleryImages((prev) => [...prev, ...newImages]);
-  };
-
-  const handleRemoveImage = (index, type) => {
-    if (type === "logo") setLogoImage([]);
-    else setGalleryImages((prev) => prev.filter((_, i) => i !== index));
-  };
-
   // 6. Submit Logic
   const sanitizeData = (data, isCreation = false) => {
     const submit = {
@@ -365,7 +215,7 @@ const CenterModal = ({
     delete submit.coverImage;
     delete submit._id;
 
-    // Xóa các field ID ảnh trong base data vì ta sẽ gán lại ID chính xác bên dưới
+    // Không sửa metadata ảnh khi Storage không thuộc phạm vi hiện tại.
     delete submit.logo_file_id;
     delete submit.logoFileId;
     delete submit.image_file_ids;
@@ -393,91 +243,21 @@ const CenterModal = ({
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setIsUploading(true);
-    let currentCenterId = center?.centerId;
-
+    setIsSaving(true);
     try {
-      const baseData = sanitizeData(formData, isCreating);
-      let finalLogoId = null;
-
-      // --- BƯỚC 1: Lấy ID Center (Nếu tạo mới) ---
-      if (isCreating) {
-        const createResult = await createCenterGQL({
-          ...baseData,
-          logoFileId: null,
-          imageFileIds: [],
-        });
-        currentCenterId = createResult.centerId;
-        if (!currentCenterId)
-          throw new Error("Không lấy được ID trung tâm sau khi tạo.");
-      } else {
-        if (!currentCenterId)
+      const data = sanitizeData(formData, isCreating);
+      if (isCreating) await createCenterGQL(data);
+      else {
+        if (!center?.centerId)
           throw new Error("Không tìm thấy Center ID để cập nhật.");
+        await updateCenterGQL(center.centerId, data);
       }
-
-      // --- BƯỚC 2: Xử lý Logo ---
-      // Ưu tiên: File mới upload > ID ảnh cũ > Null (nếu xóa hết)
-      if (logoImage.length > 0) {
-        if (logoImage[0].file) {
-          // Case: Có upload ảnh mới
-          const res = await uploadImageREST(
-            currentCenterId,
-            logoImage[0].file,
-            "logo",
-          );
-          finalLogoId = res.fileId;
-        } else if (logoImage[0].id) {
-          // Case: Giữ nguyên ảnh cũ
-          finalLogoId = logoImage[0].id;
-        }
-      }
-      // Nếu logoImage rỗng -> finalLogoId = null
-
-      // --- BƯỚC 3: Xử lý Gallery ---
-      const finalGalleryIds = [];
-
-      // Dùng for...of để chạy async await tuần tự (hoặc Promise.all nếu muốn nhanh)
-      for (const img of galleryImages) {
-        if (img.file) {
-          // Ảnh mới -> Upload lấy ID mới
-          const res = await uploadImageREST(
-            currentCenterId,
-            img.file,
-            "gallery",
-          );
-          finalGalleryIds.push(res.fileId);
-        } else if (img.id) {
-          // Ảnh cũ -> Giữ lại ID cũ
-          finalGalleryIds.push(img.id);
-        }
-      }
-
-      // --- BƯỚC 4: Gọi API Update cuối cùng ---
-      // Điều kiện: Nếu là Create và không có ảnh nào -> Không cần update
-      // Nếu là Update -> Luôn gọi để cập nhật thông tin text hoặc ảnh xóa
-      const isJustCreatedWithoutImages =
-        isCreating && !finalLogoId && finalGalleryIds.length === 0;
-
-      if (!isJustCreatedWithoutImages) {
-        const updatePayload = {
-          ...baseData,
-          logoFileId: finalLogoId, // Gửi đúng camelCase theo API mới sửa
-          imageFileIds: finalGalleryIds, // Gửi list ID đầy đủ (cũ + mới)
-        };
-
-        await updateCenterGQL(currentCenterId, updatePayload);
-      }
-
       await onSave();
       onClose();
     } catch (error) {
-      console.error("Submit Error:", error);
-      const msg = error.message.includes("logo_file_id")
-        ? "Lỗi hệ thống: Backend yêu cầu Logo nhưng chưa có cơ chế Default."
-        : error.message;
-      alert("Lỗi khi xử lý: " + msg);
+      alert("Lỗi: " + error.message);
     } finally {
-      setIsUploading(false);
+      setIsSaving(false);
     }
   };
 
@@ -561,29 +341,6 @@ const CenterModal = ({
               gap: "15px",
             }}
           >
-            {/* 1. KHU VỰC ẢNH */}
-            <div
-              style={{
-                display: "grid",
-                gridTemplateColumns: "1fr 2fr",
-                gap: "20px",
-              }}
-            >
-              <ImageUploadBox
-                label="Logo (1 ảnh)"
-                images={logoImage}
-                onAdd={(f) => handleAddImages(f, "logo")}
-                onRemove={(i) => handleRemoveImage(i, "logo")}
-              />
-              <ImageUploadBox
-                label="Gallery (Nhiều ảnh)"
-                images={galleryImages}
-                onAdd={(f) => handleAddImages(f, "gallery")}
-                onRemove={(i) => handleRemoveImage(i, "gallery")}
-                isMultiple={true}
-              />
-            </div>
-
             {/* 2. CÁC INPUT TEXT CƠ BẢN */}
             <div
               style={{
@@ -943,7 +700,7 @@ const CenterModal = ({
             <button
               type="button"
               onClick={onClose}
-              disabled={isUploading}
+              disabled={isSaving}
               style={{
                 padding: "10px 20px",
                 background: "#fff",
@@ -956,10 +713,10 @@ const CenterModal = ({
             </button>
             <button
               type="submit"
-              disabled={isUploading}
+              disabled={isSaving}
               style={{
                 padding: "10px 20px",
-                background: isUploading ? "#86EFAC" : "#10B981",
+                background: isSaving ? "#86EFAC" : "#10B981",
                 color: "#fff",
                 border: "none",
                 borderRadius: "4px",
@@ -967,7 +724,7 @@ const CenterModal = ({
                 minWidth: "120px",
               }}
             >
-              {isUploading ? (
+              {isSaving ? (
                 <LoadingSpinner size="small" color="white" />
               ) : isCreating ? (
                 "Tạo Mới"

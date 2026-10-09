@@ -154,10 +154,8 @@ const AdminBillList = () => {
 
   const getStatusText = (status) => {
     const map = {
-      pending: "Chưa thanh toán",
       confirmed: "Đã xác nhận",
       cancelled: "Đã hủy",
-      failed: "Thất bại",
     };
     return map[status] || status || "N/A";
   };
@@ -166,10 +164,7 @@ const AdminBillList = () => {
     switch (status) {
       case "confirmed":
         return "bg-green-100 text-green-800";
-      case "pending":
-        return "bg-yellow-100 text-yellow-800";
       case "cancelled":
-      case "failed":
         return "bg-red-100 text-red-800";
       default:
         return "bg-gray-100 text-gray-800";
@@ -292,7 +287,6 @@ const AdminBillList = () => {
                 >
                   <option value="">Tất cả trạng thái</option>
                   <option value="confirmed">Đã xác nhận</option>
-                  <option value="pending">Chưa thanh toán</option>
                   <option value="cancelled">Đã hủy</option>
                 </select>
                 <FunnelIcon className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-emerald-500" />
@@ -597,7 +591,7 @@ const AdminBillList = () => {
 
                 <div className="flex justify-between items-center border-t pt-4 mt-2">
                   <span className="text-gray-600 font-bold text-base">
-                    Tổng thanh toán:
+                    Tổng giá đặt sân:
                   </span>
                   <span
                     className={`font-bold text-2xl ${selectedBill.bookingType === "monthly" ? "text-blue-600" : "text-emerald-600"}`}

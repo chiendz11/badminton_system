@@ -50,7 +50,7 @@ API_GATEWAY_URL của Nginx mặc định http://gateway:8081; DEV_API_GATEWAY_U
 
 Client mới luôn gửi Idempotency-Key ổn định khi retry daily/fixed. Gateway giữ compatibility khi client cũ không gửi key bằng UUID mới, nên không bảo đảm dedup giữa những request thiếu key. Không retry tự động upstream mutation. Nếu mất response giữa reserve/confirm, retry cùng key tiếp tục hold/confirm idempotent; nếu hold đã hết hạn trả 410 và phải chọn lại với key mới. Timeout mặc định 5 giây mỗi upstream call, cấu hình UPSTREAM_TIMEOUT_MS 100–30000. Không có transaction phân tán qua hai HTTP call; Core sở hữu từng transaction và thời hạn hold.
 
-GraphQL giới hạn body 256KB, query 40KB, depth 12, số node mở rộng fragment 400; chặn fragment cycle và nhiều mutation trong một request. Metrics dùng monitoring bearer riêng, không business JWT; JSON logs có requestId xuyên gateway/Core. Không forward client actor/cookie/host headers. Routes ngoài phạm vi trả 404: auth, pass/payment, news/rating, inventory/transactions, social/notification/users/storage; UI các miền đó vẫn giữ, backend sẽ ghép sau.
+GraphQL giới hạn body 256KB, query 40KB, depth 12, số node mở rộng fragment 400; chặn fragment cycle và nhiều mutation trong một request. Metrics dùng monitoring bearer riêng, không business JWT; JSON logs có requestId xuyên gateway/Core. Không forward client actor/cookie/host headers. Routes ngoài phạm vi trả 404: auth, pass/payment, news/rating, inventory/transactions, social/notification/users/storage; Web/Admin đã bỏ màn hình và API client các miền đó, chỉ giữ UI Booking Core và AI.
 
 Contracts tại contracts/gateway; gateway unit/contract và integration Core/Postgres thực tại services/api-gateway/test. Xem [VALIDATION.md](VALIDATION.md) cho kiểm chứng local.
 

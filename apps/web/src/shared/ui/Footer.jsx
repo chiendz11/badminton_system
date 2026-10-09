@@ -2,10 +2,8 @@ import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import "../styles/footer.css";
 import { MessageSquare } from "lucide-react";
-import ChatBox from "./ChatBox.jsx";
 
 const Footer = () => {
-  const [chatOpen, setChatOpen] = useState(false);
   const [footerScale, setFooterScale] = useState(1);
   const [footerOpacity, setFooterOpacity] = useState(1);
 
@@ -14,10 +12,6 @@ const Footer = () => {
       top: 0,
       behavior: "smooth",
     });
-  };
-
-  const toggleChat = () => {
-    setChatOpen(!chatOpen);
   };
 
   useEffect(() => {
@@ -93,32 +87,6 @@ const Footer = () => {
                   <strong>Email:</strong> 23021710@vnu.edu.vn
                 </p>
               </div>
-              <div className="social-media">
-                <h3>Social Media</h3>
-                <div className="social-icons">
-                  <a
-                    href="https://facebook.com"
-                    className="social-icon facebook"
-                  >
-                    <i className="fab fa-facebook-f"></i>
-                  </a>
-                  <a
-                    href="https://instagram.com"
-                    className="social-icon instagram"
-                  >
-                    <i className="fab fa-instagram"></i>
-                  </a>
-                  <a href="https://twitter.com" className="social-icon twitter">
-                    <i className="fab fa-twitter"></i>
-                  </a>
-                  <a
-                    href="https://www.youtube.com/channel/UCDZ4Kmmnw84OgLZevnmvQXA"
-                    className="social-icon youtube"
-                  >
-                    <i className="fab fa-youtube"></i>
-                  </a>
-                </div>
-              </div>
             </div>
             <div className="footer-about">
               <h3>Giới thiệu</h3>
@@ -128,11 +96,11 @@ const Footer = () => {
               </p>
               <ul className="footer-links">
                 <li>
-                  <Link to="/policy">Chính sách bảo mật</Link>
+                  <Link to="/my-bookings">Lịch đặt sân của tôi</Link>
                 </li>
 
                 <li>
-                  <Link to="/policy">Chính sách huỷ</Link>
+                  <Link to="/booking-assistant">Trợ lý đặt sân</Link>
                 </li>
               </ul>
             </div>
@@ -144,15 +112,6 @@ const Footer = () => {
                 </li>
                 <li>
                   <Link to="/centers">Sân thi đấu</Link>
-                </li>
-                <li>
-                  <Link to="/service">Dịch vụ</Link>
-                </li>
-                <li>
-                  <Link to="/sales">Khuyến mãi</Link>
-                </li>
-                <li>
-                  <Link to="/news">Tin tức cầu lông</Link>
                 </li>
               </ul>
             </div>
@@ -168,12 +127,13 @@ const Footer = () => {
         </div>
       </footer>
 
-      <ChatBox isOpen={chatOpen} onClose={toggleChat} />
-
-      <button onClick={toggleChat} className="chat-toggle-btn">
+      <Link
+        to="/booking-assistant"
+        className="chat-toggle-btn"
+        aria-label="Trợ lý đặt sân"
+      >
         <MessageSquare size={24} />
-        <span className="sr-only">Trợ giúp</span>
-      </button>
+      </Link>
 
       <button onClick={scrollToTop} className="scroll-to-top">
         <i className="fas fa-arrow-up"></i>

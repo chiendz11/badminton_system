@@ -15,7 +15,6 @@ const CENTER_SUMMARY_FRAGMENT = `
     address
     logoUrl
     imageUrlList # 💡 THÊM: Cần lấy danh sách ảnh để chọn làm ảnh bìa (cover)
-    avgRating
     totalCourts
     isActive
     centerManagerId
