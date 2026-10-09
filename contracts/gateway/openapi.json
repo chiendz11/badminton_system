@@ -496,6 +496,245 @@
         },
         "description": "Public catalogue queries; mutations require a verified manager/admin bearer token. At most one mutation per request."
       }
+    },
+    "/api/conversations": {
+      "post": {
+        "summary": "Owner-scoped AI conversation / booking operation",
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Validated AI response"
+          },
+          "401": {
+            "description": "JWT required"
+          },
+          "404": {
+            "description": "Conversation not owned / missing"
+          },
+          "409": {
+            "description": "Concurrent turn or changed replay"
+          },
+          "502": {
+            "description": "AI unavailable"
+          },
+          "504": {
+            "description": "AI timeout; retry same client_message_id"
+          },
+          "201": {
+            "description": "Conversation created"
+          }
+        }
+      }
+    },
+    "/api/conversations/{conversation_id}": {
+      "get": {
+        "summary": "Owner-scoped AI conversation / booking operation",
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Validated AI response"
+          },
+          "401": {
+            "description": "JWT required"
+          },
+          "404": {
+            "description": "Conversation not owned / missing"
+          },
+          "409": {
+            "description": "Concurrent turn or changed replay"
+          },
+          "502": {
+            "description": "AI unavailable"
+          },
+          "504": {
+            "description": "AI timeout; retry same client_message_id"
+          }
+        },
+        "parameters": [
+          {
+            "name": "conversation_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ]
+      }
+    },
+    "/api/conversations/{conversation_id}/messages": {
+      "post": {
+        "summary": "Owner-scoped AI conversation / booking operation",
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Validated AI response"
+          },
+          "401": {
+            "description": "JWT required"
+          },
+          "404": {
+            "description": "Conversation not owned / missing"
+          },
+          "409": {
+            "description": "Concurrent turn or changed replay"
+          },
+          "502": {
+            "description": "AI unavailable"
+          },
+          "504": {
+            "description": "AI timeout; retry same client_message_id"
+          }
+        },
+        "parameters": [
+          {
+            "name": "conversation_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "text",
+                  "client_message_id"
+                ],
+                "properties": {
+                  "text": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 2000
+                  },
+                  "client_message_id": {
+                    "type": "string",
+                    "minLength": 8,
+                    "maxLength": 128,
+                    "pattern": "^[A-Za-z0-9_-]+$"
+                  },
+                  "action": {
+                    "enum": [
+                      "select",
+                      "confirm",
+                      "retry"
+                    ]
+                  },
+                  "option_id": {
+                    "type": "string",
+                    "format": "uuid"
+                  },
+                  "confirmation_id": {
+                    "type": "string",
+                    "format": "uuid"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/conversations/{conversation_id}/trace": {
+      "get": {
+        "summary": "Owner-scoped AI conversation / booking operation",
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Validated AI response"
+          },
+          "401": {
+            "description": "JWT required"
+          },
+          "404": {
+            "description": "Conversation not owned / missing"
+          },
+          "409": {
+            "description": "Concurrent turn or changed replay"
+          },
+          "502": {
+            "description": "AI unavailable"
+          },
+          "504": {
+            "description": "AI timeout; retry same client_message_id"
+          }
+        },
+        "parameters": [
+          {
+            "name": "conversation_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ]
+      }
+    },
+    "/api/ai/bookings/{booking_id}": {
+      "get": {
+        "summary": "Owner-scoped AI conversation / booking operation",
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Validated AI response"
+          },
+          "401": {
+            "description": "JWT required"
+          },
+          "404": {
+            "description": "Conversation not owned / missing"
+          },
+          "409": {
+            "description": "Concurrent turn or changed replay"
+          },
+          "502": {
+            "description": "AI unavailable"
+          },
+          "504": {
+            "description": "AI timeout; retry same client_message_id"
+          }
+        },
+        "parameters": [
+          {
+            "name": "booking_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ]
+      }
     }
   }
 }

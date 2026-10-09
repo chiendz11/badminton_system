@@ -14,7 +14,7 @@
 | content      | services/content_service      | Node / MongoDB             |
 | notification | services/notification_service | Node / MongoDB             |
 | storage      | services/storage_service      | Node                       |
-| ai           | services/ai_service           | Python / FastAPI           |
+| ai           | services/ai-service           | Python / FastAPI           |
 | frontend     | apps/web                      | Web                        |
 | admin        | apps/admin                    | Web                        |
 
@@ -26,7 +26,7 @@ Các shared package: `packages/auth-contracts`, `packages/booking-contracts`, `p
 
 ## Triển khai từng component
 
-Trên `ci/bootstrap`, manifest vẫn `configuration_only: true`. Trên `feat/booking-core`, manifest đặt `configuration_only: false` và mỗi component có `enabled` rõ ràng. Hiện có 10 component enabled: Booking Core, API Gateway, Frontend, Admin, booking/event/gateway schemas và ba shared packages đã có. Web/Admin đã dùng client gốc nên không khai báo dependency vào custom Booking Core contracts; contract tests của app kiểm tra gateway URLs/payload/envelope gốc. Package UI tự dựng đã được bỏ. Web/Admin phụ thuộc gateway API contract. Gateway còn phụ thuộc booking_core vì integration chạy Core thật và compile Core; đổi implementation Core sẽ kiểm tra gateway integration. Identity/Commerce/AI và các component chưa có source để `enabled: false`; không tạo test hoặc code giả để CI xanh.
+Trên `ci/bootstrap`, manifest vẫn `configuration_only: true`. Trên `feat/booking-core`, manifest đặt `configuration_only: false` và mỗi component có `enabled` rõ ràng. Hiện có 12 component enabled: Booking Core, API Gateway, Frontend, Admin, AI, booking/event/gateway/ai-tools schemas và ba shared packages đã có. Web/Admin đã dùng client gốc nên không khai báo dependency vào custom Booking Core contracts; contract tests của app kiểm tra gateway URLs/payload/envelope gốc. Package UI tự dựng đã được bỏ. Web/Admin phụ thuộc gateway API contract. Gateway còn phụ thuộc booking_core vì integration chạy Core thật và compile Core; đổi implementation Core sẽ kiểm tra gateway integration. Identity/Commerce và các component chưa có source để `enabled: false`; không tạo test hoặc code giả để CI xanh.
 
 Validation kiểm tra tên/path/graph của cả manifest, nhưng chỉ kiểm tra sự tồn tại source/lockfile của component được bật. Change detector chỉ đưa component enabled vào matrix. Shared package được kiểm tra qua consumer đang bật. Khi triển khai bounded context tiếp theo, bổ sung scripts/test/migration thật rồi đặt enabled true và cập nhật dependency.
 
@@ -69,7 +69,7 @@ prisma:migrate:deploy   # prisma migrate deploy, áp dụng migration đã commi
 
 Node workflow tạo PostgreSQL 16 tạm với port ngẫu nhiên chỉ bind localhost, đặt `DATABASE_URL` dành riêng cho CI, validate/generate Prisma, rồi chạy lint/typecheck/unit/contract, áp dụng migration và integration. Container được dọn ở bước `always()`, kể cả khi test/migration fail. CI không dùng `db push` để thay migration.
 
-Gateway khai báo database none vì không sở hữu DB; integration script generate/build Core và Testcontainers PostgreSQL riêng, khởi động Nest Core thật rồi gọi qua HTTP. Matrix hiện Node 2, Web 2, Contract 3, Python 0.
+Gateway khai báo database none vì không sở hữu DB; integration script generate/build Core và Testcontainers PostgreSQL riêng, khởi động Nest Core thật rồi gọi qua HTTP. Matrix hiện Node 2, Web 2, Contract 4, Python 1. AI bật với source/lockfile/tests thật và depends_on booking_core vì integration dùng Core thật.
 
 MongoDB/Redis/RabbitMQ hoặc dependency khác do integration test của từng component khởi tạo/dọn bằng Testcontainers. Không kết nối database thật. Database metadata `mongodb` không tự bật thêm container chung cho tất cả job.
 
@@ -77,7 +77,7 @@ MongoDB/Redis/RabbitMQ hoặc dependency khác do integration test của từng 
 
 ## Python AI contract
 
-AI dùng Python 3.12, uv 0.8.22, `services/ai_service/pyproject.toml` và `uv.lock`. Install dùng `uv sync --locked --all-groups`; các lệnh chạy qua `uv run --frozen`.
+AI dùng Python 3.12, uv 0.8.22, `services/ai-service/pyproject.toml` và `uv.lock`. Install dùng `uv sync --locked --all-groups`; các lệnh chạy qua `uv run --frozen`.
 
 Khai báo lệnh thật trong `pyproject.toml` của AI, ví dụ:
 
@@ -85,14 +85,14 @@ Khai báo lệnh thật trong `pyproject.toml` của AI, ví dụ:
 [tool.badminton-ci.commands]
 lint = "ruff check ."
 typecheck = "mypy app"
-unit = "pytest tests/unit"
-contract = "pytest tests/contracts"
-integration = "pytest tests/integration"
-golden = "python -m evaluation.golden"
+unit = "pytest tests/unit -q"
+contract = "pytest tests/contract -q"
+integration = "pytest tests/integration -q"
+golden = "python -m evaluation.evaluate"
 smoke = "pytest tests/smoke"
 ```
 
-Đây là interface cần triển khai trong codebase mới; nhánh này không tạo các module/test trên. Giá trị command được tách thành argv, không chạy shell pipeline. Golden evaluator đọc `GOLDEN_SUITE` (`small` mặc định, `full` qua workflow_dispatch) và `GOLDEN_REPORT=reports/golden.json`.
+Đây là interface đã triển khai tại services/ai-service; các lệnh chính thức nằm trong pyproject.toml. Giá trị command được tách thành argv, không chạy shell pipeline. Golden evaluator đọc `GOLDEN_SUITE` (`small` mặc định, `full` qua workflow_dispatch) và `GOLDEN_REPORT=reports/golden.json`.
 
 CI đặt `AI_PROVIDER=fake` và `AI_OFFLINE=true`, không cấp API key LLM. Các test/evaluator phải thực sự tôn trọng interface này. Integration/contract dùng Booking API mock hoặc test-owned API, kiểm tra tool allowlist và authorization; AI không nhận `DATABASE_URL` của Booking Core và không ghi trực tiếp booking DB.
 
@@ -108,7 +108,7 @@ Golden report phải có số sample dương, suite đã yêu cầu và các met
 }
 ```
 
-Đây là ví dụ định dạng, không phải kết quả đã chạy. Gate mặc định: schema validity = 100%, constraint F1 >= 0.90, critical field accuracy >= 0.95. Threshold được khai báo trong manifest, kiểm tra độc lập bởi `check_golden_report.py`; report thiếu metric, rỗng, sai suite hoặc dưới ngưỡng đều fail. Report được upload để review. PR dùng small golden suite; full suite được chọn thủ công và có thể nối vào nightly/release sau.
+Đây là ví dụ định dạng, không phải kết quả đã chạy. Gate mặc định: schema validity = 100%, constraint F1 >= 0.90, critical field accuracy >= 0.95. Threshold được khai báo trong manifest, kiểm tra độc lập bởi `check_golden_report.py`; report thiếu metric, rỗng, sai suite hoặc dưới ngưỡng đều fail. Report được upload để review. Small có 30 mẫu, full 40 mẫu; fake-provider metrics chỉ đo regression, không chứng minh chất lượng LLM thật. PR dùng small golden suite; full suite được chọn thủ công và có thể nối vào nightly/release sau.
 
 ## Contract schema CI
 

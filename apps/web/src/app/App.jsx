@@ -8,6 +8,9 @@ import "../shared/styles/global.css";
 const BookingSchedule = lazy(
   () => import("../features/booking/pages/Booking.jsx"),
 );
+const BookingAssistant = lazy(
+  () => import("../features/assistant/pages/BookingAssistant.tsx"),
+);
 const News = lazy(() => import("../features/news/pages/News.jsx"));
 
 const Centers = lazy(() => import("../features/centers/pages/Centers.jsx"));
@@ -58,6 +61,7 @@ function App() {
           <Route path="/profile" element={<UserProfile />} />
 
           <Route path="/booking" element={<BookingSchedule />} />
+          <Route path="/booking-assistant" element={<BookingAssistant />} />
 
           {/* 💡 THÊM ROUTE NÀY VÀO ĐÂY */}
 

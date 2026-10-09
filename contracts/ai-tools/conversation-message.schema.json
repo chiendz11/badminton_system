@@ -1,0 +1,38 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Conversation message",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "text",
+    "client_message_id"
+  ],
+  "properties": {
+    "text": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 2000
+    },
+    "client_message_id": {
+      "type": "string",
+      "minLength": 8,
+      "maxLength": 128,
+      "pattern": "^[A-Za-z0-9_-]+$"
+    },
+    "action": {
+      "enum": [
+        "select",
+        "confirm",
+        "retry"
+      ]
+    },
+    "option_id": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "confirmation_id": {
+      "type": "string",
+      "format": "uuid"
+    }
+  }
+}

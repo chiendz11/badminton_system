@@ -1,0 +1,19 @@
+{
+  "valid": [
+    {
+      "text": "Mai chơi 2 tiếng",
+      "client_message_id": "message-001"
+    }
+  ],
+  "invalid": [
+    {
+      "text": "",
+      "client_message_id": "short"
+    },
+    {
+      "text": "đặt",
+      "client_message_id": "message-001",
+      "userId": "forged"
+    }
+  ]
+}

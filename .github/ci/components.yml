@@ -1,4 +1,4 @@
-# Only implemented Booking Core boundaries are enabled in this feature branch.
+# Enable only implemented boundaries with their own tests and contracts.
 version: 1
 configuration_only: false
 global_paths:
@@ -59,7 +59,7 @@ components:
     path: contracts/ai-tools
     runtime: contract
     depends_on: []
-    enabled: false
+    enabled: true
   gateway_api:
     path: contracts/gateway
     runtime: contract
@@ -75,6 +75,7 @@ components:
       - gateway_api
       - auth_contracts
       - observability
+      - ai_tools
     docker: true
     enabled: true
   identity:
@@ -155,26 +156,28 @@ components:
     docker: true
     enabled: false
   ai:
-    path: services/ai_service
+    path: services/ai-service
     runtime: python
-    install_path: services/ai_service
+    install_path: services/ai-service
     lockfile: uv.lock
     depends_on:
       - booking_api
       - ai_tools
-      - booking_contracts
-      - observability
+      - booking_core
+      - auth_contracts
     docker: true
     golden:
       schema_validity: 1.0
       constraint_f1: 0.9
       critical_field_accuracy: 0.95
-    enabled: false
+    enabled: true
+    python_version: "3.12"
   frontend:
     path: apps/web
     runtime: web
     depends_on:
       - gateway_api
+      - ai_tools
     docker: false
     enabled: true
   admin:

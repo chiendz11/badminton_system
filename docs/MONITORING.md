@@ -1,4 +1,4 @@
-# Monitoring Booking Core và API Gateway
+# Monitoring Booking Core, API Gateway và AI
 
 ## Metrics và health
 
@@ -56,3 +56,26 @@ Gateway nhận hoặc cấp X-Request-Id, chuyển sang Core trên mọi upstrea
 5. Với 5xx, tìm request.failed và http.request cùng requestId. Không gửi stack/secret cho browser.
 
 Các test kiểm tra redaction, JWT/role, protected metrics, route cardinality, correlationId outbox, concurrency, snapshot giá, expiry và rollback trên PostgreSQL thật.
+
+## AI service
+
+Prometheus config thêm job `ai-service` tại `ai:8000`, bearer file `/run/secrets/ai_metrics_token`; token phải khớp METRICS_TOKEN của AI (Compose development: local-ai-monitoring-only). Không dùng business JWT để scrape. Readiness kiểm tra AI DB, checkpoint và Core; liveness trả provider và slot_minutes, không gọi model thật.
+
+| Metric | Labels / ý nghĩa |
+| --- | --- |
+| ai_http_requests_total | method/route/status; route template không có conversation ID |
+| ai_http_duration_seconds | route; latency cả lượt API |
+| ai_agent_actions_total | action; quyết định của planner |
+| ai_tool_calls_total | tool/outcome; search, details, create booking started/confirmed/conflict/uncertain |
+| ai_llm_tokens_total | direction input/output; usage provider trả về, fake không có usage |
+
+Logs JSON gồm requestId xuyên gateway/AI/Core, node/outcome để quan sát workflow; không ghi body, transcript, Authorization hay API key. Transcript nằm trong DB AI với owner access, không nằm trong stdout. GET trace chỉ owner đọc, không phải distributed tracing đầy đủ hay chain-of-thought. Khi nhận RETRY_BOOKING hoặc timeout lúc confirm, retry cùng client_message_id/Core intent key để lấy biên nhận; không tạo một yêu cầu đặt khác trước khi biết kết quả.
+
+```promql
+histogram_quantile(0.95, sum by (le, route) (rate(ai_http_duration_seconds_bucket[5m])))
+sum by (action) (rate(ai_agent_actions_total[5m]))
+sum by (outcome) (rate(ai_tool_calls_total{tool="create_booking"}[5m]))
+sum by (direction) (rate(ai_llm_tokens_total[5m]))
+```
+
+Prometheus/Grafana/Loki chưa được thêm thành stack chạy trong Compose; đây là instrumentation/config để tích hợp.

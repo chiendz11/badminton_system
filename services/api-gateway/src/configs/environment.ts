@@ -1,5 +1,7 @@
 export interface GatewayConfig {
   coreUrl: string;
+  aiUrl?: string;
+  aiTimeout?: number;
   jwtSecret: string;
   issuer: string;
   audience: string;
@@ -19,6 +21,19 @@ export function configuration(): GatewayConfig {
     url.pathname !== "/"
   )
     throw Error("BOOKING_CORE_URL must be an HTTP origin without credentials");
+  const aiUrl = new URL(process.env.AI_SERVICE_URL || "http://localhost:8000");
+  if (
+    !["http:", "https:"].includes(aiUrl.protocol) ||
+    aiUrl.username ||
+    aiUrl.password ||
+    aiUrl.pathname !== "/" ||
+    aiUrl.search ||
+    aiUrl.hash
+  )
+    throw Error("AI_SERVICE_URL must be an HTTP origin");
+  const aiTimeout = Number(process.env.AI_UPSTREAM_TIMEOUT_MS || 45000);
+  if (!Number.isInteger(aiTimeout) || aiTimeout < 100 || aiTimeout > 60000)
+    throw Error("Invalid AI timeout");
   const jwtSecret = process.env.JWT_SECRET || "";
   if (jwtSecret.length < 32)
     throw Error("JWT_SECRET must have at least 32 characters");
@@ -33,6 +48,8 @@ export function configuration(): GatewayConfig {
     throw Error("Invalid upstream timeout");
   return {
     coreUrl: url.origin,
+    aiUrl: aiUrl.origin,
+    aiTimeout,
     jwtSecret,
     metricsToken,
     timeout,

@@ -8,6 +8,7 @@ import { BookingCoreClient } from "./clients/booking-core.client";
 import { authenticate } from "./middleware/authenticate.middleware";
 import { GatewayError } from "./middleware/http-errors";
 import { telemetry } from "./middleware/request-telemetry";
+import { aiRoutes } from "./routes/ai.route";
 import { bookingRoutes } from "./routes/booking.route";
 import { BookingAdapter } from "./modules/booking/booking-adapter";
 import { CenterAdapter } from "./modules/centers/center-adapter";
@@ -62,6 +63,7 @@ export function createApp(
   });
   app.use(authenticate(config));
   app.post("/graphql", graphqlMiddleware(new CenterAdapter(core)));
+  app.use("/api", aiRoutes(config, transport));
   app.use("/api", bookingRoutes(new BookingAdapter(core)));
   app.use((_req, _res, next) =>
     next(new GatewayError(404, "Route không thuộc Booking Core gateway")),

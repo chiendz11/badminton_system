@@ -1,6 +1,33 @@
-# Kiểm tra Booking Core, UI gốc và API Gateway
+# Kiểm tra Booking Core, UI gốc, API Gateway và AI
 
-Kết quả local của bản nối gateway, Node 22.23.3 / pnpm 10.25.0; chưa phải kết quả GitHub Actions.
+## Bổ sung AI — 2026-10-09
+
+Kiểm tra local với Python 3.12.13 / uv 0.8.22, Node 22.23.3 / pnpm 10.25.0:
+
+| Kiểm tra | Kết quả |
+| --- | --- |
+| AI unit | 16/16; slots/budget/hard-soft/evidence và adapter LangChain/OpenAI SDK với HTTP fixture |
+| AI integration | 16/16; 13 protocol/state tests và 3 live Core/PostgreSQL tests |
+| AI contract / smoke | 3/3 mỗi nhóm |
+| Gateway unit / contract | 17/17 và 2/2 |
+| Web unit / contract | 6/6 và 4/4; chọn option không đặt, nonce cuối, replay request sau reload |
+| Ruff / mypy / ESLint / TypeScript | Pass; mypy kiểm tra 16 file app AI |
+| Production build Web / Gateway | Pass |
+| Golden small / full | 30 / 40 mẫu fake; schema validity, constraint F1, critical accuracy, intent accuracy đều 1.0; gate thresholds pass |
+| Live browser chat | Web → Gateway → AI → Core → PostgreSQL thật; 2 slot [1140,1200] cùng sân, quote 260000đ, CONFIRMED, reload khôi phục receipt và đọc trace; 6 conversation API requests, 0 JS errors |
+| Runtime health / auth / metrics | Core/AI/gateway ready 200; metrics thiếu monitoring token 401/có token 200; conversation thiếu JWT 401, token owner khác 404, đúng owner 200 |
+| OpenAPI / JSON Schema | Gateway và AI tools cùng ví dụ dương/âm pass |
+| Manifest / detector / Python commands / Compose | Pass; 21 components, 12 enabled; Node 2, Python 1, Web 2, Contract 4 |
+
+Tổng lượt chạy các nhóm test hiện tại ở trên: **67 test pass**. Live integration kiểm tra allocation hai giờ + booking + outbox đã commit, checkpoint PostgreSQL không chứa bearer; hai cuộc chat cạnh tranh chỉ một booking; hai instance với connection pool độc lập bị advisory lock chặn lượt đồng thời. Protocol tests bổ sung mất receipt sau Core commit, dừng worker sau commit consent, stale option/nonce, thay giá phải xin consent lại, hard budget, ownership và model intent không tự cấp quyền BOOK.
+
+Docker daemon trên host không khả dụng trong lượt này. Live tests/browser chạy với PostgreSQL 16.2 standalone và các process Core/AI/Gateway/Web trên cổng localhost riêng, database `booking_test`/`ai_test`, không dùng dữ liệu ứng dụng. Migration Alembic và checkpoint setup thật đã chạy. Các process/DB kiểm thử được dừng sau kiểm tra. Docker build/Trivy của AI và testcontainers startup path chưa chạy local; workflow Python có Docker sẽ chạy live integration và build/scan, thiếu Docker trên CI là fail chứ không skip. Compose mới được kiểm tra cấu hình, chưa chạy `up` trên host này.
+
+Provider ở các test/golden/browser là **fake**; HTTP fixture kiểm tra adapter SDK thật, không phải response từ model thật. Chưa gọi LLM bên ngoài vì không có API key; các tỷ lệ golden không được dùng làm độ chính xác NLP của model. Không triển khai thêm Identity, payment/pass hoặc backend các màn hình cũ khác.
+
+## Kết quả nền trước khi bổ sung AI
+
+Kết quả đã ghi của bản nối gateway trước AI, Node 22.23.3 / pnpm 10.25.0; chưa phải kết quả GitHub Actions. Bảng này được giữ làm lịch sử, không có nghĩa các image cũ và Trivy được chạy lại trong lượt bổ sung AI.
 
 | Kiểm tra                                             | Kết quả                                                                                                                                   |
 | ---------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------- |

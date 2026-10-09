@@ -96,6 +96,15 @@ const Header = () => {
                 </li>
 
                 <li>
+                  <Link
+                    to="/booking-assistant"
+                    onClick={closeMenu}
+                    className={navLinkClass}
+                  >
+                    Trợ lý đặt sân
+                  </Link>
+                </li>
+                <li>
                   <Link to="/news" onClick={closeMenu} className={navLinkClass}>
                     Tin Tức
                   </Link>

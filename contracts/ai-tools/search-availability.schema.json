@@ -1,0 +1,75 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Search contiguous 60-minute slots",
+  "type": "object",
+  "required": [
+    "date",
+    "duration_minutes"
+  ],
+  "properties": {
+    "date": {
+      "type": "string",
+      "format": "date"
+    },
+    "duration_minutes": {
+      "type": "integer",
+      "minimum": 60,
+      "maximum": 1140,
+      "multipleOf": 60
+    },
+    "earliest_start": {
+      "type": [
+        "integer",
+        "null"
+      ],
+      "minimum": 0,
+      "maximum": 1439
+    },
+    "latest_start": {
+      "type": [
+        "integer",
+        "null"
+      ],
+      "minimum": 0,
+      "maximum": 1439
+    },
+    "max_total_price_vnd": {
+      "type": [
+        "integer",
+        "null"
+      ],
+      "minimum": 0,
+      "maximum": 38000000
+    },
+    "area": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "maxLength": 100
+    },
+    "preferred_start": {
+      "type": [
+        "integer",
+        "null"
+      ],
+      "minimum": 0,
+      "maximum": 1439,
+      "multipleOf": 60
+    },
+    "soft_fields": {
+      "type": "array",
+      "items": {
+        "enum": [
+          "preferred_start",
+          "area"
+        ]
+      },
+      "uniqueItems": true
+    },
+    "sport": {
+      "const": "badminton"
+    }
+  },
+  "additionalProperties": false
+}

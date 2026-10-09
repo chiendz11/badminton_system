@@ -7,7 +7,7 @@ Nguồn [Badminton_manager_microservices tại 484d381e](https://github.com/chie
 | `BM/api_gateway/src/routes/booking.route.js`                           | `services/api-gateway/src/routes/booking.route.ts`, modules/booking | Giữ các đường dẫn booking, bỏ pass/payment; Core v1 thay booking_service |
 | `BM/api_gateway/src/routes/user.route.js`                              | booking routes cho history/statistics/exists-pending                | Chỉ lấy read model booking cá nhân; không lấy user CRUD/auth             |
 | `BM/api_gateway/src/middleware/{authenticate,authorize}.middleware.js` | middleware TypeScript cùng tên                                      | Xác minh JWT tại gateway và Core; không tin actor headers                |
-| `BM/api_gateway/src/{graphql.setup.js,configs/env.config.js}`          | graphql.setup.ts, configs/environment.ts                            | Bỏ federation/subgraph URL, dùng duy nhất BOOKING_CORE_URL               |
+| `BM/api_gateway/src/{graphql.setup.js,configs/env.config.js}`          | graphql.setup.ts, configs/environment.ts                            | Bỏ federation/subgraph URL, gọi centre REST qua BOOKING_CORE_URL               |
 | `BM/services/center_service/src/graphql/schema.js`                     | modules/centers/center.schema.ts                                    | Giữ SDL trung tâm gốc, chỉ bỏ federation directives/extend               |
 
 ```mermaid
@@ -15,6 +15,9 @@ flowchart LR
   UI[UI gốc Web / Admin] --> N[Nginx hoặc Vite proxy]
   N --> G[API Gateway :8081]
   G --> C[Booking Core :3000]
+  G --> A[AI service :8000]
+  A --> C
+  A --> AI_DB[(AI PostgreSQL)]
   C --> DB[(PostgreSQL)]
 ```
 
@@ -50,3 +53,9 @@ Client mới luôn gửi Idempotency-Key ổn định khi retry daily/fixed. Gat
 GraphQL giới hạn body 256KB, query 40KB, depth 12, số node mở rộng fragment 400; chặn fragment cycle và nhiều mutation trong một request. Metrics dùng monitoring bearer riêng, không business JWT; JSON logs có requestId xuyên gateway/Core. Không forward client actor/cookie/host headers. Routes ngoài phạm vi trả 404: auth, pass/payment, news/rating, inventory/transactions, social/notification/users/storage; UI các miền đó vẫn giữ, backend sẽ ghép sau.
 
 Contracts tại contracts/gateway; gateway unit/contract và integration Core/Postgres thực tại services/api-gateway/test. Xem [VALIDATION.md](VALIDATION.md) cho kiểm chứng local.
+
+## AI conversation routes và xác thực hiện tại
+
+Gateway chuyển POST/GET `/api/conversations`, POST `/api/conversations/:id/messages`, GET `/api/conversations/:id/trace` và GET `/api/ai/bookings/:id` tới AI. Tất cả cần JWT hợp lệ và role user/center_manager/super_admin; AI kiểm tra lại chữ ký/claims và owner hội thoại. UUID và message schema được validate trước khi forward. Không expose arbitrary tool path; không forward cookie hoặc actor headers. `AI_SERVICE_URL` là HTTP origin, mặc định http://localhost:8000; `AI_UPSTREAM_TIMEOUT_MS` mặc định 45000. Lỗi timeout trả 504, network trả 502, không tự retry POST; client giữ client_message_id.
+
+Authentication hiện là Bearer JWT HS256 stateless, xác minh secret, issuer, audience, expiry, sub, role và loyaltyPoints. Request không có token vẫn đi qua authenticate để phục vụ route public, nhưng authorize tại protected route yêu cầu actor đã xác minh. RBAC kiểm tra role ở gateway; Core kiểm tra owner/centre sau đó. Catalogue và availability public. Không có login, refresh, logout hoặc revocation trong gateway; host/Identity cung cấp token. Browser role hoặc X-User-Role không có quyền cấp actor. Xem [AI_SERVICE.md](AI_SERVICE.md) cho policy consent/recovery và sơ đồ toàn luồng.

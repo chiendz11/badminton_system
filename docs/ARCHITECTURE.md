@@ -80,3 +80,7 @@ Các policy common không import module, infrastructure hoặc generated client;
 Lệnh local không đổi: `pnpm dev:core`, `pnpm dev:gateway`, `pnpm dev:web`, `pnpm dev:admin`, `docker compose up --build -d`. Main vẫn là default branch; code nằm trên feat/booking-core. Identity thật, customer directory và outbox publisher là các integration tiếp theo, được ghi rõ trong BOOKING_CORE/MONITORING. Không có payment hoặc pass sân trong nhánh này.
 
 Tham khảo mô hình [module của NestJS](https://docs.nestjs.com/modules) và [quy tắc hook của React](https://react.dev/reference/eslint-plugin-react-hooks/lints/rules-of-hooks). Cây thư mục là lựa chọn cho workspace này, không phải yêu cầu rằng mọi dự án production phải dùng cùng một cây.
+
+## AI service
+
+`services/ai-service/app` tách schemas/auth/config, provider adapter, domain constraint policy, workflow LangGraph, tools/Core HTTP client, persistence conversation/checkpoint và observability. Alembic nằm ngoài app và chạy trước runtime. AI chỉ sở hữu transcript/state/checkpoint/trace, không đọc hoặc ghi DB Booking Core. `apps/web/src/features/assistant` chứa TypeScript chat page và API client; route chat bổ sung vào router/header hiện có. Policy consent, quote và idempotency được thực thi tại backend. Xem [AI_SERVICE.md](AI_SERVICE.md) cho graph, công nghệ và lý thuyết.

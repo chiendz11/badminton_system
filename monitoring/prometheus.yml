@@ -17,3 +17,10 @@ scrape_configs:
       credentials_file: /run/secrets/gateway_metrics_token
     static_configs:
       - targets: ["gateway:8081"]
+  - job_name: ai-service
+    metrics_path: /metrics
+    authorization:
+      type: Bearer
+      credentials_file: /run/secrets/ai_metrics_token
+    static_configs:
+      - targets: ["ai:8000"]

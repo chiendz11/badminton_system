@@ -6,3 +6,10 @@
 **/.env.*
 !**/.env.example
 services/booking-core/generated/
+
+**/.venv
+**/.pytest_cache
+**/.mypy_cache
+**/.ruff_cache
+**/__pycache__
+**/reports

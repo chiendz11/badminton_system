@@ -1,0 +1,18 @@
+{
+  "valid": [
+    {
+      "date": "2030-01-08",
+      "duration_minutes": 120
+    }
+  ],
+  "invalid": [
+    {
+      "date": "2030-01-08",
+      "duration_minutes": 90
+    },
+    {
+      "date": "not-date",
+      "duration_minutes": 120
+    }
+  ]
+}
