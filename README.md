@@ -46,7 +46,7 @@ docker compose down
 
 `down` giữ dữ liệu trong volume. Chỉ dùng `down -v` khi muốn xóa database local này.
 
-Compose mặc định chạy AI offline (`AI_PROVIDER=fake`, `AI_OFFLINE=true`) và UI ghi rõ chế độ đó. Để dùng LLM thật, đặt `AI_PROVIDER=openai-compatible`, `AI_OFFLINE=false` và `LLM_API_KEY`/model/base URL trong `.env` root rồi recreate AI. Hướng dẫn chi tiết và Ollama ở [docs/AI_SERVICE.md](docs/AI_SERVICE.md).
+Nếu không có `.env` root, Compose chạy AI offline (`AI_PROVIDER=fake`, `AI_OFFLINE=true`) và UI ghi rõ chế độ đó. Để dùng Groq, copy `.env.example` thành `.env`, điền `LLM_API_KEY` riêng và recreate AI. Mẫu dùng protocol `openai-compatible`, endpoint `https://api.groq.com/openai/v1` và model `openai/gpt-oss-120b`; cấu hình local hiện tại đã chọn Groq. File `.env` không được commit. Hướng dẫn chi tiết, provider khác và Ollama ở [docs/AI_SERVICE.md](docs/AI_SERVICE.md).
 
 Hợp đồng gateway và cấu hình ở [docs/API_GATEWAY.md](docs/API_GATEWAY.md). Hướng dẫn Node/pnpm, API và cấu hình triển khai ở [docs/BOOKING_CORE.md](docs/BOOKING_CORE.md). Hướng dẫn metrics/logs ở [docs/MONITORING.md](docs/MONITORING.md).
 

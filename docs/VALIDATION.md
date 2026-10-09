@@ -23,7 +23,15 @@ Tổng lượt chạy các nhóm test hiện tại ở trên: **67 test pass**. 
 
 Docker daemon trên host không khả dụng trong lượt này. Live tests/browser chạy với PostgreSQL 16.2 standalone và các process Core/AI/Gateway/Web trên cổng localhost riêng, database `booking_test`/`ai_test`, không dùng dữ liệu ứng dụng. Migration Alembic và checkpoint setup thật đã chạy. Các process/DB kiểm thử được dừng sau kiểm tra. Docker build/Trivy của AI và testcontainers startup path chưa chạy local; workflow Python có Docker sẽ chạy live integration và build/scan, thiếu Docker trên CI là fail chứ không skip. Compose mới được kiểm tra cấu hình, chưa chạy `up` trên host này.
 
-Provider ở các test/golden/browser là **fake**; HTTP fixture kiểm tra adapter SDK thật, không phải response từ model thật. Chưa gọi LLM bên ngoài vì không có API key; các tỷ lệ golden không được dùng làm độ chính xác NLP của model. Không triển khai thêm Identity, payment/pass hoặc backend các màn hình cũ khác.
+Provider ở các test/golden/browser trong lần bổ sung AI ban đầu là **fake**; HTTP fixture kiểm tra adapter SDK thật, không phải response từ model thật. Lần đó chưa gọi LLM bên ngoài vì chưa có API key; các tỷ lệ golden không được dùng làm độ chính xác NLP của model. Không triển khai thêm Identity, payment/pass hoặc backend các màn hình cũ khác.
+
+### Bổ sung Groq thật — 2026-10-09
+
+Sau khi người dùng cung cấp key, cấu hình local chọn endpoint `https://api.groq.com/openai/v1`, model `openai/gpt-oss-120b`, protocol `openai-compatible`, `AI_OFFLINE=false`. Groq models endpoint trả 200 và xác nhận model khả dụng. Không cần thay adapter hoặc dependency. Root và service `.env.example` chỉ chứa cấu hình mẫu, key để trống; key thật nằm trong `.env` local được Git/Docker build context loại trừ, quyền 0600.
+
+Đã gọi LangChain adapter với Groq thật: trích xuất đúng ngày mai/19:00/120 phút/tổng 300000đ/khu vực Cầu Giấy. Browser Web → Gateway → AI/Groq → Core/PostgreSQL thật xác nhận 2 slot [1140,1200] cùng sân, tổng 260000đ, reload khôi phục receipt và trace; 6 conversation API requests, 0 JS errors. Scenario 3 lượt thật (thiếu ngày/giờ → bổ sung → bỏ khu vực) giữ duration/budget/date, tăng plan version, không tạo Reservation trước consent. Metrics runtime ghi 3045 input tokens và 1181 output tokens từ 4 lượt model trong hai scenario này.
+
+Đây là kiểm tra kết nối và scenario có giới hạn, không phải kết quả golden 30/40 mẫu với model thật. Dữ liệu/DB/process kiểm tra được tạo riêng và dừng sau kiểm chứng. Docker daemon vẫn không khả dụng nên chưa chạy Compose build hoặc Trivy trong lượt cấu hình Groq.
 
 ## Kết quả nền trước khi bổ sung AI
 

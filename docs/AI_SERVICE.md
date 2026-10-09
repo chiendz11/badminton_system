@@ -79,19 +79,19 @@ docker compose up --build -d
 docker compose logs -f ai gateway api
 ```
 
-Web: `http://localhost:8082/booking-assistant`. AI: `localhost:8000`; DB AI: `localhost:5433`; các cổng Core/gateway/Admin giữ như README. Compose mặc định `AI_PROVIDER=fake`, `AI_OFFLINE=true`; UI ghi rõ chưa dùng LLM. Có thể chạy kiểm tra policy/luồng booking thật mà không phát sinh phí model.
+Web: `http://localhost:8082/booking-assistant`. AI: `localhost:8000`; DB AI: `localhost:5433`; các cổng Core/gateway/Admin giữ như README. Khi không có `.env` root, Compose fallback `AI_PROVIDER=fake`, `AI_OFFLINE=true`; UI ghi rõ chưa dùng LLM. File `.env.example` root và AI hiện chọn Groq; `.env` local riêng có key sẽ chạy provider thật. Muốn demo offline, đặt rõ `AI_PROVIDER=fake`, `AI_OFFLINE=true`.
 
-Để dùng model thật, đặt trong root `.env` được gitignore:
+Để dùng Groq, copy `.env.example` root thành `.env` được gitignore và điền key riêng:
 
 ```dotenv
 AI_PROVIDER=openai-compatible
 AI_OFFLINE=false
-LLM_BASE_URL=https://api.openai.com/v1
-LLM_MODEL=gpt-4.1-mini
+LLM_BASE_URL=https://api.groq.com/openai/v1
+LLM_MODEL=openai/gpt-oss-120b
 LLM_API_KEY=<private-key>
 ```
 
-Sau đó `docker compose up -d --build ai-migrate ai gateway`. Model là cấu hình mẫu, có thể đổi; endpoint/model phải hỗ trợ function calling + structured schema. Với Ollama trên host: `LLM_BASE_URL=http://host.docker.internal:11434/v1`, `LLM_API_KEY=ollama-local`, `LLM_MODEL=<model đã cài hỗ trợ tools>`; server cần lắng nghe địa chỉ mà container truy cập được. Adapter dùng cùng protocol, chưa chứng minh mọi model Ollama đều tương thích. Không đưa key vào `VITE_*` hoặc frontend bundle.
+Sau đó `docker compose up -d --build ai-migrate ai gateway`. `openai-compatible` là tên protocol, không có nghĩa request gửi tới OpenAI: endpoint ở trên gọi Groq. Adapter hiện có dùng được theo [Groq OpenAI compatibility](https://console.groq.com/docs/openai), không cần thêm SDK riêng. Model có thể đổi; endpoint/model phải hỗ trợ function calling + structured schema. Với OpenAI, đổi base URL/model/key tương ứng. Với Ollama trên host: `LLM_BASE_URL=http://host.docker.internal:11434/v1`, `LLM_API_KEY=ollama-local`, `LLM_MODEL=<model đã cài hỗ trợ tools>`; server cần lắng nghe địa chỉ mà container truy cập được. Chưa chứng minh mọi model Ollama đều tương thích. Không đưa key vào `VITE_*` hoặc frontend bundle.
 
 Chạy AI bằng Python local sau khi Core và hai database đã sẵn sàng:
 
