@@ -1,0 +1,96 @@
+name: Reusable Python AI CI
+'on':
+  workflow_call:
+    inputs:
+      component_name:
+        type: string
+        required: true
+      component_path:
+        type: string
+        required: true
+      python_version:
+        type: string
+        required: true
+      uv_version:
+        type: string
+        required: true
+      golden_thresholds:
+        type: string
+        required: true
+      dockerfile:
+        type: string
+        required: true
+      golden_suite:
+        type: string
+        default: small
+      docker:
+        type: boolean
+        default: true
+      docker_context:
+        type: string
+        default: .
+permissions:
+  contents: read
+jobs:
+  verify:
+    name: ${{ inputs.component_name }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      CI: 'true'
+      AI_PROVIDER: fake
+      AI_OFFLINE: 'true'
+      GOLDEN_SUITE: ${{ inputs.golden_suite }}
+      GOLDEN_REPORT: reports/golden.json
+      GOLDEN_THRESHOLDS: ${{ inputs.golden_thresholds }}
+    defaults:
+      run:
+        shell: bash
+        working-directory: ${{ inputs.component_path }}
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065
+        with:
+          python-version: ${{ inputs.python_version }}
+      - name: Validate Python CI contract
+        run: python "$GITHUB_WORKSPACE/.github/scripts/check_python_contract.py"
+      - uses: astral-sh/setup-uv@d0d8abe699bfb85fec6de9f7adb5ae17292296ff
+        with:
+          version: ${{ inputs.uv_version }}
+          enable-cache: true
+          cache-dependency-glob: ${{ inputs.component_path }}/uv.lock
+      - name: Install locked dependencies
+        run: uv sync --locked --all-groups
+      - name: Ruff lint
+        run: python "$GITHUB_WORKSPACE/.github/scripts/check_python_contract.py" --run lint
+      - name: Python typecheck
+        run: python "$GITHUB_WORKSPACE/.github/scripts/check_python_contract.py" --run typecheck
+      - name: Unit tests
+        run: python "$GITHUB_WORKSPACE/.github/scripts/check_python_contract.py" --run unit
+      - name: AI tool/Booking API contracts
+        run: python "$GITHUB_WORKSPACE/.github/scripts/check_python_contract.py" --run contract
+      - name: API integration with fake provider
+        run: python "$GITHUB_WORKSPACE/.github/scripts/check_python_contract.py" --run integration
+      - name: Golden evaluation
+        run: python "$GITHUB_WORKSPACE/.github/scripts/check_python_contract.py" --run golden
+      - name: Require golden metric thresholds
+        run: python "$GITHUB_WORKSPACE/.github/scripts/check_golden_report.py"
+      - name: FastAPI smoke test
+        run: python "$GITHUB_WORKSPACE/.github/scripts/check_python_contract.py" --run smoke
+      - name: Docker build and security scan
+        if: inputs.docker
+        uses: ./.github/actions/build-scan
+        with:
+          name: ${{ inputs.component_name }}
+          dockerfile: ${{ inputs.dockerfile }}
+          context: ${{ inputs.docker_context }}
+      - name: Save golden evaluation report
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: golden-${{ inputs.component_name }}-${{ github.sha }}
+          path: ${{ inputs.component_path }}/reports/golden.json
+          if-no-files-found: warn
+          retention-days: 7

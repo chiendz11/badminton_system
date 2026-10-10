@@ -1,0 +1,85 @@
+name: Reusable Web CI
+'on':
+  workflow_call:
+    inputs:
+      component_name:
+        type: string
+        required: true
+      component_path:
+        type: string
+        required: true
+      package_manager:
+        type: string
+        required: true
+      package_manager_version:
+        type: string
+        required: true
+      install_path:
+        type: string
+        required: true
+      lockfile:
+        type: string
+        required: true
+      node_version:
+        type: string
+        required: true
+permissions:
+  contents: read
+jobs:
+  verify:
+    name: ${{ inputs.component_name }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      CI: 'true'
+      PACKAGE_MANAGER: ${{ inputs.package_manager }}
+      PACKAGE_MANAGER_VERSION: ${{ inputs.package_manager_version }}
+      INSTALL_PATH: ${{ inputs.install_path }}
+      LOCKFILE: ${{ inputs.lockfile }}
+    defaults:
+      run:
+        shell: bash
+        working-directory: ${{ inputs.component_path }}
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          persist-credentials: false
+      - name: Validate Node CI contract
+        run: node "$GITHUB_WORKSPACE/.github/scripts/check_node_contract.mjs" web
+      - name: Set up pnpm
+        if: inputs.package_manager == 'pnpm'
+        uses: pnpm/action-setup@f40ffcd9367d9f12939873eb1018b921a783ffaa
+        with:
+          version: ${{ inputs.package_manager_version }}
+          run_install: false
+          package_json_file: ${{ inputs.install_path }}/package.json
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        with:
+          node-version: ${{ inputs.node_version }}
+          cache: ${{ inputs.package_manager }}
+          cache-dependency-path: ${{ inputs.install_path }}/${{ inputs.lockfile }}
+      - name: Install frozen workspace dependencies
+        run: |-
+          case "$PACKAGE_MANAGER" in
+            pnpm) pnpm install --frozen-lockfile ;;
+            npm) npm ci --no-audit --no-fund ;;
+            *) echo 'Unsupported package manager' >&2; exit 1 ;;
+          esac
+        working-directory: ${{ inputs.install_path }}
+      - name: Lint
+        run: '"$PACKAGE_MANAGER" run lint'
+      - name: Typecheck
+        run: '"$PACKAGE_MANAGER" run typecheck'
+      - name: Unit/component tests
+        run: '"$PACKAGE_MANAGER" run test:unit'
+      - name: Consumer contracts
+        run: '"$PACKAGE_MANAGER" run test:contract'
+      - name: Build web app
+        run: '"$PACKAGE_MANAGER" run build'
+      - name: Save web build
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: web-${{ inputs.component_name }}-${{ github.sha }}
+          path: ${{ inputs.component_path }}/dist
+          if-no-files-found: error
+          retention-days: 7
