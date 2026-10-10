@@ -1,176 +1,110 @@
-# CI components are deployable boundaries, not modules inside a service.
-# Set configuration_only: false when the future application is adopted.
+# Enable only implemented boundaries with their own tests and contracts.
 version: 1
-configuration_only: true
+configuration_only: false
 global_paths:
-- .github/**
+  - .github/**
+  - tsconfig.base.json
+  - eslint.config.mjs
+  - .dockerignore
 defaults:
-  node_version: '22'
+  node_version: "22"
   package_manager: pnpm
   package_manager_version: 10.25.0
   install_path: .
   lockfile: pnpm-lock.yaml
-  python_version: '3.12'
+  python_version: "3.12"
   uv_version: 0.8.22
 components:
   auth_contracts:
     path: packages/auth-contracts
     runtime: shared
     depends_on: []
+    enabled: true
   booking_contracts:
     path: packages/booking-contracts
     runtime: shared
     depends_on: []
-  event_contracts:
-    path: packages/event-contracts
-    runtime: shared
-    depends_on: []
+    enabled: true
   observability:
     path: packages/observability
     runtime: shared
     depends_on: []
-  identity_api:
-    path: contracts/identity
-    runtime: contract
-    depends_on: []
+    enabled: true
   booking_api:
     path: contracts/booking
     runtime: contract
     depends_on: []
-  commerce_api:
-    path: contracts/commerce
-    runtime: contract
-    depends_on: []
+    enabled: true
   events:
     path: contracts/events
     runtime: contract
     depends_on: []
+    enabled: true
   ai_tools:
     path: contracts/ai-tools
     runtime: contract
     depends_on: []
+    enabled: true
   gateway_api:
     path: contracts/gateway
     runtime: contract
     depends_on: []
+    enabled: true
   api_gateway:
-    path: services/api_gateway
+    path: services/api-gateway
     runtime: node
     database: none
     depends_on:
-    - identity_api
-    - booking_api
-    - commerce_api
-    - gateway_api
-    - auth_contracts
-    - booking_contracts
-    - observability
+      - booking_core
+      - booking_api
+      - gateway_api
+      - auth_contracts
+      - observability
+      - ai_tools
     docker: true
-  identity:
-    path: services/identity_service
-    runtime: node
-    database: postgres
-    prisma: true
-    depends_on:
-    - identity_api
-    - events
-    - auth_contracts
-    - event_contracts
-    - observability
-    docker: true
+    enabled: true
   booking_core:
-    path: services/booking_core
+    path: services/booking-core
     runtime: node
     database: postgres
     prisma: true
     depends_on:
-    - booking_api
-    - ai_tools
-    - events
-    - auth_contracts
-    - booking_contracts
-    - event_contracts
-    - observability
+      - booking_api
+      - events
+      - auth_contracts
+      - booking_contracts
+      - observability
     docker: true
-  commerce:
-    path: services/commerce_service
-    runtime: node
-    database: postgres
-    prisma: true
-    depends_on:
-    - commerce_api
-    - events
-    - auth_contracts
-    - event_contracts
-    - observability
-    docker: true
-  social:
-    path: services/social_service
-    runtime: node
-    database: mongodb
-    depends_on:
-    - identity_api
-    - auth_contracts
-    - observability
-    docker: true
-  content:
-    path: services/content_service
-    runtime: node
-    database: mongodb
-    depends_on:
-    - auth_contracts
-    - observability
-    docker: true
-  notification:
-    path: services/notification_service
-    runtime: node
-    database: mongodb
-    depends_on:
-    - events
-    - event_contracts
-    - observability
-    docker: true
-  storage:
-    path: services/storage_service
-    runtime: node
-    database: none
-    depends_on:
-    - auth_contracts
-    - observability
-    docker: true
+    enabled: true
   ai:
-    path: services/ai_service
+    path: services/ai-service
     runtime: python
-    install_path: services/ai_service
+    install_path: services/ai-service
     lockfile: uv.lock
     depends_on:
-    - booking_api
-    - ai_tools
-    - booking_contracts
-    - observability
+      - booking_api
+      - ai_tools
+      - booking_core
+      - auth_contracts
     docker: true
     golden:
       schema_validity: 1.0
       constraint_f1: 0.9
       critical_field_accuracy: 0.95
+    enabled: true
+    python_version: "3.12"
   frontend:
-    path: Frontend
+    path: apps/web
     runtime: web
     depends_on:
-    - identity_api
-    - booking_api
-    - gateway_api
-    - auth_contracts
-    - booking_contracts
+      - gateway_api
+      - ai_tools
     docker: false
+    enabled: true
   admin:
-    path: Admin
+    path: apps/admin
     runtime: web
     depends_on:
-    - identity_api
-    - booking_api
-    - commerce_api
-    - gateway_api
-    - auth_contracts
-    - booking_contracts
+      - gateway_api
     docker: false
+    enabled: true

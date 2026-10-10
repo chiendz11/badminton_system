@@ -1,0 +1,92 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "BookingOutboxEventV1",
+  "type": "object",
+  "required": ["id", "type", "aggregateId", "createdAt", "payload"],
+  "properties": {
+    "id": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "type": {
+      "enum": ["booking.confirmed.v1", "booking.cancelled.v1"]
+    },
+    "aggregateId": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "createdAt": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "payload": {
+      "type": "object",
+      "required": [
+        "bookingId",
+        "reservationId",
+        "centerId",
+        "userId",
+        "date",
+        "totalPrice",
+        "selections"
+      ],
+      "properties": {
+        "bookingId": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "reservationId": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "centerId": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "userId": {
+          "type": "string"
+        },
+        "date": {
+          "type": "string",
+          "format": "date"
+        },
+        "totalPrice": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "selections": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["courtId", "courtName", "slots", "price"],
+            "properties": {
+              "courtId": {
+                "type": "string",
+                "format": "uuid"
+              },
+              "slots": {
+                "type": "array",
+                "minItems": 1,
+                "maxItems": 24,
+                "uniqueItems": true,
+                "items": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 1380,
+                  "multipleOf": 60
+                }
+              },
+              "courtName": {
+                "type": "string"
+              },
+              "price": {
+                "type": "integer",
+                "minimum": 0
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

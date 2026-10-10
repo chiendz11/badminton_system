@@ -56,7 +56,7 @@ def main():
             cls.check_schema(document)
             document = dict(document)
             document.setdefault('$id', path.as_uri())
-            validation = cls(document, registry=registry.with_resource(path.as_uri(), Resource.from_contents(document)))
+            validation = cls(document, format_checker=cls.FORMAT_CHECKER, registry=registry.with_resource(path.as_uri(), Resource.from_contents(document)))
             examples_path = path.with_name(path.stem + '.examples.json')
             if not examples_path.is_file():
                 raise ValueError(f'{path}: add {examples_path.name} with valid and invalid examples')

@@ -1,0 +1,45 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "CreateReservation",
+  "type": "object",
+  "required": ["centerId", "date", "selections"],
+  "additionalProperties": false,
+  "properties": {
+    "centerId": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "date": {
+      "type": "string",
+      "format": "date"
+    },
+    "selections": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 8,
+      "items": {
+        "type": "object",
+        "required": ["courtId", "slots"],
+        "additionalProperties": false,
+        "properties": {
+          "courtId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "slots": {
+            "type": "array",
+            "minItems": 1,
+            "maxItems": 24,
+            "uniqueItems": true,
+            "items": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 1380,
+              "multipleOf": 60
+            }
+          }
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,240 @@
+{
+  "repository": "https://github.com/chiendz11/Badminton_manager_microservices",
+  "commit": "484d381e873f513ed4faa4413407502112f4885d",
+  "excluded": [
+    "court resale/pass",
+    "payment and checkout",
+    "login, registration, OAuth, token refresh and password flows",
+    "Identity/profile CRUD",
+    "Commerce/inventory/sales/reports",
+    "Content/news/ratings",
+    "Social/friends/realtime chat",
+    "Notification",
+    "Storage upload",
+    "Competition and weather widgets"
+  ],
+  "files": [
+    {
+      "source": "Frontend/src/App.css",
+      "target": "apps/web/src/shared/styles/App.css"
+    },
+    {
+      "source": "Frontend/src/App.jsx",
+      "target": "apps/web/src/app/App.jsx"
+    },
+    {
+      "source": "Frontend/src/apiV2/booking_service/rest/booking.js",
+      "target": "apps/web/src/features/booking/api/booking_service/rest/booking.js"
+    },
+    {
+      "source": "Frontend/src/apiV2/booking_service/rest/user.api.js",
+      "target": "apps/web/src/features/booking/api/booking_service/rest/user.api.js"
+    },
+    {
+      "source": "Frontend/src/apiV2/center_service/grahql/center.api.js",
+      "target": "apps/web/src/features/centers/api/center_service/grahql/center.api.js"
+    },
+    {
+      "source": "Frontend/src/components/Footer.jsx",
+      "target": "apps/web/src/shared/ui/Footer.jsx"
+    },
+    {
+      "source": "Frontend/src/components/Header.jsx",
+      "target": "apps/web/src/shared/ui/Header.jsx"
+    },
+    {
+      "source": "Frontend/src/components/HeroBanner.jsx",
+      "target": "apps/web/src/features/home/ui/HeroBanner.jsx"
+    },
+    {
+      "source": "Frontend/src/components/HistoryTab.jsx",
+      "target": "apps/web/src/features/booking/ui/HistoryTab.jsx"
+    },
+    {
+      "source": "Frontend/src/components/HowItWorks.jsx",
+      "target": "apps/web/src/features/home/ui/HowItWorks.jsx"
+    },
+    {
+      "source": "Frontend/src/components/ModalConfirmation.jsx",
+      "target": "apps/web/src/features/booking/ui/ModalConfirmation.jsx"
+    },
+    {
+      "source": "Frontend/src/components/PopularTimeChart.jsx",
+      "target": "apps/web/src/features/booking/ui/PopularTimeChart.jsx"
+    },
+    {
+      "source": "Frontend/src/components/PricingTable.jsx",
+      "target": "apps/web/src/features/booking/ui/PricingTable.jsx"
+    },
+    {
+      "source": "Frontend/src/components/Scroll.jsx",
+      "target": "apps/web/src/shared/ui/Scroll.jsx"
+    },
+    {
+      "source": "Frontend/src/components/StatusTab.jsx",
+      "target": "apps/web/src/features/booking/ui/StatusTab.jsx"
+    },
+    {
+      "source": "Frontend/src/components/bookingTable.jsx",
+      "target": "apps/web/src/features/booking/ui/bookingTable.jsx"
+    },
+    {
+      "source": "Frontend/src/components/datepicker.jsx",
+      "target": "apps/web/src/features/booking/ui/datepicker.jsx"
+    },
+    {
+      "source": "Frontend/src/components/legend.jsx",
+      "target": "apps/web/src/features/booking/ui/legend.jsx"
+    },
+    {
+      "source": "Frontend/src/config/axiosConfig.js",
+      "target": "apps/web/src/shared/api/http.js"
+    },
+    {
+      "source": "Frontend/src/contexts/AuthContext.jsx",
+      "target": "apps/web/src/shared/session/SessionContext.jsx"
+    },
+    {
+      "source": "Frontend/src/index.css",
+      "target": "apps/web/src/shared/styles/index.css"
+    },
+    {
+      "source": "Frontend/src/index.jsx",
+      "target": "apps/web/src/app/main.jsx"
+    },
+    {
+      "source": "Frontend/src/pages/Booking.jsx",
+      "target": "apps/web/src/features/booking/pages/Booking.jsx"
+    },
+    {
+      "source": "Frontend/src/pages/CenterDetailModal.jsx",
+      "target": "apps/web/src/features/centers/pages/CenterDetailModal.jsx"
+    },
+    {
+      "source": "Frontend/src/pages/Centers.jsx",
+      "target": "apps/web/src/features/centers/pages/Centers.jsx"
+    },
+    {
+      "source": "Frontend/src/pages/Home.jsx",
+      "target": "apps/web/src/features/home/pages/Home.jsx"
+    },
+    {
+      "source": "Frontend/src/pages/UserProfile.jsx",
+      "target": "apps/web/src/features/booking/pages/MyBookings.jsx"
+    },
+    {
+      "source": "Frontend/src/styles/UserProfile.css",
+      "target": "apps/web/src/shared/styles/UserProfile.css"
+    },
+    {
+      "source": "Frontend/src/styles/booking.css",
+      "target": "apps/web/src/shared/styles/booking.css"
+    },
+    {
+      "source": "Frontend/src/styles/centerDetailModal.css",
+      "target": "apps/web/src/shared/styles/centerDetailModal.css"
+    },
+    {
+      "source": "Frontend/src/styles/centers.css",
+      "target": "apps/web/src/shared/styles/centers.css"
+    },
+    {
+      "source": "Frontend/src/styles/footer.css",
+      "target": "apps/web/src/shared/styles/footer.css"
+    },
+    {
+      "source": "Frontend/src/styles/global.css",
+      "target": "apps/web/src/shared/styles/global.css"
+    },
+    {
+      "source": "Frontend/src/styles/header.css",
+      "target": "apps/web/src/shared/styles/header.css"
+    },
+    {
+      "source": "Frontend/src/styles/hero-banner.css",
+      "target": "apps/web/src/shared/styles/hero-banner.css"
+    },
+    {
+      "source": "Admin/src/App.jsx",
+      "target": "apps/admin/src/app/App.jsx"
+    },
+    {
+      "source": "Admin/src/apiV2/booking_service/rest/booking.api.js",
+      "target": "apps/admin/src/features/booking/api/booking_service/rest/booking.api.js"
+    },
+    {
+      "source": "Admin/src/apiV2/center_service/graphql/center.api.js",
+      "target": "apps/admin/src/features/centers/api/center_service/graphql/center.api.js"
+    },
+    {
+      "source": "Admin/src/components/AdminLayout.jsx",
+      "target": "apps/admin/src/shared/ui/AdminLayout.jsx"
+    },
+    {
+      "source": "Admin/src/components/BookingTable.jsx",
+      "target": "apps/admin/src/features/booking/ui/BookingTable.jsx"
+    },
+    {
+      "source": "Admin/src/components/CenterModal.jsx",
+      "target": "apps/admin/src/features/centers/ui/CenterModal.jsx"
+    },
+    {
+      "source": "Admin/src/components/FullscreenNotification.jsx",
+      "target": "apps/admin/src/shared/ui/FullscreenNotification.jsx"
+    },
+    {
+      "source": "Admin/src/components/LoadingSpinner.jsx",
+      "target": "apps/admin/src/shared/ui/LoadingSpinner.jsx"
+    },
+    {
+      "source": "Admin/src/components/legend.jsx",
+      "target": "apps/admin/src/features/booking/ui/legend.jsx"
+    },
+    {
+      "source": "Admin/src/config/axiosConfig.js",
+      "target": "apps/admin/src/shared/api/http.js"
+    },
+    {
+      "source": "Admin/src/constants/roles.js",
+      "target": "apps/admin/src/shared/constants/roles.js"
+    },
+    {
+      "source": "Admin/src/contexts/AuthContext.jsx",
+      "target": "apps/admin/src/shared/session/SessionContext.jsx"
+    },
+    {
+      "source": "Admin/src/index.css",
+      "target": "apps/admin/src/shared/styles/index.css"
+    },
+    {
+      "source": "Admin/src/index.jsx",
+      "target": "apps/admin/src/app/main.jsx"
+    },
+    {
+      "source": "Admin/src/pages/BillManage.jsx",
+      "target": "apps/admin/src/features/booking/pages/BillManage.jsx"
+    },
+    {
+      "source": "Admin/src/pages/CenterManagement.jsx",
+      "target": "apps/admin/src/features/centers/pages/CenterManagement.jsx"
+    },
+    {
+      "source": "Admin/src/pages/CenterStatus.jsx",
+      "target": "apps/admin/src/features/booking/pages/CenterStatus.jsx"
+    },
+    {
+      "source": "Admin/src/pages/CreateFixedBooking.jsx",
+      "target": "apps/admin/src/features/booking/pages/CreateFixedBooking.jsx"
+    },
+    {
+      "source": "Admin/src/pages/Dashboard.jsx",
+      "target": "apps/admin/src/features/dashboard/pages/Dashboard.jsx"
+    }
+  ],
+  "scope": "Booking Core UI only; live AI assistant is developed separately from the conversational plan.",
+  "adaptations": [
+    "Keep source JSX/CSS/layouts for booking and centre screens; trim unrelated sections/links/API clients.",
+    "Extract only history/statistics from UserProfile into booking/pages/MyBookings and booking/ui.",
+    "Centre editor preserves existing media metadata by omitting media fields; Storage upload controls are removed."
+  ]
+}

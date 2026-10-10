@@ -1,0 +1,40 @@
+{"text": "Mai lúc 19:00 chơi 1 tiếng, dưới 500k", "expected": {"date": "2030-01-08", "preferred_start": 1140, "earliest_start": null, "latest_start": null, "duration_minutes": 60, "max_total_price_vnd": 500000}, "intent": "search"}
+{"text": "Mai lúc 19:00 chơi 2 tiếng, dưới 500k", "expected": {"date": "2030-01-08", "preferred_start": 1140, "earliest_start": null, "latest_start": null, "duration_minutes": 120, "max_total_price_vnd": 500000}, "intent": "search"}
+{"text": "Mai lúc 19:00 chơi 3 tiếng, dưới 500k", "expected": {"date": "2030-01-08", "preferred_start": 1140, "earliest_start": null, "latest_start": null, "duration_minutes": 180, "max_total_price_vnd": 500000}, "intent": "search"}
+{"text": "Mai lúc 19:00 chơi 4 tiếng, dưới 500k", "expected": {"date": "2030-01-08", "preferred_start": 1140, "earliest_start": null, "latest_start": null, "duration_minutes": 240, "max_total_price_vnd": 500000}, "intent": "search"}
+{"text": "Không quá 100k", "expected": {"max_total_price_vnd": 100000}, "intent": "search"}
+{"text": "Không quá 200k", "expected": {"max_total_price_vnd": 200000}, "intent": "search"}
+{"text": "Không quá 250k", "expected": {"max_total_price_vnd": 250000}, "intent": "search"}
+{"text": "Không quá 300k", "expected": {"max_total_price_vnd": 300000}, "intent": "search"}
+{"text": "Không quá 400k", "expected": {"max_total_price_vnd": 400000}, "intent": "search"}
+{"text": "Chơi 60 phút", "expected": {"duration_minutes": 60}, "intent": "search"}
+{"text": "Chơi 90 phút", "expected": {"duration_minutes": 90}, "intent": "search"}
+{"text": "Chơi 120 phút", "expected": {"duration_minutes": 120}, "intent": "search"}
+{"text": "Chơi 180 phút", "expected": {"duration_minutes": 180}, "intent": "search"}
+{"text": "Sau 17:00, không quá 21:30", "expected": {"earliest_start": 1020, "latest_start": 1290}, "intent": "search"}
+{"text": "Sau 18:00, không quá 21:30", "expected": {"earliest_start": 1080, "latest_start": 1290}, "intent": "search"}
+{"text": "Sau 19:00, không quá 21:30", "expected": {"earliest_start": 1140, "latest_start": 1290}, "intent": "search"}
+{"text": "Sau 20:00, không quá 21:30", "expected": {"earliest_start": 1200, "latest_start": 1290}, "intent": "search"}
+{"text": "Ngày kia", "expected": {"date": "2030-01-09"}, "intent": "search"}
+{"text": "Đổi sang chủ nhật", "expected": {"date": "2030-01-13"}, "intent": "search"}
+{"text": "Đổi sang thứ bảy", "expected": {"date": "2030-01-12"}, "intent": "search"}
+{"text": "2030-01-10", "expected": {"date": "2030-01-10"}, "intent": "search"}
+{"text": "Không cần gần Cầu Giấy nữa", "expected": {"area": null}, "intent": "search"}
+{"text": "Gần Cầu Giấy", "expected": {"area": "Cầu Giấy"}, "intent": "search"}
+{"text": "Bỏ giới hạn giá", "expected": {"max_total_price_vnd": null}, "intent": "search"}
+{"text": "Khoảng 19:00", "expected": {"preferred_start": 1140, "earliest_start": 1080, "latest_start": 1200}, "intent": "search"}
+{"text": "Chơi 2 tiếng nhé", "expected": {"duration_minutes": 120}, "intent": "search"}
+{"text": "Chọn phương án 2", "expected": {}, "intent": "select"}
+{"text": "Xác nhận đặt sân", "expected": {}, "intent": "confirm"}
+{"text": "Hủy lựa chọn", "expected": {}, "intent": "cancel"}
+{"text": "Xin chào", "expected": {}, "intent": "help"}
+{"text": "Thứ hai", "expected": {"date": "2030-01-14"}, "intent": "search"}
+{"text": "Thứ ba", "expected": {"date": "2030-01-08"}, "intent": "search"}
+{"text": "Thứ 7", "expected": {"date": "2030-01-12"}, "intent": "search"}
+{"text": "Hôm nay lúc 20:00 chơi 1 tiếng", "expected": {"date": "2030-01-07", "preferred_start": 1200, "earliest_start": null, "latest_start": null, "duration_minutes": 60}, "intent": "search"}
+{"text": "Sau 7 giờ tối", "expected": {"earliest_start": 1140}, "intent": "search"}
+{"text": "Không quá 8 giờ rưỡi tối", "expected": {"latest_start": 1230}, "intent": "search"}
+{"text": "Đổi giờ lúc 18:00", "expected": {"preferred_start": 1080, "earliest_start": null, "latest_start": null}, "intent": "search"}
+{"text": "Dưới 160 nghìn", "expected": {"max_total_price_vnd": 160000}, "intent": "search"}
+{"text": "Chọn phương án 1", "expected": {}, "intent": "select"}
+{"text": "Không đặt nữa", "expected": {}, "intent": "cancel"}

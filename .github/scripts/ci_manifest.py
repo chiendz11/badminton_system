@@ -35,6 +35,8 @@ def load_manifest():
             raise ValueError(f'Invalid component name: {name}')
         if not isinstance(entry, dict) or entry.get('runtime') not in RUNTIMES:
             raise ValueError(f'{name}: unsupported runtime')
+        if 'enabled' in entry and not isinstance(entry['enabled'], bool):
+            raise ValueError(f'{name}: enabled must be boolean')
         path = safe_path(entry.get('path'), name)
         if path in paths:
             raise ValueError(f'Duplicate component path: {path}')
@@ -92,6 +94,8 @@ def load_manifest():
         raise ValueError('global_paths must contain repository-relative globs')
     if not config['configuration_only']:
         for name, entry in components.items():
+            if not entry.get('enabled', True):
+                continue
             folder = ROOT / entry['path']
             if not folder.is_dir():
                 raise ValueError(f'{name}: missing source path; keep configuration_only=true until adoption')

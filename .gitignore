@@ -1,0 +1,17 @@
+node_modules/
+dist/
+coverage/
+.env
+.env.*
+!.env.example
+*.log
+*.tsbuildinfo
+__pycache__/
+services/booking-core/generated/
+
+.venv/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+services/ai-service/reports/
+*.sqlite*

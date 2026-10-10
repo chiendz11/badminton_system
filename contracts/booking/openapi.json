@@ -1,0 +1,972 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "Badminton Booking Core",
+    "version": "1.0.0",
+    "description": "Booking Core: center/court/pricing/availability/reservation/booking. Pass marketplace and payments are excluded."
+  },
+  "servers": [
+    {
+      "url": "http://localhost:3000/api/v1"
+    }
+  ],
+  "paths": {
+    "/centers": {
+      "get": {
+        "summary": "Tìm trung tâm",
+        "operationId": "get__centers",
+        "responses": {
+          "200": {
+            "description": "Thành công"
+          },
+          "400": {
+            "description": "Dữ liệu không hợp lệ"
+          },
+          "401": {
+            "description": "Chưa đăng nhập"
+          },
+          "403": {
+            "description": "Không có quyền"
+          },
+          "409": {
+            "description": "Xung đột lịch hoặc yêu cầu"
+          }
+        }
+      },
+      "post": {
+        "summary": "Tạo trung tâm (admin)",
+        "operationId": "post__centers",
+        "responses": {
+          "201": {
+            "description": "Thành công"
+          },
+          "400": {
+            "description": "Dữ liệu không hợp lệ"
+          },
+          "401": {
+            "description": "Chưa đăng nhập"
+          },
+          "403": {
+            "description": "Không có quyền"
+          },
+          "409": {
+            "description": "Xung đột lịch hoặc yêu cầu"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
+      }
+    },
+    "/centers/{id}": {
+      "get": {
+        "summary": "Chi tiết trung tâm",
+        "operationId": "get__centers_id",
+        "responses": {
+          "200": {
+            "description": "Thành công"
+          },
+          "400": {
+            "description": "Dữ liệu không hợp lệ"
+          },
+          "401": {
+            "description": "Chưa đăng nhập"
+          },
+          "403": {
+            "description": "Không có quyền"
+          },
+          "409": {
+            "description": "Xung đột lịch hoặc yêu cầu"
+          }
+        },
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ]
+      },
+      "patch": {
+        "summary": "Cập nhật trung tâm",
+        "operationId": "patch__centers_id",
+        "responses": {
+          "200": {
+            "description": "Thành công"
+          },
+          "400": {
+            "description": "Dữ liệu không hợp lệ"
+          },
+          "401": {
+            "description": "Chưa đăng nhập"
+          },
+          "403": {
+            "description": "Không có quyền"
+          },
+          "409": {
+            "description": "Xung đột lịch hoặc yêu cầu"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ]
+      }
+    },
+    "/centers/{id}/courts": {
+      "post": {
+        "summary": "Tạo sân",
+        "operationId": "post__centers_id_courts",
+        "responses": {
+          "201": {
+            "description": "Thành công"
+          },
+          "400": {
+            "description": "Dữ liệu không hợp lệ"
+          },
+          "401": {
+            "description": "Chưa đăng nhập"
+          },
+          "403": {
+            "description": "Không có quyền"
+          },
+          "409": {
+            "description": "Xung đột lịch hoặc yêu cầu"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ]
+      }
+    },
+    "/centers/{id}/courts/{courtId}": {
+      "patch": {
+        "summary": "Cập nhật sân",
+        "operationId": "patch__centers_id_courts_courtId",
+        "responses": {
+          "200": {
+            "description": "Thành công"
+          },
+          "400": {
+            "description": "Dữ liệu không hợp lệ"
+          },
+          "401": {
+            "description": "Chưa đăng nhập"
+          },
+          "403": {
+            "description": "Không có quyền"
+          },
+          "409": {
+            "description": "Xung đột lịch hoặc yêu cầu"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "in": "path",
+            "name": "courtId",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ]
+      }
+    },
+    "/centers/{id}/pricing": {
+      "put": {
+        "summary": "Thay bảng giá",
+        "operationId": "put__centers_id_pricing",
+        "responses": {
+          "200": {
+            "description": "Thành công"
+          },
+          "400": {
+            "description": "Dữ liệu không hợp lệ"
+          },
+          "401": {
+            "description": "Chưa đăng nhập"
+          },
+          "403": {
+            "description": "Không có quyền"
+          },
+          "409": {
+            "description": "Xung đột lịch hoặc yêu cầu"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ]
+      }
+    },
+    "/centers/{id}/availability": {
+      "get": {
+        "summary": "Lịch trống theo ngày",
+        "operationId": "get__centers_id_availability",
+        "responses": {
+          "200": {
+            "description": "Thành công"
+          },
+          "400": {
+            "description": "Dữ liệu không hợp lệ"
+          },
+          "401": {
+            "description": "Chưa đăng nhập"
+          },
+          "403": {
+            "description": "Không có quyền"
+          },
+          "409": {
+            "description": "Xung đột lịch hoặc yêu cầu"
+          }
+        },
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "in": "query",
+            "name": "date",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "date"
+            }
+          }
+        ]
+      }
+    },
+    "/reservations": {
+      "post": {
+        "summary": "Giữ chỗ (Idempotency-Key)",
+        "operationId": "post__reservations",
+        "responses": {
+          "201": {
+            "description": "Thành công",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Reservation"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Dữ liệu không hợp lệ"
+          },
+          "401": {
+            "description": "Chưa đăng nhập"
+          },
+          "403": {
+            "description": "Không có quyền"
+          },
+          "409": {
+            "description": "Xung đột lịch hoặc yêu cầu"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Idempotency-Key",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "minLength": 8,
+              "maxLength": 128
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateReservation"
+              }
+            }
+          }
+        }
+      },
+      "get": {
+        "summary": "Read bookings/active reservations with actor scope",
+        "responses": {
+          "200": {
+            "description": "Success"
+          },
+          "401": {
+            "description": "Bearer required"
+          },
+          "403": {
+            "description": "Actor scope denied"
+          }
+        }
+      }
+    },
+    "/reservations/{id}/confirm": {
+      "post": {
+        "summary": "Xác nhận booking, không cần payment",
+        "operationId": "post__reservations_id_confirm",
+        "responses": {
+          "200": {
+            "description": "Thành công",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Booking"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Dữ liệu không hợp lệ"
+          },
+          "401": {
+            "description": "Chưa đăng nhập"
+          },
+          "403": {
+            "description": "Không có quyền"
+          },
+          "409": {
+            "description": "Xung đột lịch hoặc yêu cầu"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ]
+      }
+    },
+    "/reservations/{id}": {
+      "delete": {
+        "summary": "Bỏ giữ chỗ",
+        "operationId": "delete__reservations_id",
+        "responses": {
+          "200": {
+            "description": "Thành công"
+          },
+          "400": {
+            "description": "Dữ liệu không hợp lệ"
+          },
+          "401": {
+            "description": "Chưa đăng nhập"
+          },
+          "403": {
+            "description": "Không có quyền"
+          },
+          "409": {
+            "description": "Xung đột lịch hoặc yêu cầu"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ]
+      }
+    },
+    "/bookings/me": {
+      "get": {
+        "summary": "Lịch sử cá nhân",
+        "operationId": "get__bookings_me",
+        "responses": {
+          "200": {
+            "description": "Thành công"
+          },
+          "400": {
+            "description": "Dữ liệu không hợp lệ"
+          },
+          "401": {
+            "description": "Chưa đăng nhập"
+          },
+          "403": {
+            "description": "Không có quyền"
+          },
+          "409": {
+            "description": "Xung đột lịch hoặc yêu cầu"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
+      }
+    },
+    "/bookings/me/stats": {
+      "get": {
+        "summary": "Thống kê cá nhân",
+        "operationId": "get__bookings_me_stats",
+        "responses": {
+          "200": {
+            "description": "Thành công"
+          },
+          "400": {
+            "description": "Dữ liệu không hợp lệ"
+          },
+          "401": {
+            "description": "Chưa đăng nhập"
+          },
+          "403": {
+            "description": "Không có quyền"
+          },
+          "409": {
+            "description": "Xung đột lịch hoặc yêu cầu"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
+      }
+    },
+    "/bookings/fixed": {
+      "post": {
+        "summary": "Đặt lịch cố định (manager)",
+        "operationId": "post__bookings_fixed",
+        "responses": {
+          "201": {
+            "description": "Thành công"
+          },
+          "400": {
+            "description": "Dữ liệu không hợp lệ"
+          },
+          "401": {
+            "description": "Chưa đăng nhập"
+          },
+          "403": {
+            "description": "Không có quyền"
+          },
+          "409": {
+            "description": "Xung đột lịch hoặc yêu cầu"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Idempotency-Key",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "minLength": 8,
+              "maxLength": 128
+            }
+          }
+        ]
+      }
+    },
+    "/bookings/{id}/cancel": {
+      "post": {
+        "summary": "Hủy booking",
+        "operationId": "post__bookings_id_cancel",
+        "responses": {
+          "200": {
+            "description": "Thành công"
+          },
+          "400": {
+            "description": "Dữ liệu không hợp lệ"
+          },
+          "401": {
+            "description": "Chưa đăng nhập"
+          },
+          "403": {
+            "description": "Không có quyền"
+          },
+          "409": {
+            "description": "Xung đột lịch hoặc yêu cầu"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ]
+      }
+    },
+    "/centers/{id}/bookings": {
+      "get": {
+        "summary": "Lịch trung tâm (manager)",
+        "operationId": "get__centers_id_bookings",
+        "responses": {
+          "200": {
+            "description": "Thành công"
+          },
+          "400": {
+            "description": "Dữ liệu không hợp lệ"
+          },
+          "401": {
+            "description": "Chưa đăng nhập"
+          },
+          "403": {
+            "description": "Không có quyền"
+          },
+          "409": {
+            "description": "Xung đột lịch hoặc yêu cầu"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ]
+      }
+    },
+    "/availability/fixed": {
+      "post": {
+        "operationId": "preview_fixed_availability",
+        "summary": "Kiểm tra lịch trống toàn bộ chuỗi ngày (manager)",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Lịch tổng hợp, giá theo toàn bộ ngày"
+          },
+          "400": {
+            "description": "Khoảng ngày không hợp lệ"
+          },
+          "403": {
+            "description": "Không quản lý trung tâm"
+          }
+        }
+      }
+    },
+    "/bookings": {
+      "get": {
+        "summary": "Read bookings/active reservations with actor scope",
+        "responses": {
+          "200": {
+            "description": "Success"
+          },
+          "401": {
+            "description": "Bearer required"
+          },
+          "403": {
+            "description": "Actor scope denied"
+          }
+        }
+      }
+    },
+    "/bookings/{id}": {
+      "get": {
+        "summary": "Read bookings/active reservations with actor scope",
+        "responses": {
+          "200": {
+            "description": "Success"
+          },
+          "401": {
+            "description": "Bearer required"
+          },
+          "403": {
+            "description": "Actor scope denied"
+          }
+        },
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ]
+      },
+      "delete": {
+        "summary": "Hide completed/cancelled owner history; preserve audit rows",
+        "responses": {
+          "200": {
+            "description": "Success"
+          },
+          "401": {
+            "description": "Bearer required"
+          },
+          "403": {
+            "description": "Actor scope denied"
+          }
+        },
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ]
+      }
+    }
+  },
+  "components": {
+    "securitySchemes": {
+      "bearerAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "JWT"
+      }
+    },
+    "schemas": {
+      "CreateReservation": {
+        "title": "CreateReservation",
+        "type": "object",
+        "required": [
+          "centerId",
+          "date",
+          "selections"
+        ],
+        "additionalProperties": false,
+        "properties": {
+          "centerId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "date": {
+            "type": "string",
+            "format": "date"
+          },
+          "selections": {
+            "type": "array",
+            "minItems": 1,
+            "maxItems": 8,
+            "items": {
+              "type": "object",
+              "required": [
+                "courtId",
+                "slots"
+              ],
+              "additionalProperties": false,
+              "properties": {
+                "courtId": {
+                  "type": "string",
+                  "format": "uuid"
+                },
+                "slots": {
+                  "type": "array",
+                  "minItems": 1,
+                  "maxItems": 24,
+                  "uniqueItems": true,
+                  "items": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 1380,
+                    "multipleOf": 60
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "Reservation": {
+        "title": "Reservation",
+        "type": "object",
+        "required": [
+          "id",
+          "centerId",
+          "userId",
+          "date",
+          "status",
+          "expiresAt",
+          "totalPrice",
+          "selections"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "centerId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "userId": {
+            "type": "string"
+          },
+          "date": {
+            "type": "string",
+            "format": "date"
+          },
+          "status": {
+            "enum": [
+              "HELD",
+              "CONFIRMED",
+              "EXPIRED",
+              "CANCELLED"
+            ]
+          },
+          "expiresAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "totalPrice": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "selections": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": [
+                "courtId",
+                "courtName",
+                "slots",
+                "price"
+              ],
+              "properties": {
+                "courtId": {
+                  "type": "string",
+                  "format": "uuid"
+                },
+                "slots": {
+                  "type": "array",
+                  "minItems": 1,
+                  "maxItems": 24,
+                  "uniqueItems": true,
+                  "items": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 1380,
+                    "multipleOf": 60
+                  }
+                },
+                "courtName": {
+                  "type": "string"
+                },
+                "price": {
+                  "type": "integer",
+                  "minimum": 0
+                }
+              }
+            }
+          }
+        }
+      },
+      "Booking": {
+        "title": "Booking",
+        "type": "object",
+        "required": [
+          "id",
+          "reservationId",
+          "centerId",
+          "centerName",
+          "userId",
+          "userName",
+          "date",
+          "status",
+          "type",
+          "totalPrice",
+          "createdAt",
+          "selections"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "centerId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "userId": {
+            "type": "string"
+          },
+          "date": {
+            "type": "string",
+            "format": "date"
+          },
+          "totalPrice": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "selections": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": [
+                "courtId",
+                "courtName",
+                "slots",
+                "price"
+              ],
+              "properties": {
+                "courtId": {
+                  "type": "string",
+                  "format": "uuid"
+                },
+                "slots": {
+                  "type": "array",
+                  "minItems": 1,
+                  "maxItems": 24,
+                  "uniqueItems": true,
+                  "items": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 1380,
+                    "multipleOf": 60
+                  }
+                },
+                "courtName": {
+                  "type": "string"
+                },
+                "price": {
+                  "type": "integer",
+                  "minimum": 0
+                }
+              }
+            }
+          },
+          "reservationId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "centerName": {
+            "type": "string"
+          },
+          "userName": {
+            "type": "string"
+          },
+          "status": {
+            "enum": [
+              "CONFIRMED",
+              "CANCELLED"
+            ]
+          },
+          "type": {
+            "enum": [
+              "DAILY",
+              "FIXED"
+            ]
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      }
+    }
+  }
+}

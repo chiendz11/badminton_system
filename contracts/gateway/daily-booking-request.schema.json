@@ -1,0 +1,60 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Legacy daily booking request",
+  "type": "object",
+  "required": [
+    "centerId",
+    "bookDate",
+    "courtBookingDetails"
+  ],
+  "properties": {
+    "centerId": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "bookDate": {
+      "oneOf": [
+        {
+          "type": "string",
+          "format": "date"
+        },
+        {
+          "type": "string",
+          "format": "date-time"
+        }
+      ]
+    },
+    "userName": {
+      "type": "string"
+    },
+    "courtBookingDetails": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 8,
+      "items": {
+        "type": "object",
+        "required": [
+          "courtId",
+          "timeslots"
+        ],
+        "properties": {
+          "courtId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "timeslots": {
+            "type": "array",
+            "minItems": 1,
+            "maxItems": 19,
+            "uniqueItems": true,
+            "items": {
+              "type": "integer",
+              "minimum": 5,
+              "maximum": 23
+            }
+          }
+        }
+      }
+    }
+  }
+}
