@@ -1,0 +1,58 @@
+# Run from repository root; keeps this stack independent from Booking/AI.
+name: badminton-identity-dev
+services:
+  identity-db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: identity
+      POSTGRES_PASSWORD: identity_dev
+      POSTGRES_DB: identity
+    ports:
+      - "127.0.0.1:5434:5432"
+    volumes:
+      - identity-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U identity -d identity"]
+      interval: 3s
+      timeout: 3s
+      retries: 20
+  identity-migrate:
+    build:
+      context: ../..
+      dockerfile: services/identity/Dockerfile
+      target: migrate
+    environment:
+      DATABASE_URL: postgresql://identity:identity_dev@identity-db:5432/identity
+    depends_on:
+      identity-db:
+        condition: service_healthy
+  identity:
+    build:
+      context: ../..
+      dockerfile: services/identity/Dockerfile
+      target: runtime
+    environment:
+      NODE_ENV: development
+      PORT: "8084"
+      DATABASE_URL: postgresql://identity:identity_dev@identity-db:5432/identity?connect_timeout=3&pool_timeout=3
+      JWT_SECRET: local-development-only-change-me-32-chars
+      JWT_ISSUER: badminton-identity
+      JWT_AUDIENCE: badminton-system
+    ports:
+      - "127.0.0.1:8084:8084"
+    depends_on:
+      identity-migrate:
+        condition: service_completed_successfully
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "node",
+          "-e",
+          "fetch('http://localhost:8084/health/ready').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))",
+        ]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+volumes:
+  identity-data:
