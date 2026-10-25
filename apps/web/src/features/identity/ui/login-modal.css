@@ -1,0 +1,113 @@
+/* Các selector chỉ áp dụng cho modal Identity. */
+.identity-login {
+  position: fixed;
+  inset: 0;
+  margin: auto;
+  width: min(800px, calc(100vw - 32px));
+  max-width: none;
+  max-height: calc(100dvh - 32px);
+  padding: 0;
+  border: 0;
+  border-radius: 24px;
+  background: #fff;
+  color: #263238;
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+  box-shadow: 0 24px 80px rgb(0 0 0 / 25%);
+  overflow: auto;
+}
+.identity-login::backdrop { background: rgb(0 0 0 / 60%); }
+.identity-login .identity-login__layout { display: grid; grid-template-columns: 0.9fr 1.1fr; }
+.identity-login .identity-login__welcome {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 28px;
+  background: #0c8040;
+  color: #fff;
+  text-align: center;
+  border-radius: 0 110px 110px 0;
+}
+.identity-login .identity-login__brand { font-size: 24px; font-weight: 800; }
+.identity-login .identity-login__brand span { color: #ffcc00; }
+.identity-login .identity-login__symbol { margin: 36px 0 24px; font-size: 48px; color: #ffcc00; }
+.identity-login .identity-login__welcome h2 { margin: 0 0 12px; font-size: 30px; font-weight: 700; }
+.identity-login .identity-login__welcome p { margin: 0; line-height: 1.6; }
+.identity-login .identity-login__content { position: relative; padding: 48px 32px 40px; }
+.identity-login .identity-login__content > h2 { margin: 0 0 8px; font-size: 30px; font-weight: 700; }
+.identity-login .identity-login__intro { margin: 0 0 28px; color: #65716b; line-height: 1.5; }
+.identity-login .identity-login__close {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  display: grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  border: 0;
+  border-radius: 50%;
+  background: #f0f3f1;
+  color: #46564c;
+  font-size: 26px;
+  line-height: 1;
+  cursor: pointer;
+}
+.identity-login .identity-login__field { margin-bottom: 20px; }
+.identity-login .identity-login__field label { display: block; margin-bottom: 8px; font-weight: 600; }
+.identity-login .identity-login__field input {
+  box-sizing: border-box;
+  width: 100%;
+  min-width: 0;
+  height: 48px;
+  padding: 12px 14px;
+  border: 1px solid #d4ded8;
+  border-radius: 8px;
+  background: #f7f9f8;
+  color: #263238;
+  font: inherit;
+  font-size: 16px;
+}
+.identity-login .identity-login__field input:focus { outline: 2px solid #0c8040; outline-offset: 2px; }
+.identity-login .identity-login__password { position: relative; }
+.identity-login .identity-login__password input { padding-right: 52px; }
+.identity-login .identity-login__toggle {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  display: grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  padding: 0;
+  border: 0;
+  border-radius: 6px;
+  background: transparent;
+  color: #54655a;
+  cursor: pointer;
+}
+.identity-login .identity-login__submit {
+  width: 100%;
+  min-height: 48px;
+  margin-top: 4px;
+  padding: 12px 16px;
+  border: 0;
+  border-radius: 8px;
+  background: #0c8040;
+  color: #fff;
+  font: inherit;
+  font-weight: 700;
+  cursor: pointer;
+}
+.identity-login .identity-login__submit:hover:not(:disabled) { background: #096332; }
+.identity-login button:focus-visible { outline: 3px solid #a66c00; outline-offset: 3px; }
+.identity-login button:disabled { opacity: 0.6; cursor: not-allowed; }
+.identity-login .identity-login__error { padding: 10px 12px; border-radius: 6px; background: #fff0f0; color: #a61919; line-height: 1.5; }
+@media (max-width: 640px) {
+  .identity-login { border-radius: 16px; }
+  .identity-login .identity-login__layout { grid-template-columns: 1fr; }
+  .identity-login .identity-login__welcome { padding: 24px 48px; border-radius: 0 0 36px 36px; }
+  .identity-login .identity-login__symbol { display: none; }
+  .identity-login .identity-login__welcome h2 { margin-top: 12px; font-size: 24px; }
+  .identity-login .identity-login__content { padding: 28px 24px; }
+  .identity-login .identity-login__content > h2 { font-size: 26px; }
+}

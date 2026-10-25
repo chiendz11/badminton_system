@@ -1,6 +1,8 @@
 import React, { useState, useEffect, useContext } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import "../styles/header.css";
+import LoginModal from "../../features/identity/ui/LoginModal.jsx";
+import { login } from "../../features/identity/api/auth.js";
 
 import { SessionContext } from "../session/SessionContext.jsx";
 
@@ -9,8 +11,9 @@ const Header = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const [isLoginOpen, setIsLoginOpen] = useState(false);
 
-  const { user, loading } = useContext(SessionContext);
+  const { user, loading, updateSession } = useContext(SessionContext);
   const navigate = useNavigate();
   const DEFAULT_AVATAR_URL =
     "https://res.cloudinary.com/dm4uxmmtg/image/upload/v1762859721/badminton_app/avatars/default_user_avatar.png";
@@ -32,6 +35,11 @@ const Header = () => {
 
   const closeMenu = () => {
     setIsMobileMenuOpen(false);
+  };
+
+  const handleLogin = async (credentials) => {
+  const session = await login(credentials);
+  updateSession(session);
   };
 
   // Class chung cho các Link
@@ -150,12 +158,34 @@ const Header = () => {
                       </div>
                     </li>
                   </>
-                ) : null}
+                ) : (
+                  <li>
+                    <button
+                      type="button"
+                      className="header-login-button"
+                      onClick={() => {
+                        closeMenu();
+                        setIsLoginOpen(true);
+                      }}
+                    >
+                      <i
+                        className="fas fa-user"
+                        aria-hidden="true"
+                      ></i>
+                      Đăng nhập
+                    </button>
+                  </li>
+                )}
               </ul>
             </nav>
           </div>
         </div>
       </header>
+      <LoginModal
+          isOpen={isLoginOpen}
+          onClose={() => setIsLoginOpen(false)}
+          onSubmit={handleLogin}
+      />
     </>
   );
 };

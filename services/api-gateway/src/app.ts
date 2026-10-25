@@ -13,6 +13,8 @@ import { bookingRoutes } from "./routes/booking.route";
 import { BookingAdapter } from "./modules/booking/booking-adapter";
 import { CenterAdapter } from "./modules/centers/center-adapter";
 import { graphqlMiddleware } from "./graphql.setup";
+import { identityRoutes } from "./routes/identity.route";
+
 export function createApp(
   config: GatewayConfig = configuration(),
   transport: typeof fetch = fetch,
@@ -61,6 +63,9 @@ export function createApp(
       .type(monitor.registry.contentType)
       .send(await monitor.registry.metrics());
   });
+
+  app.use("/api/auth", identityRoutes(config, transport));
+
   app.use(authenticate(config));
   app.post("/graphql", graphqlMiddleware(new CenterAdapter(core)));
   app.use("/api", aiRoutes(config, transport));

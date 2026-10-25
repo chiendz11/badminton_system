@@ -1,5 +1,6 @@
 export interface GatewayConfig {
   coreUrl: string;
+  identityUrl?: string;
   aiUrl?: string;
   aiTimeout?: number;
   jwtSecret: string;
@@ -21,6 +22,20 @@ export function configuration(): GatewayConfig {
     url.pathname !== "/"
   )
     throw Error("BOOKING_CORE_URL must be an HTTP origin without credentials");
+  const identityUrl = new URL(
+    process.env.IDENTITY_SERVICE_URL || "http://localhost:8084",
+  );
+
+  if (
+    !["http:", "https:"].includes(identityUrl.protocol) ||
+    identityUrl.username ||
+    identityUrl.password ||
+    identityUrl.pathname !== "/" ||
+    identityUrl.search ||
+    identityUrl.hash
+  ) {
+    throw Error("IDENTITY_SERVICE_URL must be an HTTP origin");
+  }
   const aiUrl = new URL(process.env.AI_SERVICE_URL || "http://localhost:8000");
   if (
     !["http:", "https:"].includes(aiUrl.protocol) ||
@@ -48,6 +63,7 @@ export function configuration(): GatewayConfig {
     throw Error("Invalid upstream timeout");
   return {
     coreUrl: url.origin,
+    identityUrl: identityUrl.origin,
     aiUrl: aiUrl.origin,
     aiTimeout,
     jwtSecret,

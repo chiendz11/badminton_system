@@ -343,3 +343,26 @@ nav {
     font-size: 14px;
   }
 }
+/* button open login ui*/
+.header-login-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 15px;
+  border: 0;
+  border-radius: 4px;
+  background-color: #ffcc00;
+  color: #333;
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+}
+.header-login-button:hover {
+  background-color: #ffd700;
+}
+
+.header-login-button:focus-visible {
+  outline: 2px solid white;
+  outline-offset: 3px;
+}

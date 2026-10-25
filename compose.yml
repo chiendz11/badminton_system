@@ -65,6 +65,7 @@ services:
     environment:
       NODE_ENV: development
       PORT: 8081
+      IDENTITY_SERVICE_URL: http://identity:8084
       BOOKING_CORE_URL: http://api:3000
       JWT_SECRET: local-development-only-change-me-32-chars
       JWT_ISSUER: badminton-identity
@@ -89,6 +90,9 @@ services:
       interval: 10s
       timeout: 5s
       retries: 10
+    networks:
+      - default
+      - identity-network
   frontend:
     build:
       context: .
@@ -186,3 +190,7 @@ services:
 volumes:
   booking-data: {}
   ai-data: {}
+networks:
+  identity-network:
+    external: true
+    name: badminton-identity-dev_default
