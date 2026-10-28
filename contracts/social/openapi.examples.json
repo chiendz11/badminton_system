@@ -1,0 +1,21 @@
+{
+  "valid": [
+    {
+      "schema": "ConversationCreate",
+      "value": {
+        "type": "PASS_BOOKING",
+        "postId": "a1104000-0000-4000-8000-000000000001"
+      }
+    }
+  ],
+  "invalid": [
+    {
+      "schema": "ConversationCreate",
+      "value": {
+        "type": "PASS_BOOKING",
+        "postId": "a1104000-0000-4000-8000-000000000001",
+        "sellerUserId": "forged"
+      }
+    }
+  ]
+}

@@ -1,0 +1,28 @@
+groups:
+- name: api-gateway
+  rules:
+  - alert: ApiGatewayUnavailable
+    expr: up{service="api-gateway"} == 0
+    for: 2m
+    labels:
+      severity: critical
+    annotations:
+      summary: api-gateway metrics target is unavailable
+  - alert: ApiGatewayHighErrorRate
+    expr: (sum by (environment, service) (rate(api_gateway_http_requests_total{route!~"/health/.*|/metrics",status=~"5.."}[5m])) / clamp_min(sum
+      by (environment, service) (rate(api_gateway_http_requests_total{route!~"/health/.*|/metrics"}[5m])), 0.001) > 0.05) and on (environment,
+      service) (sum by (environment, service) (increase(api_gateway_http_requests_total{route!~"/health/.*|/metrics"}[5m])) >= 20)
+    for: 5m
+    labels:
+      severity: warning
+    annotations:
+      summary: api-gateway HTTP 5xx rate exceeds 5 percent
+  - alert: ApiGatewayHighLatency
+    expr: (histogram_quantile(0.95, sum by (le, environment, service) (rate(api_gateway_http_duration_seconds_bucket{route!~"/health/.*|/metrics"}[5m])))
+      > 1) and on (environment, service) (sum by (environment, service) (increase(api_gateway_http_requests_total{route!~"/health/.*|/metrics"}[5m]))
+      >= 20)
+    for: 5m
+    labels:
+      severity: warning
+    annotations:
+      summary: api-gateway p95 HTTP latency exceeds the initial alert threshold

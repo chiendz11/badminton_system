@@ -1,0 +1,38 @@
+{
+  "valid": [
+    {
+      "id": "a1104000-0000-4000-8000-000000000001",
+      "type": "booking.pass-transferred.v1",
+      "aggregateId": "a1104000-0000-4000-8000-000000000002",
+      "createdAt": "2026-11-07T10:00:00Z",
+      "schemaVersion": 1,
+      "producer": "booking-core",
+      "correlationId": "req-example-1",
+      "payload": {
+        "transferId": "a1104000-0000-4000-8000-000000000003",
+        "postId": "a1104000-0000-4000-8000-000000000004",
+        "bookingId": "a1104000-0000-4000-8000-000000000002",
+        "fromUserId": "user-seller",
+        "toUserId": "user-buyer"
+      }
+    }
+  ],
+  "invalid": [
+    {
+      "id": "a1104000-0000-4000-8000-000000000001",
+      "type": "booking.pass-transferred.v2",
+      "aggregateId": "a1104000-0000-4000-8000-000000000002",
+      "createdAt": "2026-11-07T10:00:00Z",
+      "schemaVersion": 1,
+      "producer": "booking-core",
+      "correlationId": "req-example-1",
+      "payload": {
+        "transferId": "a1104000-0000-4000-8000-000000000003",
+        "postId": "a1104000-0000-4000-8000-000000000004",
+        "bookingId": "a1104000-0000-4000-8000-000000000002",
+        "fromUserId": "user-seller",
+        "toUserId": "user-buyer"
+      }
+    }
+  ]
+}

@@ -1,38 +1,240 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "title": "Conversation message",
-  "type": "object",
   "additionalProperties": false,
+  "allOf": [
+    {
+      "else": {
+        "properties": {
+          "proposal_id": {
+            "type": "null"
+          }
+        }
+      },
+      "if": {
+        "properties": {
+          "action": {
+            "enum": [
+              "accept_proposal",
+              "reject_proposal"
+            ]
+          }
+        },
+        "required": [
+          "action"
+        ]
+      },
+      "then": {
+        "properties": {
+          "proposal_id": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "proposal_id"
+        ]
+      }
+    },
+    {
+      "else": {
+        "properties": {
+          "booking_choice_id": {
+            "type": "null"
+          }
+        }
+      },
+      "if": {
+        "properties": {
+          "action": {
+            "enum": [
+              "select_booking"
+            ]
+          }
+        },
+        "required": [
+          "action"
+        ]
+      },
+      "then": {
+        "properties": {
+          "booking_choice_id": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "booking_choice_id"
+        ]
+      }
+    },
+    {
+      "else": {
+        "properties": {
+          "cancellation_id": {
+            "type": "null"
+          }
+        }
+      },
+      "if": {
+        "properties": {
+          "action": {
+            "enum": [
+              "confirm_cancellation"
+            ]
+          }
+        },
+        "required": [
+          "action"
+        ]
+      },
+      "then": {
+        "properties": {
+          "cancellation_id": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "cancellation_id"
+        ]
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "action": {
+            "enum": [
+              "accept_proposal",
+              "reject_proposal",
+              "select_booking",
+              "confirm_cancellation",
+              "dismiss_cancellation",
+              "retry_cancellation",
+              "more_bookings"
+            ]
+          }
+        },
+        "required": [
+          "action"
+        ]
+      },
+      "then": {
+        "properties": {
+          "option_id": {
+            "type": "null"
+          },
+          "confirmation_id": {
+            "type": "null"
+          }
+        }
+      }
+    }
+  ],
+  "properties": {
+    "text": {
+      "maxLength": 2000,
+      "minLength": 1,
+      "title": "Text",
+      "type": "string"
+    },
+    "client_message_id": {
+      "maxLength": 128,
+      "minLength": 8,
+      "pattern": "^[A-Za-z0-9_-]+$",
+      "title": "Client Message Id",
+      "type": "string"
+    },
+    "action": {
+      "anyOf": [
+        {
+          "enum": [
+            "select",
+            "confirm",
+            "retry",
+            "accept_proposal",
+            "reject_proposal",
+            "select_booking",
+            "confirm_cancellation",
+            "dismiss_cancellation",
+            "retry_cancellation",
+            "more_bookings"
+          ],
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Action"
+    },
+    "option_id": {
+      "anyOf": [
+        {
+          "maxLength": 64,
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Option Id"
+    },
+    "confirmation_id": {
+      "anyOf": [
+        {
+          "maxLength": 64,
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Confirmation Id"
+    },
+    "proposal_id": {
+      "anyOf": [
+        {
+          "pattern": "^[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}$",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Proposal Id"
+    },
+    "booking_choice_id": {
+      "anyOf": [
+        {
+          "pattern": "^[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}$",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Booking Choice Id"
+    },
+    "cancellation_id": {
+      "anyOf": [
+        {
+          "pattern": "^[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}$",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Cancellation Id"
+    }
+  },
   "required": [
     "text",
     "client_message_id"
   ],
-  "properties": {
-    "text": {
-      "type": "string",
-      "minLength": 1,
-      "maxLength": 2000
-    },
-    "client_message_id": {
-      "type": "string",
-      "minLength": 8,
-      "maxLength": 128,
-      "pattern": "^[A-Za-z0-9_-]+$"
-    },
-    "action": {
-      "enum": [
-        "select",
-        "confirm",
-        "retry"
-      ]
-    },
-    "option_id": {
-      "type": "string",
-      "format": "uuid"
-    },
-    "confirmation_id": {
-      "type": "string",
-      "format": "uuid"
-    }
-  }
+  "title": "MessageRequest",
+  "type": "object"
 }

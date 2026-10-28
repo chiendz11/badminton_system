@@ -1,7 +1,13 @@
 global:
   scrape_interval: 15s
 rule_files:
-  - /etc/prometheus/booking-core-alerts.yml
+  - /etc/prometheus/rules/booking-core.yml
+  - /etc/prometheus/rules/api-gateway.yml
+  - /etc/prometheus/rules/ai-service.yml
+alerting:
+  alertmanagers:
+    - static_configs:
+        - targets: ["alertmanager:9093"]
 scrape_configs:
   - job_name: booking-core
     metrics_path: /metrics
@@ -10,6 +16,9 @@ scrape_configs:
       credentials_file: /run/secrets/booking_metrics_token
     static_configs:
       - targets: ["api:3000"]
+        labels:
+          service: booking-core
+          environment: local
   - job_name: api-gateway
     metrics_path: /metrics
     authorization:
@@ -17,6 +26,9 @@ scrape_configs:
       credentials_file: /run/secrets/gateway_metrics_token
     static_configs:
       - targets: ["gateway:8081"]
+        labels:
+          service: api-gateway
+          environment: local
   - job_name: ai-service
     metrics_path: /metrics
     authorization:
@@ -24,3 +36,6 @@ scrape_configs:
       credentials_file: /run/secrets/ai_metrics_token
     static_configs:
       - targets: ["ai:8000"]
+        labels:
+          service: ai-service
+          environment: local

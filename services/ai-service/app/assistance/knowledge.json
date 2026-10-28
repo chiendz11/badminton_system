@@ -1,0 +1,44 @@
+[
+  {
+    "id": "cancel-booking", "version": "2026-10-28", "title": "Điều kiện hủy booking",
+    "phrases": ["hủy booking", "hủy lịch", "hủy sân", "hủy đặt sân", "hủy như thế nào", "điều kiện hủy", "cách hủy", "cancel booking"],
+    "answer": "Bạn có thể hủy booking của mình khi chưa có slot nào trong booking bắt đầu. Chatbot sẽ hiển thị đúng booking và yêu cầu xác nhận hủy riêng; chỉ chọn booking chưa thực hiện hủy. Booking đã bắt đầu không hủy được. Không có cơ sở để khẳng định mọi booking được miễn phí hủy hoặc được hoàn tiền.",
+    "source_paths": ["services/booking-core/src/modules/bookings/bookings-command.service.ts", "docs/BRD.md"]
+  },
+  {
+    "id": "booking-history", "version": "2026-10-28", "title": "Tra cứu lịch sử cá nhân",
+    "phrases": ["xem lịch sử", "lịch sử ở đâu", "xem lịch của tôi", "tra cứu booking", "booking history"],
+    "answer": "Bạn có thể yêu cầu chatbot 'Xem lịch của tôi tuần này', 'Lịch sắp tới' hoặc 'Xem lịch sử đặt sân'. Kết quả chỉ gồm booking của tài khoản đang đăng nhập, không gồm booking đã ẩn khỏi lịch cá nhân. Dùng Xem thêm nếu có trang tiếp theo.",
+    "source_paths": ["services/booking-core/src/modules/bookings/bookings-query.service.ts", "docs/BRD.md"]
+  },
+  {
+    "id": "slot-duration", "version": "2026-10-28", "title": "Độ dài slot và giờ bắt đầu",
+    "phrases": ["một slot", "mỗi slot", "slot dài", "bao nhiêu phút", "nửa tiếng", "90 phút", "một tiếng rưỡi", "quy định giờ"],
+    "answer": "Mỗi slot dài 60 phút và giờ bắt đầu theo giờ tròn. Chơi hai tiếng cần hai slot liên tiếp trên cùng sân. Yêu cầu 18:30 hoặc 90 phút cần sửa lại; chatbot không tự làm tròn giờ hoặc thời lượng.",
+    "source_paths": ["services/ai-service/app/domain.py", "services/booking-core/src/common/domain/booking-quote.ts"]
+  },
+  {
+    "id": "booking-confirmation", "version": "2026-10-28", "title": "Chọn phương án và xác nhận đặt",
+    "phrases": ["cách đặt sân", "đặt sân như thế nào", "hướng dẫn đặt", "chọn sân đã đặt", "xác nhận đặt là gì"],
+    "answer": "Hãy cung cấp ngày, giờ tròn, thời lượng và các yêu cầu về khu vực/ngân sách. Sau khi xem kết quả, chọn phương án rồi xác nhận đặt riêng. Đồng ý đổi điều kiện tìm kiếm chưa phải xác nhận đặt. Nếu giá thay đổi, chatbot yêu cầu xác nhận giá mới.",
+    "source_paths": ["services/ai-service/app/workflow.py", "docs/AI_SERVICE_UPGRADE.md"]
+  },
+  {
+    "id": "payment-refund", "version": "2026-10-28", "title": "Giá booking, thanh toán và hoàn tiền",
+    "phrases": ["đã thanh toán", "hoàn tiền", "phí hủy", "miễn phí hủy", "tiền đã trả", "thu tiền"],
+    "answer": "Phiên bản hiện tại chưa tích hợp thanh toán hoặc hoàn tiền. Booking CONFIRMED và tổng giá booking không chứng minh tiền đã được thu. Chatbot không thể xác nhận bạn đã thanh toán, hứa hoàn tiền hoặc tự đặt chính sách phí hủy.",
+    "source_paths": ["docs/BRD.md#52-ngoài-phạm-vi", "docs/architecture/SKELETON_MAPPING.md"]
+  },
+  {
+    "id": "uncertain-result", "version": "2026-10-28", "title": "Mất phản hồi khi đặt hoặc hủy",
+    "phrases": ["mất phản hồi", "mất mạng", "chưa rõ kết quả", "đặt trùng", "bị lỗi", "kiểm tra lại là gì"],
+    "answer": "Khi chưa rõ kết quả thao tác, dùng nút kiểm tra lại của yêu cầu đang chờ. Không bắt đầu một thao tác đặt/hủy khác để thay thế. Hệ thống lưu ý định trước khi gọi Core và kiểm tra lại kết quả; lỗi mạng không tự có nghĩa là thao tác đã thất bại.",
+    "source_paths": ["docs/AI_SERVICE.md", "services/ai-service/app/workflow.py", "services/ai-service/app/assistance/cancellation.py"]
+  },
+  {
+    "id": "personal-statistics", "version": "2026-10-28", "title": "Cách tính thống kê cá nhân",
+    "phrases": ["thống kê tính", "giờ sân là gì", "giá trị booking", "thống kê ở đâu", "cách xem thống kê"],
+    "answer": "Bạn có thể hỏi 'Thống kê của tôi tháng này'. Tháng này tính từ đầu tháng đến hôm nay theo giờ Việt Nam. Giờ-sân là tổng số slot một tiếng của booking còn CONFIRMED, không phải thời gian đã thực sự chơi. Tổng giá trị booking không phải số tiền đã thanh toán. Nếu dữ liệu vượt giới hạn đọc, kết quả được đánh dấu chỉ một phần.",
+    "source_paths": ["services/ai-service/app/assistance/queries.py", "docs/BRD.md"]
+  }
+]

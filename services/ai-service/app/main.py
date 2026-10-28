@@ -17,6 +17,7 @@ from app.core_client import BookingCoreClient, CoreError
 from app.db.store import Store
 from app.observability import latency, log, registry, requests
 from app.providers import FakeParser, LLMParser
+from app.schemas import ConversationResponse
 from app.service import ConversationService
 
 
@@ -53,7 +54,7 @@ async def lifespan(app):
 def create_app(service=None, config=None):
     app = FastAPI(
         title="Badminton Conversational Planning",
-        version="0.1.0",
+        version="0.2.0",
         lifespan=lifespan if service is None else None,
     )
     if service is not None:
@@ -153,7 +154,7 @@ def create_app(service=None, config=None):
 
     from app.schemas import MessageRequest
 
-    @app.post("/api/conversations/{conversation_id}/messages")
+    @app.post("/api/conversations/{conversation_id}/messages", response_model=ConversationResponse)
     async def message(
         conversation_id: UUID,
         body: MessageRequest,

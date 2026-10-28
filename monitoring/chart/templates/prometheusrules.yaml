@@ -1,0 +1,15 @@
+{{- range $name, $service := .Values.services }}
+{{- if $service.enabled }}
+---
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: {{ $name }}
+  namespace: {{ $.Values.workloadNamespace }}
+  labels:
+    release: {{ $.Values.monitoringRelease | quote }}
+    app.kubernetes.io/part-of: badminton
+spec:
+  {{- $.Files.Get (printf "rules/%s.yml" $name) | required (printf "Missing rules for enabled service %s" $name) | nindent 2 }}
+{{- end }}
+{{- end }}

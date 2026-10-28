@@ -1,0 +1,27 @@
+environment: production
+workloadNamespace: badminton
+monitoringRelease: monitoring
+scrapeInterval: 15s
+dashboards:
+  enabled: true
+  namespace: monitoring
+services:
+  booking-core:
+    enabled: true
+  api-gateway:
+    enabled: true
+  ai-service:
+    enabled: true
+  # Enable a service only after its runtime and metric contract are verified.
+  identity-service:
+    enabled: false
+  commerce-service:
+    enabled: false
+  social-service:
+    enabled: false
+  content-service:
+    enabled: false
+  notification-service:
+    enabled: false
+  storage-service:
+    enabled: false

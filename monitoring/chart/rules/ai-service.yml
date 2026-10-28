@@ -1,0 +1,51 @@
+groups:
+- name: ai-service
+  rules:
+  - alert: AiServiceUnavailable
+    expr: up{service="ai-service"} == 0
+    for: 2m
+    labels:
+      severity: critical
+    annotations:
+      summary: ai-service metrics target is unavailable
+  - alert: AiServiceHighErrorRate
+    expr: (sum by (environment, service) (rate(ai_http_requests_total{route!~"/health/.*|/metrics",status=~"5.."}[5m])) / clamp_min(sum by (environment,
+      service) (rate(ai_http_requests_total{route!~"/health/.*|/metrics"}[5m])), 0.001) > 0.05) and on (environment, service) (sum by (environment,
+      service) (increase(ai_http_requests_total{route!~"/health/.*|/metrics"}[5m])) >= 20)
+    for: 5m
+    labels:
+      severity: warning
+    annotations:
+      summary: ai-service HTTP 5xx rate exceeds 5 percent
+  - alert: AiServiceHighLatency
+    expr: (histogram_quantile(0.95, sum by (le, environment, service) (rate(ai_http_duration_seconds_bucket{route!~"/health/.*|/metrics"}[5m])))
+      > 2) and on (environment, service) (sum by (environment, service) (increase(ai_http_requests_total{route!~"/health/.*|/metrics"}[5m])) >=
+      20)
+    for: 5m
+    labels:
+      severity: warning
+    annotations:
+      summary: ai-service p95 HTTP latency exceeds the initial alert threshold
+  - alert: AISearchFailureRate
+    expr: (sum by (environment, service) (rate(ai_search_outcomes_total{outcome="SEARCH_FAILED"}[5m])) / clamp_min(sum by (environment, service)
+      (rate(ai_search_outcomes_total[5m])), 0.001) > 0.2) and on (environment, service) (sum by (environment, service) (increase(ai_search_outcomes_total[5m]))
+      >= 20)
+    for: 5m
+    labels:
+      severity: warning
+    annotations:
+      summary: AI Core search failure rate exceeds the initial 20 percent threshold
+  - alert: AIRevalidationFailureSpike
+    expr: sum by (environment, service) (increase(ai_revalidation_failures_total[10m])) >= 10
+    for: 5m
+    labels:
+      severity: warning
+    annotations:
+      summary: Repeated AI proposal revalidation failures; inspect slot/price changes and Core errors
+  - alert: AIParserFailureSpike
+    expr: sum by (environment, service) (increase(ai_parser_failures_total[10m])) >= 10
+    for: 5m
+    labels:
+      severity: warning
+    annotations:
+      summary: Repeated AI parser exceptions or structured-output failures

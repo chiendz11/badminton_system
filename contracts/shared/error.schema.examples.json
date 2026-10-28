@@ -1,0 +1,15 @@
+{
+  "valid": [
+    {
+      "code": "FORBIDDEN",
+      "message": "Resource scope denied",
+      "requestId": "request-0001"
+    }
+  ],
+  "invalid": [
+    {
+      "code": "FORBIDDEN",
+      "message": "No request ID"
+    }
+  ]
+}

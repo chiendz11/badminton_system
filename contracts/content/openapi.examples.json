@@ -1,0 +1,22 @@
+{
+  "valid": [
+    {
+      "schema": "ReviewCreate",
+      "value": {
+        "bookingId": "a1104000-0000-4000-8000-000000000001",
+        "stars": 5,
+        "comment": "Good court"
+      }
+    }
+  ],
+  "invalid": [
+    {
+      "schema": "ReviewCreate",
+      "value": {
+        "bookingId": "a1104000-0000-4000-8000-000000000001",
+        "stars": 6,
+        "comment": "Invalid score"
+      }
+    }
+  ]
+}

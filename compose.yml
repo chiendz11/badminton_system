@@ -42,7 +42,7 @@ services:
       JWT_AUDIENCE: badminton-system
       NODE_ENV: development
       ENABLE_DEMO_AUTH: "true"
-      METRICS_TOKEN: local-monitoring-only
+      METRICS_TOKEN: ${BOOKING_METRICS_TOKEN:-local-monitoring-only}
       CORS_ORIGINS: http://localhost:5173,http://localhost:5174,http://localhost:8082,http://localhost:8083,http://127.0.0.1:5173,http://127.0.0.1:5174,http://127.0.0.1:8082,http://127.0.0.1:8083
     ports:
       - 127.0.0.1:3000:3000
@@ -70,7 +70,7 @@ services:
       JWT_ISSUER: badminton-identity
       JWT_AUDIENCE: badminton-system
       CORS_ORIGINS: http://localhost:5173,http://localhost:5174,http://localhost:8082,http://localhost:8083,http://127.0.0.1:5173,http://127.0.0.1:5174,http://127.0.0.1:8082,http://127.0.0.1:8083
-      METRICS_TOKEN: local-gateway-monitoring-only
+      METRICS_TOKEN: ${GATEWAY_METRICS_TOKEN:-local-gateway-monitoring-only}
       AI_SERVICE_URL: http://ai:8000
       AI_UPSTREAM_TIMEOUT_MS: "45000"
     ports:
@@ -147,12 +147,24 @@ services:
       JWT_SECRET: local-development-only-change-me-32-chars
       JWT_ISSUER: badminton-identity
       JWT_AUDIENCE: badminton-system
-      METRICS_TOKEN: local-ai-monitoring-only
+      METRICS_TOKEN: ${AI_METRICS_TOKEN:-local-ai-monitoring-only}
       AI_PROVIDER: ${AI_PROVIDER:-fake}
       AI_OFFLINE: ${AI_OFFLINE:-true}
       LLM_BASE_URL: ${LLM_BASE_URL:-https://api.openai.com/v1}
       LLM_MODEL: ${LLM_MODEL:-gpt-4.1-mini}
       LLM_API_KEY: ${LLM_API_KEY:-}
+      PROPOSAL_TTL_SECONDS: ${PROPOSAL_TTL_SECONDS:-300}
+      NEAR_MISS_TIME_MINUTES: ${NEAR_MISS_TIME_MINUTES:-60}
+      NEAR_MISS_PRICE_RATIO: ${NEAR_MISS_PRICE_RATIO:-0.2}
+      NEAR_MISS_TOP_K: ${NEAR_MISS_TOP_K:-3}
+      NEAR_MISS_WEIGHTS: ${NEAR_MISS_WEIGHTS:-{"time":0.4,"price":0.4,"area":0.2}}
+      NEARBY_AREAS: ${NEARBY_AREAS:-{}}
+      MAX_SEARCH_CENTERS: ${MAX_SEARCH_CENTERS:-5}
+      MAX_DISCOVERY_PAGES: ${MAX_DISCOVERY_PAGES:-2}
+      MAX_CANDIDATES: ${MAX_CANDIDATES:-500}
+      SEARCH_CONCURRENCY: ${SEARCH_CONCURRENCY:-2}
+      SEARCH_TIMEOUT_SECONDS: ${SEARCH_TIMEOUT_SECONDS:-10}
+      AVAILABILITY_MAX_AGE_SECONDS: ${AVAILABILITY_MAX_AGE_SECONDS:-60}
     command:
       - sh
       - -c
@@ -183,6 +195,62 @@ services:
       retries: 10
     extra_hosts:
       - host.docker.internal:host-gateway
+  prometheus:
+    image: prom/prometheus:v3.15.1
+    profiles: [monitoring]
+    command:
+      - --config.file=/etc/prometheus/prometheus.yml
+      - --storage.tsdb.path=/prometheus
+      - --storage.tsdb.retention.time=3d
+    ports:
+      - 127.0.0.1:9090:9090
+    volumes:
+      - ./monitoring/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - ./monitoring/chart/rules:/etc/prometheus/rules:ro
+      - prometheus-data:/prometheus
+    configs:
+      - source: booking-metrics-token
+        target: /run/secrets/booking_metrics_token
+      - source: gateway-metrics-token
+        target: /run/secrets/gateway_metrics_token
+      - source: ai-metrics-token
+        target: /run/secrets/ai_metrics_token
+  grafana:
+    image: grafana/grafana:13.2.4
+    profiles: [monitoring]
+    environment:
+      GF_SECURITY_ADMIN_USER: ${GRAFANA_ADMIN_USER:-admin}
+      GF_SECURITY_ADMIN_PASSWORD: ${GRAFANA_ADMIN_PASSWORD:-local-grafana-only}
+      GF_USERS_ALLOW_SIGN_UP: "false"
+    ports:
+      - 127.0.0.1:3001:3000
+    volumes:
+      - ./monitoring/local/grafana/datasources.yml:/etc/grafana/provisioning/datasources/badminton.yml:ro
+      - ./monitoring/local/grafana/dashboards.yml:/etc/grafana/provisioning/dashboards/badminton.yml:ro
+      - ./monitoring/chart/dashboards:/var/lib/grafana/dashboards:ro
+      - grafana-data:/var/lib/grafana
+  alertmanager:
+    image: prom/alertmanager:v0.34.1
+    profiles: [monitoring]
+    command:
+      - --config.file=/etc/alertmanager/alertmanager.yml
+      - --storage.path=/alertmanager
+      - --cluster.listen-address=
+    ports:
+      - 127.0.0.1:9093:9093
+    volumes:
+      - ./monitoring/local/alertmanager.yml:/etc/alertmanager/alertmanager.yml:ro
+      - alertmanager-data:/alertmanager
+configs:
+  booking-metrics-token:
+    content: ${BOOKING_METRICS_TOKEN:-local-monitoring-only}
+  gateway-metrics-token:
+    content: ${GATEWAY_METRICS_TOKEN:-local-gateway-monitoring-only}
+  ai-metrics-token:
+    content: ${AI_METRICS_TOKEN:-local-ai-monitoring-only}
 volumes:
   booking-data: {}
   ai-data: {}
+  prometheus-data: {}
+  grafana-data: {}
+  alertmanager-data: {}

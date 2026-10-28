@@ -1,0 +1,6 @@
+apiVersion: v2
+name: badminton-monitoring
+description: Application-owned metrics discovery, alert rules and Grafana dashboards.
+type: application
+version: 0.1.0
+appVersion: "1.0.0"

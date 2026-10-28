@@ -1,4 +1,5 @@
-# Enable only implemented boundaries with their own tests and contracts.
+# Contract jobs validate published definitions, including explicitly proposed APIs.
+# Application jobs remain limited to implemented boundaries with real checks.
 version: 1
 configuration_only: false
 global_paths:
@@ -33,7 +34,8 @@ components:
   booking_api:
     path: contracts/booking
     runtime: contract
-    depends_on: []
+    depends_on:
+      - http_common
     enabled: true
   events:
     path: contracts/events
@@ -47,6 +49,59 @@ components:
     enabled: true
   gateway_api:
     path: contracts/gateway
+    runtime: contract
+    depends_on:
+      - booking_api
+      - identity_api
+      - commerce_api
+      - social_api
+      - content_api
+      - notification_api
+      - storage_api
+      - ai_api
+    enabled: true
+  identity_api:
+    path: contracts/identity
+    runtime: contract
+    depends_on: [http_common]
+    enabled: true
+  commerce_api:
+    path: contracts/commerce
+    runtime: contract
+    depends_on: [http_common]
+    enabled: true
+  social_api:
+    path: contracts/social
+    runtime: contract
+    depends_on: [http_common]
+    enabled: true
+  content_api:
+    path: contracts/content
+    runtime: contract
+    depends_on: [http_common]
+    enabled: true
+  notification_api:
+    path: contracts/notification
+    runtime: contract
+    depends_on: [http_common]
+    enabled: true
+  storage_api:
+    path: contracts/storage
+    runtime: contract
+    depends_on: [http_common]
+    enabled: true
+  ai_api:
+    path: contracts/ai
+    runtime: contract
+    depends_on: [http_common]
+    enabled: true
+  sockets:
+    path: contracts/sockets
+    runtime: contract
+    depends_on: []
+    enabled: true
+  http_common:
+    path: contracts/shared
     runtime: contract
     depends_on: []
     enabled: true
@@ -84,6 +139,7 @@ components:
     depends_on:
       - booking_api
       - ai_tools
+      - ai_api
       - booking_core
       - auth_contracts
     docker: true

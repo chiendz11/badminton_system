@@ -3,6 +3,35 @@
     {
       "text": "Mai chơi 2 tiếng",
       "client_message_id": "message-001"
+    },
+    {
+      "text": "Đồng ý đổi giờ",
+      "client_message_id": "message-accept-1",
+      "action": "accept_proposal",
+      "proposal_id": "a1104000-0000-4000-8000-000000000010"
+    },
+    {
+      "text": "Giữ điều kiện",
+      "client_message_id": "message-reject-1",
+      "action": "reject_proposal",
+      "proposal_id": "a1104000-0000-4000-8000-000000000010"
+    },
+    {
+      "text": "Thao tác booking cá nhân",
+      "client_message_id": "assistance-request-001",
+      "action": "select_booking",
+      "booking_choice_id": "a1104000-0000-4000-8000-000000000010"
+    },
+    {
+      "text": "Thao tác booking cá nhân",
+      "client_message_id": "assistance-request-001",
+      "action": "confirm_cancellation",
+      "cancellation_id": "a1104000-0000-4000-8000-000000000010"
+    },
+    {
+      "text": "Xem thêm lịch",
+      "client_message_id": "assistance-more-001",
+      "action": "more_bookings"
     }
   ],
   "invalid": [
@@ -14,6 +43,60 @@
       "text": "đặt",
       "client_message_id": "message-001",
       "userId": "forged"
+    },
+    {
+      "text": "Đồng ý",
+      "client_message_id": "message-accept-2",
+      "action": "accept_proposal"
+    },
+    {
+      "text": "Chọn sân",
+      "client_message_id": "message-select-1",
+      "action": "select",
+      "proposal_id": "a1104000-0000-4000-8000-000000000010"
+    },
+    {
+      "text": "Đồng ý",
+      "client_message_id": "message-accept-3",
+      "action": "accept_proposal",
+      "proposal_id": "a1104000-0000-4000-8000-000000000010",
+      "confirmation_id": "a1104000-0000-4000-8000-000000000010"
+    },
+    {
+      "text": "Thao tác booking cá nhân",
+      "client_message_id": "assistance-request-001",
+      "action": "select_booking"
+    },
+    {
+      "text": "Thao tác booking cá nhân",
+      "client_message_id": "assistance-request-001",
+      "action": "select_booking",
+      "booking_choice_id": "a1104000-0000-4000-8000-000000000010",
+      "confirmation_id": "a1104000-0000-4000-8000-000000000010"
+    },
+    {
+      "text": "Thao tác booking cá nhân",
+      "client_message_id": "assistance-request-001",
+      "action": "confirm",
+      "booking_choice_id": "a1104000-0000-4000-8000-000000000010"
+    },
+    {
+      "text": "Thao tác booking cá nhân",
+      "client_message_id": "assistance-request-001",
+      "action": "confirm_cancellation"
+    },
+    {
+      "text": "Thao tác booking cá nhân",
+      "client_message_id": "assistance-request-001",
+      "action": "confirm_cancellation",
+      "cancellation_id": "a1104000-0000-4000-8000-000000000010",
+      "confirmation_id": "a1104000-0000-4000-8000-000000000010"
+    },
+    {
+      "text": "Thao tác booking cá nhân",
+      "client_message_id": "assistance-request-001",
+      "action": "confirm",
+      "cancellation_id": "a1104000-0000-4000-8000-000000000010"
     }
   ]
 }

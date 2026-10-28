@@ -1,0 +1,31 @@
+{{- range $name, $service := .Values.services }}
+{{- if $service.enabled }}
+---
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: {{ $name }}
+  namespace: {{ $.Values.workloadNamespace }}
+  labels:
+    release: {{ $.Values.monitoringRelease | quote }}
+    app.kubernetes.io/part-of: badminton
+spec:
+  selector:
+    matchLabels:
+      app: {{ $name }}
+  endpoints:
+    - port: http
+      path: /metrics
+      interval: {{ $.Values.scrapeInterval }}
+      authorization:
+        type: Bearer
+        credentials:
+          name: {{ printf "%s-secrets" $name }}
+          key: METRICS_TOKEN
+      relabelings:
+        - targetLabel: environment
+          replacement: {{ $.Values.environment | quote }}
+        - targetLabel: service
+          replacement: {{ $name | quote }}
+{{- end }}
+{{- end }}

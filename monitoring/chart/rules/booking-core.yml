@@ -1,0 +1,42 @@
+groups:
+- name: booking-core
+  rules:
+  - alert: BookingCoreUnavailable
+    expr: up{service="booking-core"} == 0
+    for: 2m
+    labels:
+      severity: critical
+    annotations:
+      summary: booking-core metrics target is unavailable
+  - alert: BookingCoreHighErrorRate
+    expr: (sum by (environment, service) (rate(booking_core_http_requests_total{route!~"/health/.*|/metrics",status=~"5.."}[5m])) / clamp_min(sum
+      by (environment, service) (rate(booking_core_http_requests_total{route!~"/health/.*|/metrics"}[5m])), 0.001) > 0.05) and on (environment,
+      service) (sum by (environment, service) (increase(booking_core_http_requests_total{route!~"/health/.*|/metrics"}[5m])) >= 20)
+    for: 5m
+    labels:
+      severity: warning
+    annotations:
+      summary: booking-core HTTP 5xx rate exceeds 5 percent
+  - alert: BookingCoreHighLatency
+    expr: (histogram_quantile(0.95, sum by (le, environment, service) (rate(booking_core_http_duration_seconds_bucket{route!~"/health/.*|/metrics"}[5m])))
+      > 1) and on (environment, service) (sum by (environment, service) (increase(booking_core_http_requests_total{route!~"/health/.*|/metrics"}[5m]))
+      >= 20)
+    for: 5m
+    labels:
+      severity: warning
+    annotations:
+      summary: booking-core p95 HTTP latency exceeds the initial alert threshold
+  - alert: BookingDatabaseUnavailable
+    expr: booking_core_database_up == 0
+    for: 2m
+    labels:
+      severity: critical
+    annotations:
+      summary: Booking Core cannot reach its database
+  - alert: BookingConflictSpike
+    expr: sum by (environment, service) (rate(booking_core_conflicts_total[5m])) > 1
+    for: 5m
+    labels:
+      severity: warning
+    annotations:
+      summary: Booking conflicts exceed one per second

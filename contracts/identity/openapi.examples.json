@@ -1,0 +1,20 @@
+{
+  "valid": [
+    {
+      "schema": "LoginRequest",
+      "value": {
+        "email": "demo@example.invalid",
+        "password": "example-password"
+      }
+    }
+  ],
+  "invalid": [
+    {
+      "schema": "LoginRequest",
+      "value": {
+        "email": "not-an-email",
+        "password": "example-password"
+      }
+    }
+  ]
+}

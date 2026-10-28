@@ -12,13 +12,13 @@
 | frontend | apps/web | Web |
 | admin | apps/admin | Web |
 
-Phạm vi hiện tại chỉ có Booking Core và AI, với API Gateway làm adapter. Manifest bỏ các placeholder Identity/Commerce/Social/Content/Notification/Storage chưa triển khai. Có 12 component, tất cả enabled: 5 deployable/apps, 4 contract groups và 3 shared packages. Các shared package là auth-contracts, booking-contracts, observability; schema groups là booking, events, ai-tools, gateway.
+Phạm vi hiện tại chỉ có Booking Core và AI, với API Gateway làm adapter. Manifest không bật application jobs cho service skeleton. Có 21 component: 5 deployable/apps, 13 contract groups và 3 shared packages. Các shared package là auth-contracts, booking-contracts, observability; contract groups gồm chín HTTP API specs, events, sockets, ai-tools và shared errors.
 
 `depends_on` biểu diễn dependency của component vào API/event/shared package. Chỉnh graph cùng với dependency thực tế; tránh biểu diễn mọi HTTP call như một cạnh bắt buộc chạy CI khi implementation đổi.
 
 ## Triển khai từng component
 
-Trên `ci/bootstrap`, manifest vẫn `configuration_only: true`. Trên `feat/booking-core`, manifest đặt `configuration_only: false` và mỗi component có `enabled` rõ ràng. Hiện có 12 component enabled: Booking Core, API Gateway, Frontend, Admin, AI, booking/event/gateway/ai-tools schemas và ba shared packages đã có. Web/Admin đã dùng client gốc nên không khai báo dependency vào custom Booking Core contracts; contract tests của app kiểm tra gateway URLs/payload/envelope gốc. Package UI tự dựng đã được bỏ. Web/Admin phụ thuộc gateway API contract. Gateway còn phụ thuộc booking_core vì integration chạy Core thật và compile Core; đổi implementation Core sẽ kiểm tra gateway integration. Các miền khác không còn entry trong manifest của nhánh này; không tạo test/code giả cho miền ngoài phạm vi.
+Ở giai đoạn `ci/bootstrap`, manifest dùng `configuration_only: true`; sau khi có implementation, cấu hình hiện tại dùng `configuration_only: false`. Có 21 component enabled: năm deployable/apps, 13 nhóm contract và ba shared packages theo danh mục trên. Web/Admin đã dùng client gốc nên không khai báo dependency vào custom Booking Core contracts; contract tests của app kiểm tra gateway URLs/payload/envelope gốc. Web/Admin phụ thuộc Gateway API contract. Gateway còn phụ thuộc booking_core vì integration chạy Core thật và compile Core; đổi implementation Core sẽ kiểm tra Gateway integration. Các miền chưa có runtime chỉ có entry contract; chưa bật application jobs giả cho service skeleton.
 
 Validation kiểm tra tên/path/graph của cả manifest, nhưng chỉ kiểm tra sự tồn tại source/lockfile của component được bật. Change detector chỉ đưa component enabled vào matrix. Shared package được kiểm tra qua consumer đang bật. Khi triển khai bounded context tiếp theo, bổ sung scripts/test/migration thật rồi đặt enabled true và cập nhật dependency.
 
@@ -61,7 +61,7 @@ prisma:migrate:deploy   # prisma migrate deploy, áp dụng migration đã commi
 
 Node workflow tạo PostgreSQL 16 tạm với port ngẫu nhiên chỉ bind localhost, đặt `DATABASE_URL` dành riêng cho CI, validate/generate Prisma, rồi chạy lint/typecheck/unit/contract, áp dụng migration và integration. Container được dọn ở bước `always()`, kể cả khi test/migration fail. CI không dùng `db push` để thay migration.
 
-Gateway khai báo database none vì không sở hữu DB; integration script generate/build Core và Testcontainers PostgreSQL riêng, khởi động Nest Core thật rồi gọi qua HTTP. Matrix hiện Node 2, Web 2, Contract 4, Python 1. AI bật với source/lockfile/tests thật và depends_on booking_core vì integration dùng Core thật.
+Gateway khai báo database none vì không sở hữu DB; integration script generate/build Core và Testcontainers PostgreSQL riêng, khởi động Nest Core thật rồi gọi qua HTTP. Matrix hiện Node 2, Web 2, Contract 13, Python 1. AI bật với source/lockfile/tests thật và depends_on booking_core vì integration dùng Core thật.
 
 MongoDB/Redis/RabbitMQ hoặc dependency khác do integration test của từng component khởi tạo/dọn bằng Testcontainers. Không kết nối database thật. Database metadata `mongodb` không tự bật thêm container chung cho tất cả job.
 
@@ -141,3 +141,9 @@ git push origin feat/booking-core
 `main` vẫn là default branch. Workflow tự chạy cho PR vào main, push main, merge queue hoặc workflow_dispatch; push feature đơn thuần không tự chạy. Nhánh feature này có test/backend/Web/Docker thật, khác trạng thái CI-only của ci/bootstrap. Kết quả local và runtime nằm trong hướng dẫn Booking Core; Trivy là gate của Actions và sẽ quét lại trên CI. Xem [VALIDATION.md](VALIDATION.md) cho kết quả local.
 
 Targeted cross-service/nightly integration và ECR/GitOps release sẽ thêm khi scenario thật tồn tại. Nguồn kiến trúc CI: [thảo luận CI mới](https://chatgpt.com/share/6ac2943b-efb4-83ec-b181-e9161879f28d).
+
+## Contract theo service và tham chiếu liên file
+
+Cập nhật 19/10/2026: Gateway public proposals tham chiếu provider Path Items. `gateway_api.depends_on` liệt kê provider contracts để kiểm `$ref` bị ảnh hưởng; schema lỗi chung có component `http_common`, AI runtime phụ thuộc `ai_api`.
+
+Validator dùng `validate(..., base_uri=...)` để resolve file tương đối. Mỗi OpenAPI có `openapi.examples.json`; JSON Schema có `.schema.examples.json`. Positive phải hợp lệ, negative phải bị từ chối. Contract job kiểm cấu trúc/shape, không chứng nhận endpoint Proposed chạy được. Consumer/provider tests hiện có tiếp tục kiểm behavior; xem [catalog](../contracts/README.md).

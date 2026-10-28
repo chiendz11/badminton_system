@@ -1,0 +1,395 @@
+{
+  "createdDate": "2026-10-18",
+  "status": "draft-awaiting-review",
+  "inputs": [
+    {
+      "filename": "kien_truc_va_trien_khai_badminton_manager_v2 (1).md",
+      "sha256": "0f26023365bbc25d7b487a6d833930adca80872473bb0c5d272df035177b9049",
+      "sizeBytes": 56235
+    },
+    {
+      "filename": "Badminton_Manager_TechCorp_10_Week_Plan.xlsx",
+      "sha256": "25922734164e7313b666bee750378204ac3417f9ea1c3f24febf876c618e1046",
+      "sizeBytes": 32104,
+      "previousSha256": "66eb0ae86d5af37eea8ebb93fd85fc81b822808c24ed61b8e7677a2ebdc039fd",
+      "previousSizeBytes": 32003,
+      "updatedDate": "2026-10-25"
+    }
+  ],
+  "targetRepository": "https://github.com/chiendz11/badminton_system",
+  "targetBaselineCommit": "fbd3d4d538692b8ae383f561165c844fdf9d0bf2",
+  "legacyRepository": "https://github.com/chiendz11/Badminton_manager_microservices",
+  "legacyCommit": "484d381e873f513ed4faa4413407502112f4885d",
+  "legacyReadMethod": "git show commit:path; pristine committed source, not working tree changes",
+  "legacySources": [
+    {
+      "path": "AI/data/Question.csv",
+      "sha256": "0e5190f6c7b4e794729c01b008f63f1ea1b2c8d320fad95b414b9f738cc0033f"
+    },
+    {
+      "path": "BM/api_gateway/src/routes/booking.route.js",
+      "sha256": "c3a4161717e3baf17d6eb44cf4f3ad699f02ee61b1c6eae196ca9d7ea4bd9d18"
+    },
+    {
+      "path": "BM/docker-compose.yml",
+      "sha256": "f2441f0b4d5d2c72f71e7cce2376895c2139b0cacc2184eb8cb5ed138123de78"
+    },
+    {
+      "path": "BM/services/auth_service/prisma/schema.prisma",
+      "sha256": "7b29d0ab6542d3e20273ad2da75c632bce05053e2819f85c6e44b6278e624541"
+    },
+    {
+      "path": "BM/services/booking_service/src/Controller/passbooking.controller.ts",
+      "sha256": "df42c4fac1101b7a16862321cb850fe39e3ffd142d5913de5233c320faa7b226"
+    },
+    {
+      "path": "BM/services/booking_service/src/Schema/interested_user.schema.ts",
+      "sha256": "912cbb46720a6d152f0f5faa719fe01576f805a68259596c95b43bfe18ea1287"
+    },
+    {
+      "path": "BM/services/booking_service/src/Schema/pass-booking.schema.ts",
+      "sha256": "5d761d732a9953ed8189379728fda0f8ca6d734dd32d550ef87ca96f1000cd82"
+    },
+    {
+      "path": "BM/services/booking_service/src/Service/booking.service.ts",
+      "sha256": "3577758719f95e2bc6e30490e1112ed072d8b57d2718d2b0c0a2c0f364899c8b"
+    },
+    {
+      "path": "BM/services/booking_service/src/Service/pass-booking.service.ts",
+      "sha256": "f318ac8e922148c44b6cde6948b5226e670608006d1408a3b53758d0aa3e513c"
+    },
+    {
+      "path": "BM/services/booking_service/src/Service/payment.service.ts",
+      "sha256": "67357d988f1a3655ea4288c56cbdd03813f70a7039b11acc938356a7e0975d6c"
+    },
+    {
+      "path": "BM/services/inventory_service/src/models/inventory.model.js",
+      "sha256": "565309e1ed753f196c199833e3f06884002c6ef99128c5e5d7dad93e48ba53a5"
+    },
+    {
+      "path": "BM/services/new_service/src/models/news.model.js",
+      "sha256": "6ef531eb56726ecaabb043141420f5d697e6fc9d378531795847d204dd2c7b1e"
+    },
+    {
+      "path": "BM/services/notification_service/src/Schema/notification.schema.ts",
+      "sha256": "db3c3468e55afb257ae02e6c66d3786857ff37d4b3573d7dbef01810aa24a35a"
+    },
+    {
+      "path": "BM/services/notification_service/src/Service/notification.service.ts",
+      "sha256": "7acbdb51c838dd8fbe4d1ab03fafcf1717d80eeeddb2d4d632582473389907ed"
+    },
+    {
+      "path": "BM/services/rating_service/src/models/rating.model.js",
+      "sha256": "5fa9e67591aa19cd437663a7433d488f78f7ec586e821ea98c235452893280df"
+    },
+    {
+      "path": "BM/services/social_service/src/Gateway/chat.gateway.ts",
+      "sha256": "8e58e50ac0d3b4351e9ef9e227d183568b8a5e33b6b3a650eb41f54a7da1f73b"
+    },
+    {
+      "path": "BM/services/social_service/src/Schema/conversation.schema.ts",
+      "sha256": "7ff37a253919a58e2017f1d479329664141664f4016e76cef6152c4c2a8b2813"
+    },
+    {
+      "path": "BM/services/social_service/src/Schema/message.schema.ts",
+      "sha256": "3ce1d03de2d52b701cfa2cae16109cd6f24591ef29fc3f29b23da32dcafdb42c"
+    },
+    {
+      "path": "BM/services/social_service/src/Service/conversation.service.ts",
+      "sha256": "8f0df6e1ee1c0d636ff3faffbaf1e3244e45d572bcffaef188343fe4d4c213e8"
+    },
+    {
+      "path": "BM/services/storage_service/src/models/file.model.js",
+      "sha256": "c5798cbe2b389085b9bbb9aad60547daa8996fb00c99c7576403508d0e87df47"
+    },
+    {
+      "path": "BM/services/storage_service/src/routes/storage.route.js",
+      "sha256": "6fa3eab824004b97f9f0ef5236c2d2df629a77c01d9dba86376954fd5b29f61b"
+    },
+    {
+      "path": "BM/services/transaction_service/src/models/sellhistory.model.js",
+      "sha256": "c51d1fccc4856135fc2f0283e7eb5e8d566592ad1a5489d61ad5a7a045fdc408"
+    },
+    {
+      "path": "BM/services/transaction_service/src/models/stockhistory.model.js",
+      "sha256": "d1d4cc20202cb3049186a3d9a3379a8c59d4dc390ea7bcd24fa52318a3708db3"
+    },
+    {
+      "path": "BM/services/transaction_service/src/services/transaction.service.js",
+      "sha256": "965e1e6233189995b8097e8dd5474209ca3bded9feae262acca0bb6ba6a81f67"
+    },
+    {
+      "path": "BM/services/user_service/src/models/user.model.js",
+      "sha256": "075e52ed5d9e0db46ca29123a6467a24a93606c7d731ae4253726f77f41b9a3e"
+    },
+    {
+      "path": "Frontend/src/components/ChatBox.jsx",
+      "sha256": "cc12ba72f33e43a992a353f51a049b08b973196037c439c9aeddcb23b6f3c0e2"
+    },
+    {
+      "path": "Frontend/src/components/FriendsTab.jsx",
+      "sha256": "2054c369ba12a949514f68b3e253d865d816378dfc806d6280413b0a848ac220"
+    },
+    {
+      "path": "Frontend/src/components/HistoryTab.jsx",
+      "sha256": "d3860d7c1a97c272029b8619c87c1d967ab4a0ca8ab06488ad16bf3ba3c0ca0d"
+    },
+    {
+      "path": "Frontend/src/components/ModalPassBooking.jsx",
+      "sha256": "5429bbe31030c32214af5ce31c169882364e10123e58d53265ed0954dfdf5e3c"
+    },
+    {
+      "path": "Frontend/src/pages/PassCourts.jsx",
+      "sha256": "60495267497e00e58d70dcf920aa0a7e4b8edaf456807da17c0393bb8d712e77"
+    }
+  ],
+  "tasks": [
+    {
+      "id": "W04-N1",
+      "week": 4,
+      "owner": "Người 1",
+      "ownership": "Tech Lead · Booking Core",
+      "reviewer": "Người 2",
+      "estimatedHours": 8,
+      "originalStatus": "Chưa bắt đầu",
+      "artifactStatus": "draft-awaiting-review",
+      "path": "docs/week-4/W04-N1_business-discovery.md",
+      "sourceRange": "'Kế hoạch 10 tuần'!A2:O2",
+      "deliverable": "BRD outline + domain glossary + context nghiệp vụ",
+      "definitionOfDone": "Actor, business state, happy/error paths được nhóm góp ý."
+    },
+    {
+      "id": "W04-N2",
+      "week": 4,
+      "owner": "Người 2",
+      "ownership": "Pass Marketplace · Frontend",
+      "reviewer": "Người 1",
+      "estimatedHours": 8,
+      "originalStatus": "Chưa bắt đầu",
+      "artifactStatus": "draft-awaiting-review",
+      "path": "docs/week-4/W04-N2_pass-ux.md",
+      "sourceRange": "'Kế hoạch 10 tuần'!A3:O3",
+      "deliverable": "User stories + pass wireflow + acceptance criteria",
+      "definitionOfDone": "Có điều kiện VALID/INVALID cho từng hành động pass; cả nhóm duyệt."
+    },
+    {
+      "id": "W04-N3",
+      "week": 4,
+      "owner": "Người 3",
+      "ownership": "Social Realtime · Notification",
+      "reviewer": "Người 4",
+      "estimatedHours": 8,
+      "originalStatus": "Chưa bắt đầu",
+      "artifactStatus": "draft-awaiting-review",
+      "path": "docs/week-4/W04-N3_social-notification.md",
+      "sourceRange": "'Kế hoạch 10 tuần'!A4:O4",
+      "deliverable": "Chat business rules + message/notification scenarios",
+      "definitionOfDone": "Quy tắc phòng chat & notifications có ngoại lệ rõ."
+    },
+    {
+      "id": "W04-N4",
+      "week": 4,
+      "owner": "Người 4",
+      "ownership": "Identity · Commerce · Content",
+      "reviewer": "Người 3",
+      "estimatedHours": 8,
+      "originalStatus": "Chưa bắt đầu",
+      "artifactStatus": "draft-awaiting-review",
+      "path": "docs/week-4/W04-N4_identity-commerce-content.md",
+      "sourceRange": "'Kế hoạch 10 tuần'!A5:O5",
+      "deliverable": "RBAC draft + POS rules + admin use cases",
+      "definitionOfDone": "Trách nhiệm user/center manager/admin rõ; POS rule được review."
+    },
+    {
+      "id": "W04-N5",
+      "week": 4,
+      "owner": "Người 5",
+      "ownership": "AI Service · MLOps · Platform",
+      "reviewer": "Người 1",
+      "estimatedHours": 8,
+      "originalStatus": "Chưa bắt đầu",
+      "artifactStatus": "draft-awaiting-review",
+      "path": "docs/week-4/W04-N5_ai-nfr.md",
+      "sourceRange": "'Kế hoạch 10 tuần'!A6:O6",
+      "deliverable": "AI use cases + quality metrics + system NFR",
+      "definitionOfDone": "Giới hạn read-only và success metrics được nhóm thống nhất."
+    },
+    {
+      "id": "W05-N1",
+      "week": 5,
+      "owner": "Người 1",
+      "ownership": "Tech Lead · Booking Core",
+      "reviewer": "Người 4",
+      "estimatedHours": 9,
+      "originalStatus": "Chưa bắt đầu",
+      "artifactStatus": "draft-awaiting-review",
+      "path": "docs/week-5/W05-N1_architecture.md",
+      "sourceRange": "'Kế hoạch 10 tuần'!A7:O7",
+      "deliverable": "C4 + ADR-001/002/003 + ERD tổng quát",
+      "definitionOfDone": "Cả 5 người review, ADR accepted, câu hỏi kiến trúc quan trọng đã giải quyết."
+    },
+    {
+      "id": "W05-N2",
+      "week": 5,
+      "owner": "Người 2",
+      "ownership": "Pass Marketplace · Frontend",
+      "reviewer": "Người 1",
+      "estimatedHours": 8,
+      "originalStatus": "Chưa bắt đầu",
+      "artifactStatus": "draft-awaiting-review",
+      "path": "docs/week-5/W05-N2_pass-ui-api.md",
+      "sourceRange": "'Kế hoạch 10 tuần'!A8:O8",
+      "deliverable": "Wireframes + Pass OpenAPI + API examples",
+      "definitionOfDone": "Backend/frontend thống nhất request/response và transfer workflow."
+    },
+    {
+      "id": "W05-N3",
+      "week": 5,
+      "owner": "Người 3",
+      "ownership": "Social Realtime · Notification",
+      "reviewer": "Người 5",
+      "estimatedHours": 8,
+      "originalStatus": "Chưa bắt đầu",
+      "artifactStatus": "draft-awaiting-review",
+      "path": "docs/week-5/W05-N3_social-events.md",
+      "sourceRange": "'Kế hoạch 10 tuần'!A9:O9",
+      "deliverable": "Socket contract + event catalog + ADR",
+      "definitionOfDone": "JWT/room ACL, message store, notification retry thống nhất."
+    },
+    {
+      "id": "W05-N4",
+      "week": 5,
+      "owner": "Người 4",
+      "ownership": "Identity · Commerce · Content",
+      "reviewer": "Người 1",
+      "estimatedHours": 8,
+      "originalStatus": "Chưa bắt đầu",
+      "artifactStatus": "draft-awaiting-review",
+      "path": "docs/week-5/W05-N4_data-rbac.md",
+      "sourceRange": "'Kế hoạch 10 tuần'!A10:O10",
+      "deliverable": "ERD/schema v1 + role matrix + technology ADR",
+      "definitionOfDone": "Transaction sale-stock và quyền được mô hình hóa, data owner rõ."
+    },
+    {
+      "id": "W05-N5",
+      "week": 5,
+      "owner": "Người 5",
+      "ownership": "AI Service · MLOps · Platform",
+      "reviewer": "Người 3",
+      "estimatedHours": 9,
+      "originalStatus": "Chưa bắt đầu",
+      "artifactStatus": "draft-awaiting-review",
+      "path": "docs/week-5/W05-N5_ai-platform.md",
+      "sourceRange": "'Kế hoạch 10 tuần'!A11:O11",
+      "deliverable": "AI API/tool spec + system deployment + ADR",
+      "definitionOfDone": "Chốt model baseline/eval, tech budget, port/secrets, platform NFR."
+    }
+  ],
+  "gates": {
+    "G01": "awaiting-real-group-review-and-meeting-notes",
+    "G02": "awaiting-accepted-ADRs-and-contract-approvals",
+    "W6": "folder-only-not-runnable-health-gate"
+  },
+  "skeletons": [
+    {
+      "path": "services/identity-service",
+      "status": "folder-only",
+      "owner": "Người 4",
+      "directories": [
+        "prisma",
+        "src/auth",
+        "src/user",
+        "src/profile",
+        "src/oauth",
+        "src/role",
+        "src/session",
+        "src/common",
+        "tests/unit",
+        "tests/integration"
+      ]
+    },
+    {
+      "path": "services/commerce-service",
+      "status": "folder-only",
+      "owner": "Người 4",
+      "directories": [
+        "prisma",
+        "src/modules/product",
+        "src/modules/inventory",
+        "src/modules/stock",
+        "src/modules/sale",
+        "src/modules/invoice",
+        "src/modules/reporting",
+        "src/common",
+        "tests/unit",
+        "tests/integration"
+      ]
+    },
+    {
+      "path": "services/social-service",
+      "status": "folder-only",
+      "owner": "Người 3",
+      "directories": [
+        "src/friendship",
+        "src/conversation",
+        "src/message",
+        "src/gateway",
+        "src/clients",
+        "src/guards",
+        "src/common",
+        "tests/unit",
+        "tests/integration"
+      ]
+    },
+    {
+      "path": "services/content-service",
+      "status": "folder-only",
+      "owner": "Người 4",
+      "directories": [
+        "src/review",
+        "src/rating",
+        "src/news",
+        "src/clients",
+        "src/common",
+        "tests/unit",
+        "tests/integration"
+      ]
+    },
+    {
+      "path": "services/notification-service",
+      "status": "folder-only",
+      "owner": "Người 3",
+      "directories": [
+        "src/consumers",
+        "src/notification",
+        "src/delivery",
+        "src/adapters",
+        "src/retry",
+        "src/common",
+        "tests/unit",
+        "tests/integration"
+      ]
+    },
+    {
+      "path": "services/storage-service",
+      "status": "folder-only",
+      "owner": "Người 4 (API/quyền), phối hợp Người 5 (platform)",
+      "directories": [
+        "src/files",
+        "src/metadata",
+        "src/uploads",
+        "src/providers/cloudinary",
+        "src/authorization",
+        "src/common",
+        "tests/unit",
+        "tests/integration"
+      ]
+    }
+  ],
+  "weekNumbering": {
+    "firstWeek": 4,
+    "lastWeek": 13,
+    "offsetFromOriginal": 3,
+    "updatedDate": "2026-10-25"
+  }
+}

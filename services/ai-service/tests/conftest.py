@@ -60,6 +60,9 @@ class CoreFixture:
         self.fail_confirm_once = False
         self.fail_after_commit_once = False
         self.requests = []
+        self.calendar_override = None
+        self.centers_override = None
+        self.fail_calendar = False
 
     def transport(self, request):
         self.requests.append((request.method, request.url.path))
@@ -70,7 +73,8 @@ class CoreFixture:
             return httpx.Response(
                 200,
                 json={
-                    "items": [
+                    "items": self.centers_override
+                    or [
                         {
                             "id": CENTER,
                             "name": "Sân Cầu Giấy",
@@ -78,10 +82,14 @@ class CoreFixture:
                             "isActive": True,
                         }
                     ],
-                    "total": 1,
+                    "total": len(self.centers_override) if self.centers_override else 1,
                 },
             )
         if path.endswith("/availability"):
+            if self.fail_calendar:
+                return httpx.Response(503, json={"message": "test-owned Core failure"})
+            if self.calendar_override is not None:
+                return httpx.Response(200, json=self.calendar_override)
             return httpx.Response(
                 200,
                 json={
