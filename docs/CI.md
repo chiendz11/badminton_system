@@ -141,3 +141,38 @@ git push origin feat/booking-core
 `main` vẫn là default branch. Workflow tự chạy cho PR vào main, push main, merge queue hoặc workflow_dispatch; push feature đơn thuần không tự chạy. Nhánh feature này có test/backend/Web/Docker thật, khác trạng thái CI-only của ci/bootstrap. Kết quả local và runtime nằm trong hướng dẫn Booking Core; Trivy là gate của Actions và sẽ quét lại trên CI. Xem [VALIDATION.md](VALIDATION.md) cho kết quả local.
 
 Targeted cross-service/nightly integration và ECR/GitOps release sẽ thêm khi scenario thật tồn tại. Nguồn kiến trúc CI: [thảo luận CI mới](https://chatgpt.com/share/6ac2943b-efb4-83ec-b181-e9161879f28d).
+
+---
+
+## Luồng CD và Tích hợp GitOps (publish-and-deploy.yml)
+
+Tiếp nối phần CI kiểm tra chất lượng, hệ thống đã được bổ sung luồng Continuous Delivery (CD) theo mô hình chuẩn của MaintAI:
+
+```text
+[Push / Merge PR vào main hoặc feat/initial-implementation]
+       │
+       ▼ (1. publish-and-deploy.yml kích hoạt)
+[Build Docker Images cho các services]
+  - badminton-booking-core
+  - badminton-booking-core-migrations
+  - badminton-ai-service
+  - badminton-api-gateway
+  - badminton-web
+  - badminton-admin
+       │
+       ▼ (2. Push image lên GHCR)
+  ghcr.io/<owner>/badminton-<service>:sha-<sha>
+  ghcr.io/<owner>/badminton-<service>:latest
+       │
+       ▼ (3. Checkout badminton-gitops)
+[Chạy .github/scripts/update_gitops_images.py]
+  - Cập nhật image overrides vào environments/local/apps/kustomization.yaml
+       │
+       ▼ (4. Commit & Push lên badminton-gitops)
+[Argo CD tự động phát hiện commit mới và Sync Pods vào Cụm Kubernetes!]
+```
+
+Workflow hỗ trợ cả `workflow_dispatch` để trigger thủ công với các tham số:
+- `target_branch`: Nhánh mục tiêu trên `badminton-gitops` (mặc định: `feat/initial-implementation` hoặc `main`).
+- `services`: Chọn các service cần build (mặc định: `all`).
+
