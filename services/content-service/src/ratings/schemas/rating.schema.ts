@@ -6,16 +6,16 @@ export type RatingDocument = HydratedDocument<Rating>;
 
 @Schema({ timestamps: true })
 export class Rating {
-    @Prop({ required: true })
+    @Prop({ type: String, required: true })
     centerId!: string;
 
-    @Prop({ required: true })
+    @Prop({ type: String, required: true })
     userId!: string;
 
-    @Prop({ required: true, min: 1, max: 5 })
+    @Prop({ type: Number, required: true, min: 1, max: 5 })
     score!: number;
 
-    @Prop({ default: '' })
+    @Prop({ type: String, default: '' })
     comment!: string;
 }
 

@@ -11,6 +11,7 @@ COMPONENTS = [
     "booking-core",
     "ai-service",
     "api-gateway",
+    "content-service",
     "web",
     "admin"
 ]
