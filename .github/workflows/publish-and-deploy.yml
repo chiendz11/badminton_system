@@ -19,6 +19,7 @@ on:
       - 'services/booking-core/**'
       - 'services/ai-service/**'
       - 'services/api-gateway/**'
+      - 'services/content-service/**'
       - 'apps/web/**'
       - 'apps/admin/**'
       - 'packages/**'
@@ -57,6 +58,12 @@ jobs:
             context: .
             dockerfile: services/api-gateway/Dockerfile
             image: badminton-api-gateway
+            target: ""
+            build_args: ""
+          - name: content-service
+            context: .
+            dockerfile: services/content-service/Dockerfile
+            image: badminton-content-service
             target: ""
             build_args: ""
           - name: web

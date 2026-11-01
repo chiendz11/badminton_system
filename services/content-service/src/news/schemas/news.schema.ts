@@ -6,26 +6,26 @@ export type NewsDocument = HydratedDocument<News>;
 
 @Schema({ timestamps: true, collection: 'news' })
 export class News {
-    @Prop({ required: true, trim: true })
+    @Prop({ type: String, required: true, trim: true })
     title!: string;
 
-    @Prop({ required: true, trim: true })
+    @Prop({ type: String, required: true, trim: true })
     summary!: string;
 
-    @Prop({ default: '' })
+    @Prop({ type: String, default: '' })
     image!: string;
 
-    @Prop({ required: true })
+    @Prop({ type: String, required: true })
     url!: string;
 
-    @Prop({ default: 'general' })
+    @Prop({ type: String, default: 'general' })
     category!: string;
 
-    @Prop({ default: 'Unknown' })
+    @Prop({ type: String, default: 'Unknown' })
     source!: string;
 
     // Giữ định dạng ngày của hệ thống cũ
-    @Prop({ default: '' })
+    @Prop({ type: String, default: '' })
     date!: string;
 
     // Trường mới để sắp xếp thời gian chính xác
