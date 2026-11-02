@@ -1,5 +1,9 @@
 # Trợ lý hội thoại đặt sân
 
+Bản nâng cấp 27/10/2026 có diagnostics, near-miss một vi phạm, locked constraints, thương lượng và revalidation. Đọc [thiết kế và implementation V1](AI_SERVICE_UPGRADE.md) cho luồng hiện hành, cấu hình, contract và kiểm chứng; [walkthrough baseline](AI_SERVICE_CODE_WALKTHROUGH.md) giải thích nền tảng booking/persistence trước nâng cấp.
+
+Bổ sung 28/10/2026: chatbot xem lịch/lịch sử cá nhân, thống kê theo khoảng ngày, hủy booking với xác nhận riêng, so sánh trung tâm và trả lời FAQ có nguồn. [AI_ASSISTANCE_FEATURES.md](AI_ASSISTANCE_FEATURES.md) giải thích ví dụ hội thoại, guard/recovery, cách tính số liệu và toàn bộ file thay đổi. FAQ hiện dùng truy hồi từ khóa trên bảy bài quản lý phiên bản, chưa có embeddings/vector database.
+
 Triển khai theo `Ke_hoach_Chatbot_Conversational_Planning_Execution.md` người dùng cung cấp, tích hợp vào Booking Core hiện có. Điều chỉnh hai điểm so với sơ đồ minh họa: **slot là 60 phút** và tools gọi API của Core thay vì truy cập database sân/booking. Code nằm ở `services/ai-service`; trang chat mới `/booking-assistant` nằm trong Web hiện có. Giao diện booking/Admin gốc vẫn dùng gateway như trước.
 
 ## Kiến trúc và công nghệ
@@ -11,7 +15,8 @@ flowchart LR
   A --> L[LangChain / structured extraction]
   A --> F[LangGraph / rule planner]
   F --> S[(AI PostgreSQL / state, turns, checkpoints, trace)]
-  F --> T[Allowlisted tools / HTTPX]
+  F --> R[Constraint diagnostics / bounded ranking / negotiation]
+  R --> T[Allowlisted tools / HTTPX]
   T --> C[Booking Core / JWT, owner, quote, transaction]
   C --> D[(Booking PostgreSQL / allocation + outbox)]
 ```
@@ -34,9 +39,9 @@ Tài liệu chính thức: [LangChain structured output](https://docs.langchain.
 
 **Conversation state và cập nhật DIFF.** Model chỉ đề xuất các trường vừa thêm/sửa/bỏ, kèm evidence nằm trong tin nhắn. Backend merge vào state cũ, giữ trường không đổi. Đổi điều kiện tăng version, xóa options và nonce cũ; không chọn lại bằng ID của lần search đã hết hiệu lực. Model nhận điều kiện hiện tại và lượt nói mới, không cần gửi toàn bộ lịch sử hoặc JWT cho provider.
 
-**Rule-based planning trên state machine.** PARSE → MERGE → PLAN; thiếu/mơ hồ thì hỏi, đủ dữ liệu thì SEARCH → OBSERVE; không có kết quả thì REPLAN. Chọn option dẫn tới bước CONFIRM chờ consent; BOOK chỉ chạy sau đồng ý cuối. Đây là planner v1 trong tài liệu, không phải planner do LLM tự sinh rồi thực thi tùy ý. Mỗi lượt chạy graph từ đầu trên state bền vững; checkpoint giúp lưu/quan sát, còn durable booking intent bảo vệ side effect khi lỗi giữa chừng.
+**Rule-based planning trên state machine.** PARSE → MERGE → PLAN; thiếu/mơ hồ thì hỏi, đủ dữ liệu thì SEARCH → EVALUATE → OBSERVE. Không có nghiệm nhưng coverage đủ thì RECOMMEND → PROPOSE/ASK; đồng ý proposal chỉ đổi đúng field và query Core lại, không tự đặt. Chọn option dẫn tới bước CONFIRM chờ consent; BOOK chỉ chạy sau đồng ý cuối. Đây là planner với policy Python, không phải planner do LLM tự sinh rồi thực thi tùy ý. Mỗi lượt chạy graph từ đầu trên state bền vững; checkpoint giúp lưu/quan sát, còn durable booking intent bảo vệ side effect khi lỗi giữa chừng.
 
-**Constraint satisfaction trên miền rời rạc.** Với thời lượng `d`, cần `d/60` slot khả dụng liên tiếp của **cùng một sân**. `19:00–21:00` là `[1140,1200]`, không ghép một slot sân A với một slot sân B. Ngày, thời lượng, giá tổng và cửa sổ giờ là hard constraints. Giờ ưu tiên/khu vực chỉ được nới khi `soft_fields` cho phép. Lọc tính khả thi trước, rồi xếp theo độ lệch giờ ưu tiên, tổng tiền và thứ tự ổn định; không dùng bộ giải CSP hoặc thuật toán tối ưu mới.
+**Constraint satisfaction trên miền rời rạc.** Với thời lượng `d`, cần `d/60` slot khả dụng liên tiếp của **cùng một sân**. `19:00–21:00` là `[1140,1200]`, không ghép một slot sân A với một slot sân B. Ngày, thời lượng, giá tổng và cửa sổ giờ là hard constraints. Giờ ưu tiên/khu vực chỉ được nới tự động khi `soft_fields` cho phép. Near-miss V1 chỉ đề xuất đúng một thay đổi trong ngưỡng, loại mọi vi phạm field locked; chưa thành option cho đến khi user đồng ý và Core được query lại. Lọc tính khả thi trước, rồi xếp theo độ lệch giờ ưu tiên, tổng tiền và thứ tự ổn định; không dùng bộ giải CSP hoặc thuật toán tối ưu mới.
 
 **Human-in-the-loop.** Chọn sân chưa reserve/confirm. Server trả nonce, thời hạn và tóm tắt sân/ngày/giờ/tổng giá. Chỉ nonce hiện tại hoặc câu đồng ý rõ ràng cho lựa chọn đang hiệu lực mới cho phép BOOK; model trả intent `confirm` một mình không cấp quyền. Khi Core báo giá khác dự kiến, bỏ hold cũ và xin consent mới nếu giá còn trong ngân sách.
 
@@ -49,9 +54,9 @@ Tài liệu chính thức: [LangChain structured output](https://docs.langchain.
 - Múi giờ `Asia/Ho_Chi_Minh`; ngày từ hôm nay tới 90 ngày. “Mai”, “thứ bảy” được hiểu theo thời điểm nhận tin nhắn.
 - Duration phải là bội số 60; `90 phút` hoặc giờ ưu tiên `19:30` sẽ hỏi lại, không làm tròn. Biên cửa sổ có thể là `20:30`: đó là giờ **bắt đầu chậm nhất**, nên các slot bắt đầu 19:00/20:00 vẫn có thể chơi 2 tiếng.
 - “Khoảng 19:00” cho phép tìm giờ gần đó; giờ chính xác không tự nới kể cả có một cửa sổ rộng hơn. Giá trần là tổng của toàn thời lượng; quote lúc reserve của Core là nguồn quyết định.
-- Khu vực được so tên/địa chỉ bỏ dấu. Chưa có tọa độ/GPS nên không tuyên bố khoảng cách km hoặc sân gần nhất thực tế.
-- Đọc tối đa 500 trung tâm catalogue, kiểm tra tối đa 5 trung tâm khớp mặc định, trả tối đa 5 options. Giới hạn này có cấu hình tối đa 10; không tuyên bố tìm hết mọi sân khi catalogue lớn.
-- Search kiểm tra lịch song song trong giới hạn trên. Tối đa một lần tìm lại ngoài khu vực nếu khu vực là soft; không âm thầm vượt hard budget/date/duration/window. Conflict lúc đặt trả `SLOT_UNAVAILABLE`, yêu cầu người dùng tìm/chọn lại.
+- Khu vực được so token trên địa chỉ bỏ dấu; near-miss khu vực cần whitelist lân cận được cấu hình. Chưa có tọa độ/GPS nên không tuyên bố khoảng cách km hoặc sân gần nhất thực tế.
+- Workflow mặc định đọc tối đa 2 trang catalogue (100 mục/trang), kiểm tra tối đa 5 trung tâm, tạo tối đa 500 candidates và trả tối đa 5 options/3 proposals. Giới hạn có cấu hình; khi chưa đủ coverage trả `SEARCH_INCOMPLETE`, không tuyên bố hết sân.
+- Search có semaphore 2 request calendar và deadline toàn search 10 giây. Soft area được đánh giá trong cùng pool có giới hạn; không cần retry rộng không kiểm soát. Revalidation chỉ search mới một lần, không quay lại proposal tự động. Conflict lúc đặt vẫn trả `SLOT_UNAVAILABLE`.
 - Một lượt có deadline 40 giây; model timeout mặc định 25 giây, Core 5 giây/call; gateway 45 giây, client 65 giây. Request timeout giữ key để phục hồi, không tự báo đặt thành công.
 
 ## API và tools
@@ -62,11 +67,13 @@ Mọi endpoint sau cần business bearer JWT. Gateway chuyển các route conver
 | --- | --- | --- |
 | POST `/api/conversations` | cùng path | Tạo hội thoại của signed `sub`. |
 | GET `/api/conversations/:id` | cùng path | State, 200 lượt gần nhất, request chưa trả lời để replay với cùng key. |
-| POST `/api/conversations/:id/messages` | cùng path | Tin nhắn hoặc action select/confirm/retry; response có options, next action, nonce, booking và plan version. |
+| POST `/api/conversations/:id/messages` | cùng path | Tin nhắn hoặc action đặt/thương lượng, select_booking/confirm_cancellation/dismiss_cancellation/retry_cancellation/more_bookings; response có `assistance` bên cạnh options/proposals/diagnostics/booking. |
 | GET `/api/conversations/:id/trace` | cùng path | Các bước xử lý đã lưu; chỉ owner. |
 | GET `/api/ai/bookings/:id` | GET `/api/bookings/:id` | Đọc biên nhận qua Core; chatbot chỉ cho đọc booking của chính actor. |
 
-`search_availability` là LangChain StructuredTool, nhận constraints có schema, lấy catalogue/availability qua HTTP. `get_option_details` chỉ đọc option server đã lưu. `create_booking` là orchestration reserve/confirm/recovery có policy trong BOOK. `get_booking` chỉ gọi Core; không có SQL tool, payment/pass hoặc admin mutation trong allowlist.
+`search_availability` vẫn giữ adapter LangChain StructuredTool cho tương thích. Workflow cố định gọi trực tiếp `BookingTools.search_result` có kiểu để nhận diagnostics/coverage; không để LLM chọn đường mutation. `get_option_details` chỉ đọc option server đã lưu. `create_booking` là orchestration reserve/confirm/recovery có policy trong BOOK. `get_booking` chỉ gọi Core; không có SQL tool, payment/pass hoặc admin mutation trong allowlist.
+
+Nhánh `ASSIST` bổ sung `list_my_bookings`, `get_my_booking_stats`, `compare_centers`, `search_faq`, `cancel_my_booking`. Các thao tác gọi API Core hiện có; FAQ đọc knowledge JSON local. Riêng cancel cần preview, `cancellation_id`, owner check và durable intent trước mutation. Khi chưa rõ kết quả, trả `RETRY_CANCELLATION`; `confirmation_id` đặt sân không có quyền hủy booking.
 
 AI không được cấp database URL Booking Core trong runtime. Các biến `AI_LIVE_*` chỉ phục vụ integration test với DB tên kết thúc `_test`; fixture tạo/xóa dữ liệu của chính nó. Database AI lưu transcript và checkpoint, không lưu JWT/API key. Trace gồm node/outcome/version, không phải chain-of-thought riêng của model.
 
@@ -132,3 +139,7 @@ Gateway dùng **JWT Bearer HS256 stateless**: kiểm tra chữ ký `JWT_SECRET`,
 Phân quyền tài nguyên vẫn ở Core: user chỉ booking của mình, manager chỉ centre được quản lý, admin theo policy Core. Client không thể sửa `X-User-ID`/`X-User-Role` để tự cấp quyền. Catalogue/availability public; đặt/hủy/history/quản lý được bảo vệ. AI xác minh JWT lại và chỉ owner được đọc/ghi hội thoại, kể cả token admin cũng không đọc chat người khác. Không có Identity/login/refresh/revocation trong gateway; JWT hợp lệ còn hạn là nguồn danh tính hiện tại. [API_GATEWAY.md](API_GATEWAY.md) mô tả routes và cấu hình.
 
 `/metrics` cần bearer monitoring riêng, không dùng business JWT. AI readiness kiểm tra DB, checkpoint và Core, liveness kiểm tra tiến trình; không gọi model mất phí ở health check. Metrics: `ai_http_requests_total`, `ai_http_duration_seconds`, `ai_agent_actions_total`, `ai_tool_calls_total`, `ai_llm_tokens_total`. Labels hữu hạn, không chứa user/conversation/booking ID. Logs stdout có service/event/requestId/node/outcome hoặc method/route/status/durationMs; không log body, transcript, key hoặc Authorization. HTTP request ID đi Web → gateway → AI → Core. Xem [MONITORING.md](MONITORING.md) để scrape và xử lý sự cố.
+
+## Recommendation V1 và evaluation
+
+Ngưỡng near-miss, whitelist khu vực, TTL, coverage và quy trình kiểm tra được ghi ở [AI_SERVICE_UPGRADE](AI_SERVICE_UPGRADE.md). Hai lệnh bổ sung: `python -m evaluation.evaluate_recommendation` và `python -m evaluation.evaluate_conversations`, chạy trong thư mục service với dependency dev. Kết quả synthetic/FakeParser không thay thế đánh giá Groq thật hoặc bằng chứng live Core/PostgreSQL.

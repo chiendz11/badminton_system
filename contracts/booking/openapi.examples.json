@@ -1,0 +1,95 @@
+{
+  "valid": [
+    {
+      "schema": "PassCreate",
+      "value": {
+        "bookingId": "a1104000-0000-4000-8000-000000000002",
+        "resalePrice": 120000,
+        "description": "Sân tối thứ bảy"
+      }
+    },
+    {
+      "schema": "TransferRequest",
+      "value": {
+        "receiverUserId": "user-buyer"
+      }
+    },
+    {
+      "schema": "PassPost",
+      "value": {
+        "id": "b2204000-0000-4000-8000-000000000001",
+        "bookingId": "a1104000-0000-4000-8000-000000000001",
+        "sellerUserId": "user-seller",
+        "resalePrice": 120000,
+        "currency": "VND",
+        "status": "ACTIVE",
+        "expiresAt": "2026-11-07T11:00:00Z",
+        "version": 1,
+        "bookingSnapshot": {
+          "centerId": "a1104000-0000-4000-8000-000000000006",
+          "centerName": "Trung tâm A",
+          "date": "2026-11-07",
+          "selections": [
+            {
+              "courtId": "a1104000-0000-4000-8000-000000000008",
+              "courtName": "Sân 1",
+              "slots": [
+                1080
+              ],
+              "price": 120000
+            }
+          ],
+          "originalPrice": 120000,
+          "currency": "VND"
+        }
+      }
+    }
+  ],
+  "invalid": [
+    {
+      "schema": "PassCreate",
+      "value": {
+        "bookingId": "a1104000-0000-4000-8000-000000000002",
+        "resalePrice": -1
+      }
+    },
+    {
+      "schema": "TransferRequest",
+      "value": {
+        "receiverUserId": "user-buyer",
+        "sellerUserId": "forged"
+      }
+    },
+    {
+      "schema": "PassPost",
+      "value": {
+        "id": "b2204000-0000-4000-8000-000000000001",
+        "bookingId": "a1104000-0000-4000-8000-000000000001",
+        "sellerUserId": "user-seller",
+        "resalePrice": 120000,
+        "currency": "VND",
+        "status": "ACTIVE",
+        "expiresAt": "2026-11-07T11:00:00Z",
+        "version": 1,
+        "bookingSnapshot": {
+          "centerId": "a1104000-0000-4000-8000-000000000006",
+          "centerName": "Trung tâm A",
+          "date": "2026-11-07",
+          "selections": [
+            {
+              "courtId": "a1104000-0000-4000-8000-000000000008",
+              "courtName": "Sân 1",
+              "slots": [
+                1080,
+                1080
+              ],
+              "price": 120000
+            }
+          ],
+          "originalPrice": 120000,
+          "currency": "VND"
+        }
+      }
+    }
+  ]
+}

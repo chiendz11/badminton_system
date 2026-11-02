@@ -1,4 +1,5 @@
 import { useCallback, useContext, useEffect, useRef, useState } from "react";
+import { AssistancePanel } from "../components/AssistancePanel";
 import Header from "../../../shared/ui/Header.jsx";
 import { SessionContext } from "../../../shared/session/SessionContext.jsx";
 import {
@@ -9,6 +10,7 @@ import {
   type ChatResponse,
   type ChatRequest,
   type Option,
+  type Proposal,
 } from "../api/chat";
 
 export default function BookingAssistant() {
@@ -54,6 +56,9 @@ export default function BookingAssistant() {
             setResult({
               ...last,
               options: data.state.options,
+              assistance: data.state.assistance || null,
+              proposals: data.state.pending_negotiation?.proposals || [],
+              pending_negotiation: data.state.pending_negotiation || null,
               selected_option_id: data.state.selected_option_id,
               confirmation_id: data.state.confirmation_id,
               requires_confirmation:
@@ -119,7 +124,12 @@ export default function BookingAssistant() {
     [busy, id, owner],
   );
   async function reset() {
-    if (busy || uncertain.current || result?.action === "RETRY_BOOKING") return;
+    if (
+      busy ||
+      uncertain.current ||
+      ["RETRY_BOOKING", "RETRY_CANCELLATION"].includes(result?.action || "")
+    )
+      return;
     localStorage.removeItem(`booking-assistant:${owner}`);
     setId(null);
     setMessages([]);
@@ -175,7 +185,11 @@ export default function BookingAssistant() {
         )}
         <button
           disabled={
-            busy || !!uncertain.current || result?.action === "RETRY_BOOKING"
+            busy ||
+            !!uncertain.current ||
+            ["RETRY_BOOKING", "RETRY_CANCELLATION"].includes(
+              result?.action || "",
+            )
           }
           className="bg-green-700 text-white px-4 py-2 rounded disabled:opacity-50"
           onClick={() =>
@@ -191,6 +205,84 @@ export default function BookingAssistant() {
       </article>
     );
   }
+  function proposalCard(proposal: Proposal) {
+    const expired = new Date(proposal.expires_at).getTime() <= Date.now();
+    const disabled =
+      busy ||
+      !!uncertain.current ||
+      expired ||
+      ["RETRY_BOOKING", "RETRY_CANCELLATION"].includes(result?.action || "");
+    return (
+      <article
+        key={proposal.proposal_id}
+        className="rounded-lg border border-amber-400 bg-amber-50 p-4 space-y-2"
+      >
+        <h3 className="font-bold text-amber-900">
+          Đề xuất thay đổi điều kiện · {proposal.court_name} ·{" "}
+          {proposal.center_name}
+        </h3>
+        <p>
+          {new Date(proposal.start).toLocaleString("vi-VN", {
+            timeZone: "Asia/Ho_Chi_Minh",
+          })}{" "}
+          →{" "}
+          {new Date(proposal.end).toLocaleTimeString("vi-VN", {
+            timeZone: "Asia/Ho_Chi_Minh",
+            hour: "2-digit",
+            minute: "2-digit",
+          })}
+        </p>
+        <p>
+          Tổng giá:{" "}
+          <strong>{proposal.total_price_vnd.toLocaleString("vi-VN")} đ</strong>
+        </p>
+        <ul>
+          {proposal.violations.map((violation) => (
+            <li key={violation.field}>
+              {violation.field === "max_total_price_vnd"
+                ? `Cao hơn ngân sách ${(violation.delta || 0).toLocaleString("vi-VN")} đ`
+                : violation.field === "area"
+                  ? `Khu vực lân cận: ${violation.actual}`
+                  : `${(violation.delta || 0) > 0 ? "Muộn" : "Sớm"} hơn ${Math.abs(violation.delta || 0)} phút`}
+            </li>
+          ))}
+        </ul>
+        <p className="text-sm">
+          Đề xuất chưa được giữ chỗ. Đồng ý chỉ đổi điều kiện và kiểm tra lại
+          lịch/giá; bạn vẫn cần chọn sân rồi xác nhận đặt.
+        </p>
+        {expired && <p>Đề xuất đã hết hạn. Hãy tìm lại lịch hiện tại.</p>}
+        <div className="flex gap-3">
+          <button
+            disabled={disabled}
+            className="bg-amber-700 text-white px-3 py-2 rounded disabled:opacity-50"
+            onClick={() =>
+              post({
+                text: "Đồng ý đổi điều kiện theo đề xuất",
+                action: "accept_proposal",
+                proposal_id: proposal.proposal_id,
+              })
+            }
+          >
+            Đồng ý đổi điều kiện
+          </button>
+          <button
+            disabled={disabled}
+            className="border px-3 py-2 rounded disabled:opacity-50"
+            onClick={() =>
+              post({
+                text: "Từ chối đề xuất, giữ điều kiện hiện tại",
+                action: "reject_proposal",
+                proposal_id: proposal.proposal_id,
+              })
+            }
+          >
+            Giữ điều kiện hiện tại
+          </button>
+        </div>
+      </article>
+    );
+  }
   return (
     <>
       <Header />
@@ -200,7 +292,11 @@ export default function BookingAssistant() {
           <button
             onClick={reset}
             disabled={
-              busy || !!uncertain.current || result?.action === "RETRY_BOOKING"
+              busy ||
+              !!uncertain.current ||
+              ["RETRY_BOOKING", "RETRY_CANCELLATION"].includes(
+                result?.action || "",
+              )
             }
             className="border rounded px-3 py-2"
           >
@@ -209,7 +305,9 @@ export default function BookingAssistant() {
         </div>
         <p>
           Mỗi slot là 1 tiếng. Ví dụ: “Tối mai khoảng 19:00, chơi 2 tiếng, dưới
-          250 nghìn, gần Cầu Giấy”. Chọn sân rồi xác nhận cuối để đặt.
+          250 nghìn, gần Cầu Giấy”. Chọn sân rồi xác nhận cuối để đặt. Bạn cũng
+          có thể xem lịch cá nhân, thống kê, yêu cầu hủy booking, so sánh trung
+          tâm hoặc hỏi hướng dẫn.
         </p>
         {!owner && (
           <p role="alert" className="bg-yellow-100 p-4 rounded">
@@ -231,7 +329,7 @@ export default function BookingAssistant() {
               className={
                 message.role === "user"
                   ? "ml-10 bg-white p-3 rounded-lg"
-                  : "mr-10 bg-green-100 p-3 rounded-lg"
+                  : "mr-10 bg-green-100 p-3 rounded-lg whitespace-pre-line"
               }
             >
               <strong>{message.role === "user" ? "Bạn" : "Trợ lý"}: </strong>
@@ -267,7 +365,7 @@ export default function BookingAssistant() {
             maxLength={2000}
             disabled={busy || !owner || !!uncertain.current}
             className="flex-1 border rounded p-3"
-            placeholder="Nhập ngày, giờ, thời lượng hoặc sửa yêu cầu..."
+            placeholder="Tìm sân, xem lịch, thống kê, hủy booking hoặc hỏi hướng dẫn..."
           />
           <button
             disabled={busy || !owner || !text.trim() || !!uncertain.current}
@@ -276,9 +374,28 @@ export default function BookingAssistant() {
             {busy ? "Đang xử lý..." : "Gửi"}
           </button>
         </form>
+        {result?.assistance && (
+          <AssistancePanel
+            data={result.assistance}
+            disabled={busy || !!uncertain.current}
+            post={post}
+          />
+        )}
         <div className="grid md:grid-cols-2 gap-4">
           {result?.options.map(card)}
         </div>
+        {result?.diagnostics?.coverage === "partial" && (
+          <p role="status" className="bg-amber-50 p-3 rounded">
+            Kết quả chỉ thuộc phạm vi đã kiểm tra; chưa thể kết luận toàn bộ khu
+            vực hết sân.
+          </p>
+        )}
+        <section
+          aria-label="Đề xuất thay đổi điều kiện"
+          className="grid md:grid-cols-2 gap-4"
+        >
+          {result?.proposals?.map(proposalCard)}
+        </section>
         {result?.requires_confirmation && selected && (
           <section className="bg-yellow-100 border rounded-lg p-5 space-y-3">
             <h2 className="font-bold">Xác nhận cuối</h2>
@@ -326,7 +443,11 @@ export default function BookingAssistant() {
         )}
         {result?.booking && (
           <section className="bg-green-100 p-5 rounded-lg">
-            <h2 className="font-bold">Booking đã xác nhận</h2>
+            <h2 className="font-bold">
+              {result.booking.status === "CANCELLED"
+                ? "Booking đã hủy"
+                : "Booking đã xác nhận"}
+            </h2>
             <p>Mã: {result.booking.id}</p>
             <p>
               Tổng giá Core: {result.booking.totalPrice.toLocaleString("vi-VN")}{" "}

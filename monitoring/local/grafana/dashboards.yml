@@ -1,0 +1,10 @@
+apiVersion: 1
+providers:
+  - name: badminton
+    orgId: 1
+    folder: Badminton
+    type: file
+    disableDeletion: false
+    editable: false
+    options:
+      path: /var/lib/grafana/dashboards

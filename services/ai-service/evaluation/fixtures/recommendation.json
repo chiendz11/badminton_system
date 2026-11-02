@@ -1,0 +1,324 @@
+{
+  "description": "Synthetic, manually labeled V1 policy fixtures; not user preference ground truth or a live Core snapshot.",
+  "cases": [
+    {
+      "id": "design-example",
+      "constraints": {
+        "date": "2030-01-08",
+        "preferred_start": 1140,
+        "duration_minutes": 120,
+        "max_total_price_vnd": 200000,
+        "area": "Cầu Giấy"
+      },
+      "candidates": [
+        {
+          "id": "A",
+          "minute": 1140,
+          "total_price_vnd": 220000
+        },
+        {
+          "id": "B",
+          "minute": 1200,
+          "total_price_vnd": 180000
+        },
+        {
+          "id": "C",
+          "minute": 1140,
+          "total_price_vnd": 270000
+        },
+        {
+          "id": "D",
+          "minute": 1320,
+          "total_price_vnd": 180000
+        },
+        {
+          "id": "E",
+          "minute": 1200,
+          "total_price_vnd": 250000
+        }
+      ],
+      "feasible": [],
+      "near_miss": [
+        "A",
+        "B"
+      ]
+    },
+    {
+      "id": "locked-time",
+      "constraints": {
+        "date": "2030-01-08",
+        "preferred_start": 1140,
+        "duration_minutes": 120,
+        "max_total_price_vnd": 200000,
+        "area": "Cầu Giấy",
+        "locked_fields": [
+          "preferred_start"
+        ]
+      },
+      "candidates": [
+        {
+          "id": "A",
+          "minute": 1140,
+          "total_price_vnd": 220000
+        },
+        {
+          "id": "B",
+          "minute": 1200,
+          "total_price_vnd": 180000
+        }
+      ],
+      "feasible": [],
+      "near_miss": [
+        "A"
+      ]
+    },
+    {
+      "id": "locked-budget",
+      "constraints": {
+        "date": "2030-01-08",
+        "preferred_start": 1140,
+        "duration_minutes": 120,
+        "max_total_price_vnd": 200000,
+        "area": "Cầu Giấy",
+        "locked_fields": [
+          "max_total_price_vnd"
+        ]
+      },
+      "candidates": [
+        {
+          "id": "A",
+          "minute": 1140,
+          "total_price_vnd": 220000
+        },
+        {
+          "id": "B",
+          "minute": 1200,
+          "total_price_vnd": 180000
+        }
+      ],
+      "feasible": [],
+      "near_miss": [
+        "B"
+      ]
+    },
+    {
+      "id": "two-violations",
+      "constraints": {
+        "date": "2030-01-08",
+        "preferred_start": 1140,
+        "duration_minutes": 120,
+        "max_total_price_vnd": 200000,
+        "area": "Cầu Giấy"
+      },
+      "candidates": [
+        {
+          "id": "E",
+          "minute": 1200,
+          "total_price_vnd": 220000
+        }
+      ],
+      "feasible": [],
+      "near_miss": []
+    },
+    {
+      "id": "exact-suppresses-proposals",
+      "constraints": {
+        "date": "2030-01-08",
+        "preferred_start": 1140,
+        "duration_minutes": 120,
+        "max_total_price_vnd": 200000,
+        "area": "Cầu Giấy"
+      },
+      "candidates": [
+        {
+          "id": "A",
+          "minute": 1140,
+          "total_price_vnd": 200000
+        },
+        {
+          "id": "B",
+          "minute": 1200,
+          "total_price_vnd": 180000
+        }
+      ],
+      "feasible": [
+        "A"
+      ],
+      "near_miss": []
+    },
+    {
+      "id": "zero-budget",
+      "constraints": {
+        "date": "2030-01-08",
+        "preferred_start": 1140,
+        "duration_minutes": 120,
+        "max_total_price_vnd": 0,
+        "area": "Cầu Giấy"
+      },
+      "candidates": [
+        {
+          "id": "A",
+          "minute": 1140,
+          "total_price_vnd": 1
+        }
+      ],
+      "feasible": [],
+      "near_miss": []
+    },
+    {
+      "id": "soft-window",
+      "constraints": {
+        "date": "2030-01-08",
+        "preferred_start": 1140,
+        "duration_minutes": 120,
+        "max_total_price_vnd": 200000,
+        "area": "Cầu Giấy",
+        "soft_fields": [
+          "preferred_start"
+        ],
+        "earliest_start": 1080,
+        "latest_start": 1200
+      },
+      "candidates": [
+        {
+          "id": "B",
+          "minute": 1200,
+          "total_price_vnd": 180000
+        },
+        {
+          "id": "D",
+          "minute": 1260,
+          "total_price_vnd": 180000
+        }
+      ],
+      "feasible": [
+        "B"
+      ],
+      "near_miss": []
+    },
+    {
+      "id": "price-boundary",
+      "constraints": {
+        "date": "2030-01-08",
+        "preferred_start": 1140,
+        "duration_minutes": 120,
+        "max_total_price_vnd": 200000,
+        "area": "Cầu Giấy"
+      },
+      "candidates": [
+        {
+          "id": "A",
+          "minute": 1140,
+          "total_price_vnd": 240000
+        },
+        {
+          "id": "C",
+          "minute": 1140,
+          "total_price_vnd": 240001
+        }
+      ],
+      "feasible": [],
+      "near_miss": [
+        "A"
+      ]
+    },
+    {
+      "id": "time-boundary",
+      "constraints": {
+        "date": "2030-01-08",
+        "preferred_start": 1140,
+        "duration_minutes": 120,
+        "max_total_price_vnd": 200000,
+        "area": "Cầu Giấy"
+      },
+      "candidates": [
+        {
+          "id": "B",
+          "minute": 1200,
+          "total_price_vnd": 180000
+        },
+        {
+          "id": "C",
+          "minute": 1260,
+          "total_price_vnd": 180000
+        }
+      ],
+      "feasible": [],
+      "near_miss": [
+        "B"
+      ]
+    },
+    {
+      "id": "unknown-neighbor",
+      "constraints": {
+        "date": "2030-01-08",
+        "preferred_start": 1140,
+        "duration_minutes": 120,
+        "max_total_price_vnd": 200000,
+        "area": "Cầu Giấy"
+      },
+      "candidates": [
+        {
+          "id": "A",
+          "minute": 1140,
+          "total_price_vnd": 180000,
+          "area_matches": false
+        }
+      ],
+      "feasible": [],
+      "near_miss": []
+    },
+    {
+      "id": "configured-neighbor",
+      "constraints": {
+        "date": "2030-01-08",
+        "preferred_start": 1140,
+        "duration_minutes": 120,
+        "max_total_price_vnd": 200000,
+        "area": "Cầu Giấy"
+      },
+      "candidates": [
+        {
+          "id": "A",
+          "minute": 1140,
+          "total_price_vnd": 180000,
+          "area_matches": false,
+          "configured_neighbor": "Nam Từ Liêm"
+        }
+      ],
+      "feasible": [],
+      "near_miss": [
+        "A"
+      ]
+    },
+    {
+      "id": "weights-change-order-without-preference-ground-truth",
+      "constraints": {
+        "date": "2030-01-08",
+        "preferred_start": 1140,
+        "duration_minutes": 120,
+        "max_total_price_vnd": 200000,
+        "area": "Cầu Giấy"
+      },
+      "candidates": [
+        {
+          "id": "price",
+          "minute": 1140,
+          "total_price_vnd": 220000
+        },
+        {
+          "id": "area",
+          "minute": 1140,
+          "total_price_vnd": 180000,
+          "area_matches": false,
+          "configured_neighbor": "Nam Từ Liêm"
+        }
+      ],
+      "feasible": [],
+      "near_miss": [
+        "price",
+        "area"
+      ]
+    }
+  ]
+}

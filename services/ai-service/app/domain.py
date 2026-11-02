@@ -1,4 +1,5 @@
 import copy
+import re
 import unicodedata
 from datetime import date, datetime, timedelta
 from uuid import uuid4
@@ -25,8 +26,33 @@ def merge_state(old: dict, parsed: ParsedMessage, text: str):
         if normalized(c.evidence) not in normalized(text):
             raise ValueError("Điều kiện thiếu bằng chứng từ tin nhắn")
         values[c.field] = c.value
+        if c.value != state["constraints"].get(c.field):
+            values["locked_fields"] = [f for f in values.get("locked_fields", []) if f != c.field]
     if parsed.soft_fields is not None:
+        added = set(parsed.soft_fields) - set(values.get("soft_fields", []))
+        words = normalized(text)
+        if "preferred_start" in added and not re.search(
+            r"(?:khoang|uu tien(?: luc| gio)?)\s*\d|linh hoat.{0,20}(?:gio|thoi gian)", words
+        ):
+            raise ValueError("Giờ mềm cần sự cho phép rõ ràng cho chính thời gian")
+        if "area" in added:
+            area = normalized(str(values.get("area") or ""))
+            if not (
+                area and re.search(r"uu tien(?: khu vuc| khu)?\s*" + re.escape(area), words)
+            ) and not re.search(r"linh hoat.{0,20}(?:khu vuc|dia diem)", words):
+                raise ValueError("Khu vực mềm cần sự cho phép rõ ràng cho chính địa điểm")
         values["soft_fields"] = parsed.soft_fields
+    for lock in parsed.locks:
+        evidence = normalized(lock.evidence)
+        if evidence not in normalized(text) or not any(
+            word in evidence
+            for word in ["chi ", "khong doi", "giu nguyen", "tuyet doi", "khong qua"]
+        ):
+            raise ValueError("Điều kiện khóa cần bằng chứng không muốn thay đổi")
+        values["locked_fields"] = sorted(set(values.get("locked_fields", [])) | {lock.field})
+    values["soft_fields"] = [
+        f for f in values.get("soft_fields", []) if f not in values.get("locked_fields", [])
+    ]
     updated = Constraints.model_validate(values).model_dump()
     changed = updated != state["constraints"]
     if changed and state.get("pending_booking"):
@@ -40,6 +66,9 @@ def merge_state(old: dict, parsed: ParsedMessage, text: str):
             confirmation_id=None,
             confirmation_expires_at=None,
             booking=None,
+            pending_negotiation=None,
+            search_result=None,
+            rejected_proposal_keys=[],
         )
     return state, changed
 

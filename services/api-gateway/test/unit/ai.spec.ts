@@ -24,6 +24,45 @@ function token(role = "user") {
   });
 }
 describe("AI gateway boundary", () => {
+  it("forwards proposal acceptance while rejecting IDs used with the wrong action", async () => {
+    const transport = vi.fn(
+      async () =>
+        new Response(
+          JSON.stringify({ action: "SEARCH_RESULTS", options: [] }),
+          { status: 200 },
+        ),
+    );
+    const server = createApp(config, transport);
+    const body = {
+      text: "Đồng ý đổi điều kiện",
+      client_message_id: "proposal-message-001",
+      action: "accept_proposal",
+      proposal_id: id,
+    };
+    await request(server)
+      .post(`/api/conversations/${id}/messages`)
+      .set("Authorization", "Bearer " + token())
+      .send(body)
+      .expect(200);
+    expect(
+      JSON.parse(
+        (transport.mock.calls[0] as unknown as [string, RequestInit])[1]
+          .body as string,
+      ),
+    ).toEqual(body);
+    for (const invalid of [
+      { ...body, action: "select" },
+      { ...body, proposal_id: undefined },
+      { ...body, confirmation_id: id },
+    ]) {
+      await request(server)
+        .post(`/api/conversations/${id}/messages`)
+        .set("Authorization", "Bearer " + token())
+        .send(invalid)
+        .expect(400);
+    }
+    expect(transport).toHaveBeenCalledTimes(1);
+  });
   it("requires a verified JWT before calling AI", async () => {
     const transport = vi.fn();
     await request(createApp(config, transport))
@@ -101,4 +140,43 @@ describe("AI gateway boundary", () => {
     expect(response.text).not.toContain("private-network-address");
     expect(failed).toHaveBeenCalledTimes(1);
   });
+});
+
+it("keeps cancellation consent separate and forwards only the server-issued nonce", async () => {
+  const transport = vi.fn(
+    async () =>
+      new Response(JSON.stringify({ action: "BOOKING_CANCELLED" }), {
+        status: 200,
+      }),
+  );
+  const server = createApp(config, transport);
+  const body = {
+    text: "Xác nhận hủy booking",
+    client_message_id: "cancel-message-001",
+    action: "confirm_cancellation",
+    cancellation_id: id,
+  };
+  await request(server)
+    .post(`/api/conversations/${id}/messages`)
+    .set("Authorization", "Bearer " + token())
+    .send(body)
+    .expect(200);
+  for (const invalid of [
+    { ...body, cancellation_id: undefined },
+    { ...body, action: "confirm" },
+    { ...body, confirmation_id: id },
+    { ...body, booking_choice_id: id },
+    {
+      text: "Chọn booking",
+      client_message_id: "choose-message",
+      action: "select_booking",
+    },
+  ]) {
+    await request(server)
+      .post(`/api/conversations/${id}/messages`)
+      .set("Authorization", "Bearer " + token())
+      .send(invalid)
+      .expect(400);
+  }
+  expect(transport).toHaveBeenCalledTimes(1);
 });

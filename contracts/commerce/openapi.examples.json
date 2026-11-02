@@ -1,0 +1,32 @@
+{
+  "valid": [
+    {
+      "schema": "SaleRequest",
+      "value": {
+        "centerId": "a1104000-0000-4000-8000-000000000006",
+        "items": [
+          {
+            "productId": "a1104000-0000-4000-8000-000000000007",
+            "quantity": 2
+          }
+        ],
+        "paymentMethod": "CASH"
+      }
+    }
+  ],
+  "invalid": [
+    {
+      "schema": "SaleRequest",
+      "value": {
+        "centerId": "a1104000-0000-4000-8000-000000000006",
+        "items": [
+          {
+            "productId": "a1104000-0000-4000-8000-000000000007",
+            "quantity": 0
+          }
+        ],
+        "paymentMethod": "CASH"
+      }
+    }
+  ]
+}

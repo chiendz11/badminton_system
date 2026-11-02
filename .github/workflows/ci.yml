@@ -36,6 +36,18 @@ jobs:
         run: python -m pip install PyYAML==6.0.3
       - name: Validate manifest and dependency graph
         run: python .github/scripts/ci_manifest.py
+      - uses: azure/setup-helm@1a275c3b69536ee54be43f2070a358922e12c8d4
+        with:
+          version: v4.2.2
+      - name: Validate shared monitoring sources and local Compose
+        run: python monitoring/check.py
+      - name: Validate Prometheus rules
+        shell: bash
+        run: |-
+          rules=(monitoring/chart/rules/*.yml)
+          docker run --rm --entrypoint /bin/promtool \
+            -v "$PWD:/repo:ro" -w /repo \
+            prom/prometheus:v3.15.1 check rules "${rules[@]}"
       - name: Check CI script syntax without running application tests
         run: |-
           python - <<'PYTHON'

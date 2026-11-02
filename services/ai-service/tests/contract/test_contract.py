@@ -6,10 +6,33 @@ import httpx
 from jsonschema import Draft202012Validator, FormatChecker
 
 from app.core_client import BookingCoreClient
+from app.main import create_app
 from app.schemas import MessageRequest
 from app.tools import BookingTools, SearchArguments
 
 ROOT = Path(__file__).resolve().parents[4]
+
+
+def test_published_ai_api_matches_live_routes_and_message_schema_without_startup():
+    # OpenAPI generation does not run lifespan, open databases or call the LLM.
+    runtime = create_app(service=object(), config=object()).openapi()
+    published = json.loads((ROOT / "contracts/ai/openapi.json").read_text())
+    implemented = {
+        (path, method)
+        for path, item in published["paths"].items()
+        for method, operation in item.items()
+        if operation.get("x-implementation-status") == "implemented"
+    }
+    assert implemented == {
+        (path, method) for path, item in runtime["paths"].items() for method in item
+    }
+    assert (
+        published["components"]["schemas"]["MessageRequest"]
+        == runtime["components"]["schemas"]["MessageRequest"]
+    )
+    for name, schema in runtime["components"]["schemas"].items():
+        assert published["components"]["schemas"][name] == schema, name
+    assert published["paths"]["/v1/chat"]["post"]["x-implementation-status"] == "proposed"
 
 
 def test_published_request_schema_matches_api_request():
@@ -60,4 +83,9 @@ def test_tool_allowlist_has_no_sql_payment_or_admin_write():
         "get_option_details",
         "create_booking",
         "get_booking",
+        "list_my_bookings",
+        "get_my_booking_stats",
+        "compare_centers",
+        "search_faq",
+        "cancel_my_booking",
     }

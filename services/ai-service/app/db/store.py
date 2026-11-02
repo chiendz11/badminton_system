@@ -1,5 +1,4 @@
 import asyncio
-import copy
 import hashlib
 from contextlib import asynccontextmanager
 
@@ -8,7 +7,7 @@ from sqlalchemy import select, text
 from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
 
 from app.db.models import Conversation, Trace, Turn
-from app.schemas import initial_state
+from app.schemas import initial_state, normalize_state
 
 
 class Store:
@@ -80,14 +79,23 @@ class Store:
                             "response": t.response,
                         }
                     )
-            state = copy.deepcopy(item.state)
+            state = normalize_state(item.state)
             # A process can stop after committing consent/receipt but before the turn response.
             # Expose the durable outcome and the original request key for safe browser recovery.
-            if state.get("booking"):
-                state["next_action"] = "BOOKED"
+            if state.get("pending_cancellation"):
+                state["next_action"] = "RETRY_CANCELLATION"
+                if state.get("assistance"):
+                    state["assistance"]["cancellation_pending"] = True
             elif state.get("pending_booking"):
                 state["next_action"] = "RETRY_BOOKING"
             pending = next((t.request for t in turns if t.response is None), None)
+            if (
+                pending
+                and state.get("booking")
+                and not state.get("assistance")
+                and not state.get("pending_booking")
+            ):
+                state["next_action"] = "BOOKED"
             if pending:
                 pending = {key: value for key, value in pending.items() if value is not None}
             return {

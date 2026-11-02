@@ -1,0 +1,1974 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "Badminton Conversational Planning",
+    "version": "0.2.0",
+    "description": "Current FastAPI routes exported without starting the application lifespan, plus proposed read-only /v1/chat pending ADR-008. Responses without FastAPI response_model remain intentionally unschematized; this refactor does not invent runtime response contracts."
+  },
+  "paths": {
+    "/health/live": {
+      "get": {
+        "summary": "Live",
+        "operationId": "live_health_live_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        },
+        "x-implementation-status": "implemented",
+        "x-owner": "Người 5",
+        "security": []
+      }
+    },
+    "/health/ready": {
+      "get": {
+        "summary": "Ready",
+        "operationId": "ready_health_ready_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        },
+        "x-implementation-status": "implemented",
+        "x-owner": "Người 5",
+        "security": []
+      }
+    },
+    "/metrics": {
+      "get": {
+        "summary": "Metrics",
+        "operationId": "metrics_metrics_get",
+        "parameters": [
+          {
+            "name": "authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": "",
+              "title": "Authorization"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        },
+        "x-implementation-status": "implemented",
+        "x-owner": "Người 5",
+        "security": [
+          {
+            "MonitoringBearer": []
+          }
+        ]
+      }
+    },
+    "/api/conversations": {
+      "post": {
+        "summary": "Create",
+        "operationId": "create_api_conversations_post",
+        "parameters": [
+          {
+            "name": "authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": "",
+              "title": "Authorization"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        },
+        "x-implementation-status": "implemented",
+        "x-owner": "Người 5",
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ]
+      }
+    },
+    "/api/conversations/{conversation_id}": {
+      "get": {
+        "summary": "Read",
+        "operationId": "read_api_conversations__conversation_id__get",
+        "parameters": [
+          {
+            "name": "conversation_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Conversation Id"
+            }
+          },
+          {
+            "name": "authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": "",
+              "title": "Authorization"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        },
+        "x-implementation-status": "implemented",
+        "x-owner": "Người 5",
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ]
+      }
+    },
+    "/api/conversations/{conversation_id}/messages": {
+      "post": {
+        "summary": "Message",
+        "operationId": "message_api_conversations__conversation_id__messages_post",
+        "parameters": [
+          {
+            "name": "conversation_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Conversation Id"
+            }
+          },
+          {
+            "name": "authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": "",
+              "title": "Authorization"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MessageRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ConversationResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        },
+        "x-implementation-status": "implemented",
+        "x-owner": "Người 5",
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ]
+      }
+    },
+    "/api/conversations/{conversation_id}/trace": {
+      "get": {
+        "summary": "Trace",
+        "operationId": "trace_api_conversations__conversation_id__trace_get",
+        "parameters": [
+          {
+            "name": "conversation_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Conversation Id"
+            }
+          },
+          {
+            "name": "authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": "",
+              "title": "Authorization"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        },
+        "x-implementation-status": "implemented",
+        "x-owner": "Người 5",
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ]
+      }
+    },
+    "/api/bookings/{booking_id}": {
+      "get": {
+        "summary": "Booking",
+        "operationId": "booking_api_bookings__booking_id__get",
+        "parameters": [
+          {
+            "name": "booking_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Booking Id"
+            }
+          },
+          {
+            "name": "authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": "",
+              "title": "Authorization"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        },
+        "x-implementation-status": "implemented",
+        "x-owner": "Người 5",
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ]
+      }
+    },
+    "/v1/chat": {
+      "post": {
+        "operationId": "readOnlyAIChat",
+        "tags": [
+          "AI"
+        ],
+        "summary": "Read-only conversational advice",
+        "description": "PROPOSED — not implemented. Actor owns conversation. Read-only profile is Proposed pending ADR-008, existing execution API unchanged.",
+        "x-delivery-status": "proposed",
+        "x-owner-policy": "Actor owns conversation. Read-only profile is Proposed pending ADR-008, existing execution API unchanged.",
+        "responses": {
+          "200": {
+            "description": "Proposed success response",
+            "headers": {
+              "X-Request-Id": {
+                "schema": {
+                  "type": "string"
+                },
+                "description": "Correlation ID"
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AIChatResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/Error400"
+          },
+          "401": {
+            "$ref": "#/components/responses/Error401"
+          },
+          "403": {
+            "$ref": "#/components/responses/Error403"
+          },
+          "404": {
+            "$ref": "#/components/responses/Error404"
+          },
+          "409": {
+            "$ref": "#/components/responses/Error409"
+          },
+          "429": {
+            "$ref": "#/components/responses/Error429"
+          },
+          "503": {
+            "$ref": "#/components/responses/Error503"
+          }
+        },
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/XRequestId"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AIChatRequest"
+              }
+            }
+          }
+        },
+        "x-implementation-status": "proposed",
+        "x-owner": "Người 5",
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "x-gateway-path": "/api/ai/v1/chat"
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "HTTPValidationError": {
+        "properties": {
+          "detail": {
+            "items": {
+              "$ref": "#/components/schemas/ValidationError"
+            },
+            "type": "array",
+            "title": "Detail"
+          }
+        },
+        "type": "object",
+        "title": "HTTPValidationError"
+      },
+      "MessageRequest": {
+        "allOf": [
+          {
+            "if": {
+              "properties": {
+                "action": {
+                  "enum": [
+                    "accept_proposal",
+                    "reject_proposal"
+                  ]
+                }
+              },
+              "required": [
+                "action"
+              ]
+            },
+            "then": {
+              "properties": {
+                "proposal_id": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "proposal_id"
+              ]
+            },
+            "else": {
+              "properties": {
+                "proposal_id": {
+                  "type": "null"
+                }
+              }
+            }
+          },
+          {
+            "if": {
+              "properties": {
+                "action": {
+                  "enum": [
+                    "select_booking"
+                  ]
+                }
+              },
+              "required": [
+                "action"
+              ]
+            },
+            "then": {
+              "properties": {
+                "booking_choice_id": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "booking_choice_id"
+              ]
+            },
+            "else": {
+              "properties": {
+                "booking_choice_id": {
+                  "type": "null"
+                }
+              }
+            }
+          },
+          {
+            "if": {
+              "properties": {
+                "action": {
+                  "enum": [
+                    "confirm_cancellation"
+                  ]
+                }
+              },
+              "required": [
+                "action"
+              ]
+            },
+            "then": {
+              "properties": {
+                "cancellation_id": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "cancellation_id"
+              ]
+            },
+            "else": {
+              "properties": {
+                "cancellation_id": {
+                  "type": "null"
+                }
+              }
+            }
+          },
+          {
+            "if": {
+              "properties": {
+                "action": {
+                  "enum": [
+                    "accept_proposal",
+                    "reject_proposal",
+                    "select_booking",
+                    "confirm_cancellation",
+                    "dismiss_cancellation",
+                    "retry_cancellation",
+                    "more_bookings"
+                  ]
+                }
+              },
+              "required": [
+                "action"
+              ]
+            },
+            "then": {
+              "properties": {
+                "option_id": {
+                  "type": "null"
+                },
+                "confirmation_id": {
+                  "type": "null"
+                }
+              }
+            }
+          }
+        ],
+        "properties": {
+          "text": {
+            "type": "string",
+            "maxLength": 2000,
+            "minLength": 1,
+            "title": "Text"
+          },
+          "client_message_id": {
+            "type": "string",
+            "maxLength": 128,
+            "minLength": 8,
+            "pattern": "^[A-Za-z0-9_-]+$",
+            "title": "Client Message Id"
+          },
+          "action": {
+            "anyOf": [
+              {
+                "type": "string",
+                "enum": [
+                  "select",
+                  "confirm",
+                  "retry",
+                  "accept_proposal",
+                  "reject_proposal",
+                  "select_booking",
+                  "confirm_cancellation",
+                  "dismiss_cancellation",
+                  "retry_cancellation",
+                  "more_bookings"
+                ]
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Action"
+          },
+          "option_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 64
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Option Id"
+          },
+          "confirmation_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 64
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Confirmation Id"
+          },
+          "proposal_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "pattern": "^[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}$"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Proposal Id"
+          },
+          "booking_choice_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "pattern": "^[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}$"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Booking Choice Id"
+          },
+          "cancellation_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "pattern": "^[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}$"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Cancellation Id"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "text",
+          "client_message_id"
+        ],
+        "title": "MessageRequest"
+      },
+      "ValidationError": {
+        "properties": {
+          "loc": {
+            "items": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "integer"
+                }
+              ]
+            },
+            "type": "array",
+            "title": "Location"
+          },
+          "msg": {
+            "type": "string",
+            "title": "Message"
+          },
+          "type": {
+            "type": "string",
+            "title": "Error Type"
+          },
+          "input": {
+            "title": "Input"
+          },
+          "ctx": {
+            "type": "object",
+            "title": "Context"
+          }
+        },
+        "type": "object",
+        "required": [
+          "loc",
+          "msg",
+          "type"
+        ],
+        "title": "ValidationError"
+      },
+      "AIChatResponse": {
+        "type": "object",
+        "properties": {
+          "conversationId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "reply": {
+            "type": "string",
+            "minLength": 1
+          },
+          "constraints": {
+            "$ref": "#/components/schemas/Constraints"
+          },
+          "options": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AIOption"
+            }
+          },
+          "sources": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "sourceId": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "version": {
+                  "type": "string",
+                  "minLength": 1
+                }
+              },
+              "required": [
+                "sourceId",
+                "version"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "needsClarification": {
+            "type": "boolean"
+          },
+          "requestId": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "required": [
+          "conversationId",
+          "reply",
+          "constraints",
+          "options",
+          "sources",
+          "needsClarification",
+          "requestId"
+        ],
+        "additionalProperties": false
+      },
+      "Constraints": {
+        "type": "object",
+        "properties": {
+          "date": {
+            "type": "string",
+            "format": "date"
+          },
+          "centerId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "startMinute": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 1380,
+            "multipleOf": 60
+          },
+          "durationMinutes": {
+            "type": "integer",
+            "minimum": 60,
+            "maximum": 1440,
+            "multipleOf": 60
+          },
+          "maxPrice": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          }
+        },
+        "required": [],
+        "additionalProperties": false
+      },
+      "AIOption": {
+        "type": "object",
+        "properties": {
+          "centerId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "courtId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "date": {
+            "type": "string",
+            "format": "date"
+          },
+          "startMinute": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 1380,
+            "multipleOf": 60
+          },
+          "durationMinutes": {
+            "type": "integer",
+            "minimum": 60,
+            "maximum": 1440,
+            "multipleOf": 60
+          },
+          "totalPrice": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          },
+          "currency": {
+            "type": "string",
+            "enum": [
+              "VND"
+            ]
+          }
+        },
+        "required": [
+          "centerId",
+          "courtId",
+          "date",
+          "startMinute",
+          "durationMinutes",
+          "totalPrice",
+          "currency"
+        ],
+        "additionalProperties": false
+      },
+      "Error": {
+        "$ref": "../shared/error.schema.json"
+      },
+      "AIChatRequest": {
+        "type": "object",
+        "properties": {
+          "conversationId": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "uuid"
+          },
+          "message": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 2000
+          },
+          "clientMessageId": {
+            "type": "string",
+            "minLength": 8,
+            "maxLength": 128
+          }
+        },
+        "required": [
+          "message",
+          "clientMessageId"
+        ],
+        "additionalProperties": false
+      },
+      "ConstraintViolation": {
+        "properties": {
+          "field": {
+            "type": "string",
+            "enum": [
+              "date",
+              "preferred_start",
+              "earliest_start",
+              "latest_start",
+              "duration_minutes",
+              "max_total_price_vnd",
+              "area"
+            ],
+            "title": "Field"
+          },
+          "requested": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Requested"
+          },
+          "actual": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "integer"
+              }
+            ],
+            "title": "Actual"
+          },
+          "delta": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Delta"
+          },
+          "relative_delta": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Relative Delta"
+          },
+          "severity": {
+            "type": "string",
+            "enum": [
+              "within_near_miss_threshold",
+              "outside_policy",
+              "locked"
+            ],
+            "title": "Severity"
+          },
+          "negotiable": {
+            "type": "boolean",
+            "title": "Negotiable"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "field",
+          "requested",
+          "actual",
+          "severity",
+          "negotiable"
+        ],
+        "title": "ConstraintViolation"
+      },
+      "ConversationResponse": {
+        "properties": {
+          "conversation_id": {
+            "type": "string",
+            "title": "Conversation Id"
+          },
+          "assistant_message": {
+            "type": "string",
+            "title": "Assistant Message"
+          },
+          "action": {
+            "type": "string",
+            "title": "Action"
+          },
+          "options": {
+            "items": {
+              "$ref": "#/components/schemas/Option"
+            },
+            "type": "array",
+            "title": "Options"
+          },
+          "proposals": {
+            "items": {
+              "$ref": "#/components/schemas/NearMissOption"
+            },
+            "type": "array",
+            "title": "Proposals"
+          },
+          "diagnostics": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/SearchDiagnostics"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "search_metadata": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/SearchMetadata"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "pending_negotiation": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/NegotiationContext"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "assistance": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/AssistanceResult"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "selected_option_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Selected Option Id"
+          },
+          "confirmation_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Confirmation Id"
+          },
+          "requires_confirmation": {
+            "type": "boolean",
+            "title": "Requires Confirmation"
+          },
+          "booking": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Booking"
+          },
+          "plan_version": {
+            "type": "integer",
+            "title": "Plan Version"
+          },
+          "plan": {
+            "items": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "type": "array",
+            "title": "Plan"
+          },
+          "provider": {
+            "type": "string",
+            "title": "Provider"
+          },
+          "slot_minutes": {
+            "type": "integer",
+            "title": "Slot Minutes"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "conversation_id",
+          "assistant_message",
+          "action",
+          "options",
+          "selected_option_id",
+          "confirmation_id",
+          "requires_confirmation",
+          "booking",
+          "plan_version",
+          "plan",
+          "provider",
+          "slot_minutes"
+        ],
+        "title": "ConversationResponse"
+      },
+      "NearMissOption": {
+        "properties": {
+          "center_id": {
+            "type": "string",
+            "maxLength": 128,
+            "minLength": 1,
+            "title": "Center Id"
+          },
+          "center_name": {
+            "type": "string",
+            "maxLength": 200,
+            "minLength": 1,
+            "title": "Center Name"
+          },
+          "court_id": {
+            "type": "string",
+            "maxLength": 128,
+            "minLength": 1,
+            "title": "Court Id"
+          },
+          "court_name": {
+            "type": "string",
+            "maxLength": 200,
+            "minLength": 1,
+            "title": "Court Name"
+          },
+          "date": {
+            "type": "string",
+            "maxLength": 10,
+            "title": "Date"
+          },
+          "start": {
+            "type": "string",
+            "maxLength": 40,
+            "title": "Start"
+          },
+          "end": {
+            "type": "string",
+            "maxLength": 40,
+            "title": "End"
+          },
+          "slots": {
+            "items": {
+              "type": "integer"
+            },
+            "type": "array",
+            "maxItems": 24,
+            "minItems": 1,
+            "title": "Slots"
+          },
+          "total_price_vnd": {
+            "type": "integer",
+            "maximum": 38000000.0,
+            "minimum": 0.0,
+            "title": "Total Price Vnd"
+          },
+          "proposal_id": {
+            "type": "string",
+            "title": "Proposal Id"
+          },
+          "search_id": {
+            "type": "string",
+            "title": "Search Id"
+          },
+          "constraints_version": {
+            "type": "integer",
+            "title": "Constraints Version"
+          },
+          "verified_at": {
+            "type": "string",
+            "title": "Verified At"
+          },
+          "expires_at": {
+            "type": "string",
+            "title": "Expires At"
+          },
+          "violations": {
+            "items": {
+              "$ref": "#/components/schemas/ConstraintViolation"
+            },
+            "type": "array",
+            "maxItems": 7,
+            "title": "Violations"
+          },
+          "suggested_changes": {
+            "items": {
+              "$ref": "#/components/schemas/SuggestedChange"
+            },
+            "type": "array",
+            "maxItems": 1,
+            "minItems": 1,
+            "title": "Suggested Changes"
+          },
+          "score": {
+            "type": "number",
+            "minimum": 0.0,
+            "title": "Score"
+          },
+          "requires_constraint_change": {
+            "type": "boolean",
+            "const": true,
+            "title": "Requires Constraint Change",
+            "default": true
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "center_id",
+          "center_name",
+          "court_id",
+          "court_name",
+          "date",
+          "start",
+          "end",
+          "slots",
+          "total_price_vnd",
+          "proposal_id",
+          "search_id",
+          "constraints_version",
+          "verified_at",
+          "expires_at",
+          "violations",
+          "suggested_changes",
+          "score"
+        ],
+        "title": "NearMissOption"
+      },
+      "NegotiationContext": {
+        "properties": {
+          "search_id": {
+            "type": "string",
+            "title": "Search Id"
+          },
+          "constraints_version": {
+            "type": "integer",
+            "title": "Constraints Version"
+          },
+          "proposal_ids": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "maxItems": 10,
+            "title": "Proposal Ids"
+          },
+          "proposals": {
+            "items": {
+              "$ref": "#/components/schemas/NearMissOption"
+            },
+            "type": "array",
+            "maxItems": 10,
+            "title": "Proposals"
+          },
+          "expires_at": {
+            "type": "string",
+            "title": "Expires At"
+          },
+          "question": {
+            "type": "string",
+            "title": "Question"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "search_id",
+          "constraints_version",
+          "proposal_ids",
+          "proposals",
+          "expires_at",
+          "question"
+        ],
+        "title": "NegotiationContext"
+      },
+      "Option": {
+        "properties": {
+          "center_id": {
+            "type": "string",
+            "maxLength": 128,
+            "minLength": 1,
+            "title": "Center Id"
+          },
+          "center_name": {
+            "type": "string",
+            "maxLength": 200,
+            "minLength": 1,
+            "title": "Center Name"
+          },
+          "court_id": {
+            "type": "string",
+            "maxLength": 128,
+            "minLength": 1,
+            "title": "Court Id"
+          },
+          "court_name": {
+            "type": "string",
+            "maxLength": 200,
+            "minLength": 1,
+            "title": "Court Name"
+          },
+          "date": {
+            "type": "string",
+            "maxLength": 10,
+            "title": "Date"
+          },
+          "start": {
+            "type": "string",
+            "maxLength": 40,
+            "title": "Start"
+          },
+          "end": {
+            "type": "string",
+            "maxLength": 40,
+            "title": "End"
+          },
+          "slots": {
+            "items": {
+              "type": "integer"
+            },
+            "type": "array",
+            "maxItems": 24,
+            "minItems": 1,
+            "title": "Slots"
+          },
+          "total_price_vnd": {
+            "type": "integer",
+            "maximum": 38000000.0,
+            "minimum": 0.0,
+            "title": "Total Price Vnd"
+          },
+          "option_id": {
+            "type": "string",
+            "title": "Option Id"
+          },
+          "search_id": {
+            "type": "string",
+            "title": "Search Id"
+          },
+          "relaxed_fields": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Relaxed Fields"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "center_id",
+          "center_name",
+          "court_id",
+          "court_name",
+          "date",
+          "start",
+          "end",
+          "slots",
+          "total_price_vnd",
+          "option_id",
+          "search_id"
+        ],
+        "title": "Option"
+      },
+      "SearchDiagnostics": {
+        "properties": {
+          "candidate_count": {
+            "type": "integer",
+            "title": "Candidate Count",
+            "default": 0
+          },
+          "feasible_count": {
+            "type": "integer",
+            "title": "Feasible Count",
+            "default": 0
+          },
+          "near_miss_count": {
+            "type": "integer",
+            "title": "Near Miss Count",
+            "default": 0
+          },
+          "rejected_count": {
+            "type": "integer",
+            "title": "Rejected Count",
+            "default": 0
+          },
+          "dominant_violations": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "maxItems": 7,
+            "title": "Dominant Violations"
+          },
+          "violation_counts": {
+            "additionalProperties": {
+              "type": "integer"
+            },
+            "type": "object",
+            "title": "Violation Counts"
+          },
+          "coverage": {
+            "type": "string",
+            "enum": [
+              "complete_within_queried_scope",
+              "partial"
+            ],
+            "title": "Coverage"
+          },
+          "errors": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "maxItems": 10,
+            "title": "Errors"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "coverage"
+        ],
+        "title": "SearchDiagnostics"
+      },
+      "SearchMetadata": {
+        "properties": {
+          "source": {
+            "type": "string",
+            "const": "booking_core",
+            "title": "Source",
+            "default": "booking_core"
+          },
+          "search_id": {
+            "type": "string",
+            "title": "Search Id"
+          },
+          "constraints_version": {
+            "type": "integer",
+            "title": "Constraints Version"
+          },
+          "searched_at": {
+            "type": "string",
+            "title": "Searched At"
+          },
+          "centers_discovered": {
+            "type": "integer",
+            "title": "Centers Discovered",
+            "default": 0
+          },
+          "centers_queried": {
+            "type": "integer",
+            "title": "Centers Queried",
+            "default": 0
+          },
+          "total_centers": {
+            "type": "integer",
+            "title": "Total Centers",
+            "default": 0
+          },
+          "core_calls": {
+            "type": "integer",
+            "title": "Core Calls",
+            "default": 0
+          },
+          "attempts": {
+            "type": "integer",
+            "title": "Attempts",
+            "default": 1
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "search_id",
+          "constraints_version",
+          "searched_at"
+        ],
+        "title": "SearchMetadata"
+      },
+      "SuggestedChange": {
+        "properties": {
+          "field": {
+            "type": "string",
+            "enum": [
+              "date",
+              "preferred_start",
+              "earliest_start",
+              "latest_start",
+              "duration_minutes",
+              "max_total_price_vnd",
+              "area"
+            ],
+            "title": "Field"
+          },
+          "value": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "integer"
+              }
+            ],
+            "title": "Value"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "field",
+          "value"
+        ],
+        "title": "SuggestedChange"
+      },
+      "AssistanceResult": {
+        "properties": {
+          "kind": {
+            "type": "string",
+            "enum": [
+              "bookings",
+              "statistics",
+              "centers",
+              "faq",
+              "cancellation"
+            ],
+            "title": "Kind"
+          },
+          "bookings": {
+            "items": {
+              "$ref": "#/components/schemas/BookingCard"
+            },
+            "type": "array",
+            "title": "Bookings"
+          },
+          "centers": {
+            "items": {
+              "$ref": "#/components/schemas/CenterCard"
+            },
+            "type": "array",
+            "title": "Centers"
+          },
+          "statistics": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/PersonalStats"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "citations": {
+            "items": {
+              "$ref": "#/components/schemas/KnowledgeCitation"
+            },
+            "type": "array",
+            "title": "Citations"
+          },
+          "cancellation": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/CancellationPreview"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "cancellation_pending": {
+            "type": "boolean",
+            "title": "Cancellation Pending",
+            "default": false
+          },
+          "has_more": {
+            "type": "boolean",
+            "title": "Has More",
+            "default": false
+          },
+          "coverage": {
+            "type": "string",
+            "enum": [
+              "complete",
+              "partial"
+            ],
+            "title": "Coverage",
+            "default": "complete"
+          },
+          "scope": {
+            "type": "string",
+            "title": "Scope",
+            "default": ""
+          },
+          "notice": {
+            "type": "string",
+            "title": "Notice",
+            "default": ""
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "kind"
+        ],
+        "title": "AssistanceResult"
+      },
+      "BookingCard": {
+        "properties": {
+          "choice_id": {
+            "type": "string",
+            "title": "Choice Id"
+          },
+          "booking_id": {
+            "type": "string",
+            "title": "Booking Id"
+          },
+          "center_name": {
+            "type": "string",
+            "title": "Center Name"
+          },
+          "date": {
+            "type": "string",
+            "title": "Date"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "CONFIRMED",
+              "CANCELLED"
+            ],
+            "title": "Status"
+          },
+          "total_price_vnd": {
+            "type": "integer",
+            "title": "Total Price Vnd"
+          },
+          "slots": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Slots"
+          },
+          "cancellable": {
+            "type": "boolean",
+            "title": "Cancellable"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "choice_id",
+          "booking_id",
+          "center_name",
+          "date",
+          "status",
+          "total_price_vnd",
+          "slots",
+          "cancellable"
+        ],
+        "title": "BookingCard"
+      },
+      "CancellationPreview": {
+        "properties": {
+          "cancellation_id": {
+            "type": "string",
+            "title": "Cancellation Id"
+          },
+          "expires_at": {
+            "type": "string",
+            "title": "Expires At"
+          },
+          "booking": {
+            "$ref": "#/components/schemas/BookingCard"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "cancellation_id",
+          "expires_at",
+          "booking"
+        ],
+        "title": "CancellationPreview"
+      },
+      "CenterCard": {
+        "properties": {
+          "center_id": {
+            "type": "string",
+            "title": "Center Id"
+          },
+          "name": {
+            "type": "string",
+            "title": "Name"
+          },
+          "address": {
+            "type": "string",
+            "title": "Address"
+          },
+          "opening_hours": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Opening Hours"
+          },
+          "active_courts": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Active Courts"
+          },
+          "pricing": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Pricing"
+          },
+          "description": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Description"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "center_id",
+          "name",
+          "address",
+          "opening_hours",
+          "active_courts",
+          "pricing",
+          "description"
+        ],
+        "title": "CenterCard"
+      },
+      "KnowledgeCitation": {
+        "properties": {
+          "article_id": {
+            "type": "string",
+            "title": "Article Id"
+          },
+          "title": {
+            "type": "string",
+            "title": "Title"
+          },
+          "version": {
+            "type": "string",
+            "title": "Version"
+          },
+          "source_paths": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Source Paths"
+          },
+          "excerpt": {
+            "type": "string",
+            "title": "Excerpt"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "article_id",
+          "title",
+          "version",
+          "source_paths",
+          "excerpt"
+        ],
+        "title": "KnowledgeCitation"
+      },
+      "PersonalStats": {
+        "properties": {
+          "confirmed": {
+            "type": "integer",
+            "title": "Confirmed"
+          },
+          "cancelled": {
+            "type": "integer",
+            "title": "Cancelled"
+          },
+          "booked_court_hours": {
+            "type": "integer",
+            "title": "Booked Court Hours"
+          },
+          "confirmed_booking_value_vnd": {
+            "type": "integer",
+            "title": "Confirmed Booking Value Vnd"
+          },
+          "centers": {
+            "items": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "type": "array",
+            "title": "Centers"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "confirmed",
+          "cancelled",
+          "booked_court_hours",
+          "confirmed_booking_value_vnd",
+          "centers"
+        ],
+        "title": "PersonalStats"
+      }
+    },
+    "securitySchemes": {
+      "BearerAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "JWT",
+        "description": "Current claim profile sub/role/iss/aud/exp; issuer/algorithm rollout per ADR-006."
+      },
+      "MonitoringBearer": {
+        "type": "http",
+        "scheme": "bearer",
+        "description": "Private monitoring credential, not user access token."
+      }
+    },
+    "responses": {
+      "Error400": {
+        "description": "Validation error",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/Error"
+            }
+          }
+        }
+      },
+      "Error401": {
+        "description": "Authentication required/invalid",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/Error"
+            }
+          }
+        }
+      },
+      "Error403": {
+        "description": "Resource scope denied",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/Error"
+            }
+          }
+        }
+      },
+      "Error404": {
+        "description": "Resource not found",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/Error"
+            }
+          }
+        }
+      },
+      "Error409": {
+        "description": "State, stock or idempotency conflict",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/Error"
+            }
+          }
+        }
+      },
+      "Error429": {
+        "description": "Rate limit exceeded",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/Error"
+            }
+          }
+        }
+      },
+      "Error503": {
+        "description": "Dependency unavailable",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/Error"
+            }
+          }
+        }
+      }
+    },
+    "parameters": {
+      "XRequestId": {
+        "name": "X-Request-Id",
+        "in": "header",
+        "required": false,
+        "schema": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128
+        }
+      }
+    }
+  },
+  "x-runtime-contract-version": "0.1.0",
+  "x-implementation-status": "mixed",
+  "x-owner": "Người 5",
+  "servers": [
+    {
+      "url": "http://localhost:8000",
+      "description": "Current AI service origin"
+    }
+  ]
+}

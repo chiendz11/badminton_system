@@ -1,0 +1,26 @@
+{
+  "valid": [
+    {
+      "schema": "AIChatRequest",
+      "value": {
+        "conversationId": null,
+        "message": "Mai 18h đến 20h",
+        "clientMessageId": "message-0002"
+      }
+    }
+  ],
+  "invalid": [
+    {
+      "schema": "AIOption",
+      "value": {
+        "centerId": "a1104000-0000-4000-8000-000000000006",
+        "courtId": "a1104000-0000-4000-8000-000000000008",
+        "date": "2026-11-07",
+        "startMinute": 1110,
+        "durationMinutes": 60,
+        "totalPrice": 120000,
+        "currency": "VND"
+      }
+    }
+  ]
+}

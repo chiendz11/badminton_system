@@ -12,10 +12,18 @@ services/booking-core/  # NestJS bounded context
 services/ai-service/    # FastAPI + LangGraph, DB hội thoại riêng
 packages/               # contracts, observability dùng chung
 contracts/              # schema HTTP/event
-monitoring/             # Prometheus config và alert
+monitoring/             # nguồn rule/dashboard dùng chung Compose và Helm
 ```
 
-Web/Admin tách `app`, `features/{pages,ui,api}`, `shared`; Booking Core tách module nghiệp vụ và infrastructure. Xem [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) cho trách nhiệm và quy tắc dependency.
+Repo app quản lý code, metrics/logs, migration từng service và toàn bộ cấu hình monitoring ứng dụng trong [monitoring/](monitoring/README.md). Compose dùng trực tiếp rule/dashboard; GitOps tham chiếu Helm chart cùng nguồn bằng app commit đã review. [badminton-gitops](https://github.com/chiendz11/badminton-gitops) cài stack monitoring và cấu hình triển khai; [badminton-infras](https://github.com/chiendz11/badminton-infras) quản lý AWS. Không còn skeleton platform hoặc data-migration ở root. Xem [quy ước monitoring](docs/MONITORING.md).
+
+Bật bộ metrics/dashboard/cảnh báo local bằng `docker compose --profile monitoring up -d --build` (Compose >=2.23.1). Grafana ở http://localhost:3001, Prometheus ở http://localhost:9090, Alertmanager ở http://localhost:9093. Profile chỉ thu metrics của ba backend có runtime; logs tập trung và các exporter chưa được bổ sung.
+
+Web/Admin tách `app`, `features/{pages,ui,api}`, `shared`; Booking Core tách module nghiệp vụ và infrastructure. Xem [cấu trúc codebase](docs/architecture/CODEBASE_ARCHITECTURE.md) cho trách nhiệm và quy tắc dependency.
+
+Bản thiết kế toàn hệ thống V2 và artifact cho 5 người ở tuần 4–5 nằm trong [docs/DELIVERY_W04_W05.md](docs/DELIVERY_W04_W05.md), kèm [system contract](docs/SYSTEM_CONTRACTS.md) và [kiến trúc đích](docs/ARCHITECTURE.md) và [đối chiếu hiện trạng](docs/architecture/SYSTEM_ARCHITECTURE.md). Sáu service bổ sung hiện chỉ có cây thư mục/README; Compose và chức năng bên dưới vẫn theo phạm vi Core/AI hiện có.
+
+[Báo cáo môn học tuần 4–6 và kế hoạch tuần 4–13](docs/reports/README.md) dùng chung số tuần 4–13 với Excel và artifact. Các báo cáo là dự thảo để nhóm xác nhận trước khi đăng Discussions.
 
 ## Chức năng
 
@@ -24,7 +32,8 @@ Web/Admin tách `app`, `features/{pages,ui,api}`, `shared`; Booking Core tách m
 - Quản lý tạo lịch cố định theo khoảng ngày/thứ trong tuần; kiểm tra lịch trống trên mọi ngày; tạo cả chuỗi trong một transaction.
 - PostgreSQL advisory lock và exclusion constraint ngăn hai booking chiếm cùng sân/giờ; idempotency tránh tạo trùng khi retry; giá được chốt lúc giữ chỗ.
 - Frontend/Admin giữ JSX, CSS và bố cục booking/centre/history/statistics từ repo gốc; chỉ giữ UI Booking Core và trang AI. Xóa màn hình/API client kho, bán hàng, news, rating, social, notification, profile/users CRUD và Storage upload; không có pass/payment/login.
-- Trợ lý đặt sân tiếng Việt nhiều lượt tại `/booking-assistant`: giữ ngữ cảnh, lập/tìm lại kế hoạch, chọn sân rồi xác nhận cuối. Slot 60 phút; 2 tiếng cần 2 slot liên tiếp cùng sân. Xem [docs/AI_SERVICE.md](docs/AI_SERVICE.md) về công nghệ, lý thuyết và provider thật/offline.
+- Trợ lý đặt sân tiếng Việt nhiều lượt tại `/booking-assistant`: giữ ngữ cảnh, lập/tìm lại kế hoạch, chọn sân rồi xác nhận cuối. Slot 60 phút; 2 tiếng cần 2 slot liên tiếp cùng sân. Xem [docs/AI_SERVICE.md](docs/AI_SERVICE.md) về công nghệ, lý thuyết và provider thật/offline. Nâng cấp [Recommendation V1](docs/AI_SERVICE_UPGRADE.md) bổ sung diagnostics, đề xuất đổi một điều kiện, chấp nhận/từ chối và kiểm tra lại Core trước bước chọn/xác nhận.
+- Chatbot còn hỗ trợ lịch/lịch sử cá nhân, thống kê theo khoảng ngày, hủy booking có xác nhận riêng, so sánh trung tâm và FAQ có nguồn. Xem [hướng dẫn và các file triển khai](docs/AI_ASSISTANCE_FEATURES.md); số liệu giá trị booking không đồng nghĩa đã thanh toán.
 - Unit/integration/consumer-provider contract tests; JSON logs có request ID, Prometheus metrics, health/readiness và alert mẫu.
 
 Phạm vi này không có pass sân hoặc payment. UI gốc → API Gateway → Booking Core đã nối cho catalogue trung tâm, lịch trống, đặt/xác nhận/hủy, lịch sử/thống kê và lịch cố định. Gateway giữ REST/GraphQL của client gốc, xác minh JWT rồi chuyển bearer token tới Core. UI và API client ngoài Booking Core/AI đã được bỏ theo phạm vi mới. Session JWT và directory khách/manager do host cấp; không triển khai Identity service. Gateway vẫn là cổng nối hai service.

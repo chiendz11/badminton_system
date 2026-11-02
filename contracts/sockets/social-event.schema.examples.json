@@ -1,0 +1,25 @@
+{
+  "valid": [
+    {
+      "direction": "client_to_server",
+      "event": "sendMessage",
+      "payload": {
+        "conversationId": "a1104000-0000-4000-8000-000000000005",
+        "clientMessageId": "message-0001",
+        "content": "Mình quan tâm sân này"
+      }
+    }
+  ],
+  "invalid": [
+    {
+      "direction": "client_to_server",
+      "event": "sendMessage",
+      "payload": {
+        "conversationId": "a1104000-0000-4000-8000-000000000005",
+        "clientMessageId": "message-0001",
+        "content": "Mình quan tâm sân này",
+        "senderUserId": "forged"
+      }
+    }
+  ]
+}

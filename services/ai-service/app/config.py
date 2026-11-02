@@ -25,6 +25,17 @@ class Settings(BaseSettings):
     max_search_centers: int = 5
     max_options: int = 5
     confirmation_ttl_seconds: int = 600
+    proposal_ttl_seconds: int = 300
+    max_candidates: int = 500
+    max_discovery_pages: int = 2
+    search_concurrency: int = 2
+    search_timeout_seconds: int = 10
+    availability_max_age_seconds: int = 60
+    near_miss_time_minutes: int = 60
+    near_miss_price_ratio: float = 0.2
+    near_miss_top_k: int = 3
+    near_miss_weights: dict[str, float] = {"time": 0.4, "price": 0.4, "area": 0.2}
+    nearby_areas: dict[str, list[str]] = {}
 
     @model_validator(mode="after")
     def valid(self):
@@ -63,6 +74,34 @@ class Settings(BaseSettings):
             raise ValueError("Timeouts must fit the gateway request budget")
         if not 60 <= self.confirmation_ttl_seconds <= 1800:
             raise ValueError("Confirmation lifetime must be 60..1800 seconds")
+        if not 30 <= self.proposal_ttl_seconds <= 600:
+            raise ValueError("Proposal lifetime must be 30..600 seconds")
+        if not 1 <= self.max_candidates <= 2000 or not 1 <= self.near_miss_top_k <= 10:
+            raise ValueError("Invalid candidate/proposal bounds")
+        if not 1 <= self.max_discovery_pages <= 5 or not 1 <= self.search_concurrency <= 4:
+            raise ValueError("Invalid discovery/concurrency bounds")
+        if not 1 <= self.search_timeout_seconds <= 12:
+            raise ValueError("Search must fit the gateway turn budget")
+        if not 1 <= self.availability_max_age_seconds <= 300:
+            raise ValueError("Invalid availability freshness policy")
+        if (
+            not 0 <= self.near_miss_time_minutes <= 120
+            or not 0 <= self.near_miss_price_ratio <= 0.5
+        ):
+            raise ValueError("Invalid near-miss thresholds")
+        if set(self.near_miss_weights) != {"time", "price", "area"} or (
+            any(not 0 <= v <= 1 for v in self.near_miss_weights.values())
+            or abs(sum(self.near_miss_weights.values()) - 1) > 0.000001
+        ):
+            raise ValueError("Ranking weights must be non-negative and sum to one")
+        if len(self.nearby_areas) > 50 or any(len(v) > 10 for v in self.nearby_areas.values()):
+            raise ValueError("Area adjacency must be explicitly bounded")
+        if any(
+            not name.strip() or len(name) > 100
+            for origin, adjacent in self.nearby_areas.items()
+            for name in [origin, *adjacent]
+        ):
+            raise ValueError("Area names must be nonblank and at most 100 characters")
         model_url = urlparse(self.llm_base_url)
         if (
             model_url.scheme not in {"http", "https"}

@@ -7,6 +7,7 @@ from sqlalchemy import select
 
 from app.core_client import BookingCoreClient
 from app.db.models import Trace, Turn
+from app.schemas import MessageRequest, normalize_state
 from app.tools import BookingTools
 from app.workflow import Workflow
 
@@ -25,7 +26,10 @@ class ConversationService:
                     Turn.conversation_id == id, Turn.client_id == request.client_message_id
                 )
             )
-            if turn and turn.request != request.model_dump():
+            if (
+                turn
+                and MessageRequest.model_validate(turn.request).model_dump() != request.model_dump()
+            ):
                 raise HTTPException(409, "client_message_id đã dùng cho nội dung khác")
             if turn and turn.response:
                 return turn.response
@@ -46,21 +50,27 @@ class ConversationService:
 
             workflow = Workflow(
                 self.parser_factory(),
-                BookingTools(core, actor, self.config, self.clock()),
+                BookingTools(core, actor, self.config, self.clock(), clock=self.clock),
                 self.config,
                 self.clock(),
                 persist,
                 id,
                 request_id,
+                turn.id,
             )
             graph = workflow.graph(self.checkpointer)
+            turn_state = normalize_state(conversation.state)
+            if turn_state.get("pending_negotiation"):
+                turn_state["negotiation_turns"] = min(
+                    50, turn_state.get("negotiation_turns", 0) + 1
+                )
             try:
                 # Keep the entire turn below the gateway's 45-second upstream timeout.
                 # A cancelled mutation retains its committed intent/key for explicit recovery.
                 async with asyncio.timeout(40):
                     result = await graph.ainvoke(
                         {
-                            "state": copy.deepcopy(conversation.state),
+                            "state": turn_state,
                             "message": request.model_dump(),
                             "parsed": {},
                             "changed": False,
@@ -80,6 +90,11 @@ class ConversationService:
                 "assistant_message": result["reply"],
                 "action": state["next_action"],
                 "options": state["options"],
+                "assistance": state.get("assistance"),
+                "proposals": (state.get("pending_negotiation") or {}).get("proposals", []),
+                "diagnostics": (state.get("search_result") or {}).get("diagnostics"),
+                "search_metadata": (state.get("search_result") or {}).get("search_metadata"),
+                "pending_negotiation": state.get("pending_negotiation"),
                 "selected_option_id": state["selected_option_id"],
                 "confirmation_id": state.get("confirmation_id"),
                 "requires_confirmation": bool(
