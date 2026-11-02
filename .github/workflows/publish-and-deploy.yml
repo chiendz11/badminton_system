@@ -1,0 +1,169 @@
+name: Build, Publish and Deploy
+
+on:
+  workflow_dispatch:
+    inputs:
+      target_branch:
+        description: 'Branch to update in GitOps repo'
+        required: true
+        default: 'feat/initial-implementation'
+      services:
+        description: 'Services to build (comma-separated or "all")'
+        required: true
+        default: 'all'
+  push:
+    branches:
+      - main
+      - feat/initial-implementation
+    paths:
+      - 'services/booking-core/**'
+      - 'services/ai-service/**'
+      - 'services/api-gateway/**'
+      - 'services/content-service/**'
+      - 'apps/web/**'
+      - 'apps/admin/**'
+      - 'packages/**'
+
+permissions:
+  contents: write
+  packages: write
+
+jobs:
+  build-and-publish:
+    name: Build & Publish ${{ matrix.name }}
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - name: booking-core
+            context: .
+            dockerfile: services/booking-core/Dockerfile
+            image: badminton-booking-core
+            target: ""
+            build_args: ""
+          - name: booking-core-migrations
+            context: .
+            dockerfile: services/booking-core/Dockerfile
+            image: badminton-booking-core-migrations
+            target: build
+            build_args: ""
+          - name: ai-service
+            context: .
+            dockerfile: services/ai-service/Dockerfile
+            image: badminton-ai-service
+            target: ""
+            build_args: ""
+          - name: api-gateway
+            context: .
+            dockerfile: services/api-gateway/Dockerfile
+            image: badminton-api-gateway
+            target: ""
+            build_args: ""
+          - name: content-service
+            context: .
+            dockerfile: services/content-service/Dockerfile
+            image: badminton-content-service
+            target: ""
+            build_args: ""
+          - name: web
+            context: .
+            dockerfile: apps/web/Dockerfile
+            image: badminton-web
+            target: ""
+            build_args: "VITE_API_GATEWAY_URL=http://127.0.0.1:18081"
+          - name: admin
+            context: .
+            dockerfile: apps/admin/Dockerfile
+            image: badminton-admin
+            target: ""
+            build_args: "VITE_API_GATEWAY_URL=http://127.0.0.1:18081"
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Check if service selected
+        id: check_select
+        run: |
+          SERVICES="${{ github.event.inputs.services || 'all' }}"
+          if [ "$SERVICES" = "all" ] || echo ",$SERVICES," | grep -q ",${{ matrix.name }},"; then
+            echo "should_build=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "should_build=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Set up Docker Buildx
+        if: steps.check_select.outputs.should_build == 'true'
+        uses: docker/setup-buildx-action@v3
+
+      - name: Log in to GitHub Container Registry
+        if: steps.check_select.outputs.should_build == 'true'
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build and push container image
+        if: steps.check_select.outputs.should_build == 'true'
+        uses: docker/build-push-action@v5
+        with:
+          context: ${{ matrix.context }}
+          file: ${{ matrix.dockerfile }}
+          target: ${{ matrix.target != '' && matrix.target || null }}
+          build-args: ${{ matrix.build_args != '' && matrix.build_args || null }}
+          push: true
+          tags: |
+            ghcr.io/${{ github.repository_owner }}/${{ matrix.image }}:sha-${{ github.sha }}
+            ghcr.io/${{ github.repository_owner }}/${{ matrix.image }}:latest
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+  update-gitops:
+    name: Update GitOps manifests and promote
+    needs: [build-and-publish]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout App Repo
+        uses: actions/checkout@v4
+        with:
+          path: app
+
+      - name: Checkout GitOps Repo
+        uses: actions/checkout@v4
+        with:
+          repository: ${{ github.repository_owner }}/badminton-gitops
+          token: ${{ secrets.GITOPS_SYNC_TOKEN || secrets.GITHUB_TOKEN }}
+          path: gitops
+          ref: ${{ github.event.inputs.target_branch || 'feat/initial-implementation' }}
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install dependencies
+        run: pip install pyyaml
+
+      - name: Update image tags in GitOps
+        run: |
+          python3 app/.github/scripts/update_gitops_images.py \
+            --gitops-dir gitops \
+            --registry "ghcr.io/${{ github.repository_owner }}" \
+            --tag "sha-${{ github.sha }}"
+
+      - name: Commit and push GitOps changes
+        run: |
+          cd gitops
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          if [ -n "$(git status --porcelain)" ]; then
+            git add .
+            git commit -m "chore(gitops): promote app images to sha-${{ github.sha }}"
+            git push origin HEAD:${{ github.event.inputs.target_branch || 'feat/initial-implementation' }}
+            echo "GitOps repository updated with new image tags."
+          else
+            echo "No changes in GitOps repository."
+          fi
+

@@ -116,6 +116,15 @@ components:
       - auth_contracts
       - observability
       - ai_tools
+      - content_service
+    docker: true
+    enabled: true
+  content_service:
+    path: services/content-service
+    runtime: node
+    database: none
+    depends_on:
+      - auth_contracts
     docker: true
     enabled: true
   booking_core:

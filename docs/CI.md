@@ -147,3 +147,38 @@ Targeted cross-service/nightly integration và ECR/GitOps release sẽ thêm khi
 Cập nhật 19/10/2026: Gateway public proposals tham chiếu provider Path Items. `gateway_api.depends_on` liệt kê provider contracts để kiểm `$ref` bị ảnh hưởng; schema lỗi chung có component `http_common`, AI runtime phụ thuộc `ai_api`.
 
 Validator dùng `validate(..., base_uri=...)` để resolve file tương đối. Mỗi OpenAPI có `openapi.examples.json`; JSON Schema có `.schema.examples.json`. Positive phải hợp lệ, negative phải bị từ chối. Contract job kiểm cấu trúc/shape, không chứng nhận endpoint Proposed chạy được. Consumer/provider tests hiện có tiếp tục kiểm behavior; xem [catalog](../contracts/README.md).
+
+---
+
+## Luồng CD và Tích hợp GitOps (publish-and-deploy.yml)
+
+Tiếp nối phần CI kiểm tra chất lượng, hệ thống đã được bổ sung luồng Continuous Delivery (CD) theo mô hình chuẩn của MaintAI:
+
+```text
+[Push / Merge PR vào main hoặc feat/initial-implementation]
+       │
+       ▼ (1. publish-and-deploy.yml kích hoạt)
+[Build Docker Images cho các services]
+  - badminton-booking-core
+  - badminton-booking-core-migrations
+  - badminton-ai-service
+  - badminton-api-gateway
+  - badminton-content-service
+  - badminton-web
+  - badminton-admin
+       │
+       ▼ (2. Push image lên GHCR)
+  ghcr.io/<owner>/badminton-<service>:sha-<sha>
+  ghcr.io/<owner>/badminton-<service>:latest
+       │
+       ▼ (3. Checkout badminton-gitops)
+[Chạy .github/scripts/update_gitops_images.py]
+  - Cập nhật image overrides vào environments/local/apps/kustomization.yaml
+       │
+       ▼ (4. Commit & Push lên badminton-gitops)
+[Argo CD tự động phát hiện commit mới và Sync Pods vào Cụm Kubernetes!]
+```
+
+Workflow hỗ trợ cả `workflow_dispatch` để trigger thủ công với các tham số:
+- `target_branch`: Nhánh mục tiêu trên `badminton-gitops` (mặc định: `feat/initial-implementation` hoặc `main`).
+- `services`: Chọn các service cần build (mặc định: `all`).
