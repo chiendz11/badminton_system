@@ -16,4 +16,4 @@
 - Xây dựng frontend shell, API client và mock fixtures theo contract; thể hiện đầy đủ các trạng thái giao diện.
 - Tích hợp các thành phần đã có runtime vào Compose và CI; kiểm tra khả năng khởi động local, health, lint/test/build và kết nối frontend–backend.
 
-Tài liệu kèm: [artifact tuần 5](../week-5/README.md), [kiến trúc](../architecture/SYSTEM_ARCHITECTURE.md), [system contracts](../SYSTEM_CONTRACTS.md), [hồ sơ ADR](../adr/README.md).
+Tài liệu kèm: [artifact tuần 5](../week-5/README.md), [kiến trúc chuẩn](../week-5/ARCHITECTURE.md), [system contracts](../week-5/SYSTEM_CONTRACTS.md), [hồ sơ ADR](../week-5/adr/README.md).

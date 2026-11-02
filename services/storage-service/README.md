@@ -22,7 +22,7 @@ storage-service/
 
 MongoDB metadata riêng + Cloudinary object storage. Không thể transaction ACID qua cả hai; cần trạng thái pending/ready/failed và cleanup đối soát.
 
-API, event và quyền nằm trong [system contract](../../docs/SYSTEM_CONTRACTS.md), quyết định ở [ADR](../../docs/adr/README.md) (ADR-009). Dùng tên kebab-case để khớp repo hiện tại; tương ứng tên underscore trong tài liệu kiến trúc.
+API, event và quyền nằm trong [system contract](../../docs/week-5/SYSTEM_CONTRACTS.md), quyết định ở [ADR](../../docs/week-5/adr/README.md) (ADR-009). Dùng tên kebab-case để khớp repo hiện tại; tương ứng tên underscore trong tài liệu kiến trúc.
 
 ## Trước khi biến thành service chạy được
 
@@ -37,4 +37,4 @@ API, event và quyền nằm trong [system contract](../../docs/SYSTEM_CONTRACTS
 - [`BM/services/storage_service/src/models/file.model.js`](https://github.com/chiendz11/Badminton_manager_microservices/blob/484d381e873f513ed4faa4413407502112f4885d/BM/services/storage_service/src/models/file.model.js)
 - [`BM/services/storage_service/src/routes/storage.route.js`](https://github.com/chiendz11/Badminton_manager_microservices/blob/484d381e873f513ed4faa4413407502112f4885d/BM/services/storage_service/src/routes/storage.route.js)
 
-Skeleton không sao chép code legacy. [Mapping đầy đủ](../../docs/architecture/SKELETON_MAPPING.md).
+Skeleton không sao chép code legacy. [Mapping đầy đủ](../../docs/week-5/architecture/SKELETON_MAPPING.md).

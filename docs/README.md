@@ -1,69 +1,103 @@
 # Bản Đồ Tài Liệu Hệ Thống — Badminton Manager V2
 
-Chào mừng bạn đến với kho tài liệu kỹ thuật và nghiệp vụ của dự án **Badminton Manager V2**. Toàn bộ tài liệu được chuẩn hóa theo tiến độ 10 tuần (từ Tuần 4 đến Tuần 13) và phân chia theo các miền nghiệp vụ - kỹ thuật rõ ràng.
+Kho tài liệu kỹ thuật và nghiệp vụ của dự án **Badminton Manager V2** được tổ chức theo cấu trúc phân cấp chuẩn mực (Domain-Centric & Week-Milestone Hierarchy), hỗ trợ đầy đủ tiến độ 10 tuần học tập và phát triển mã nguồn.
+
+```
+docs/
+├── planning/              # Kế hoạch tổng thể 10 tuần (Excel, CSV, Markdown, Provenance)
+├── week-4/                # Khảo sát nghiệp vụ: Master BRD, BRD V2, 5 Artifacts W04
+├── week-5/                # Thiết kế kỹ thuật: Master Architecture, Contracts, ADRs, 5 Artifacts W05
+├── week-6/                # Khung hệ thống (Skeleton): 5 Artifacts W06, nghiệm thu Gate G03
+├── reports/               # Báo cáo thảo luận hàng tuần (WEEK_04 -> WEEK_06, Biên bản bàn giao)
+├── services/              # Tài liệu kỹ thuật chi tiết các dịch vụ (Core, Gateway, UI, AI Subsystem)
+└── devops/                # Tự động hóa CI/CD, Giám sát Prometheus/Grafana, Kiểm chứng & Runbooks
+```
 
 ---
 
-## 1. Lộ trình, Kế hoạch & Báo cáo Tiến độ (Planning & Reports)
+## 1. Kế hoạch Tổng thể 10 Tuần (Planning)
 
-Bao gồm kế hoạch thực thi 10 tuần, phân rã 50 tasks chi tiết cho 5 thành viên và các báo cáo nghiệm thu từng tuần:
+Tập hợp đầy đủ hồ sơ phân công chi tiết 50 tasks (W04–W13) cho 5 thành viên nhóm:
 
-- **Bảng kế hoạch 10 tuần chi tiết (50 Tasks đầy đủ W04–W13):**
-  - File Excel: [`Badminton_Manager_Ke_Hoach_10_Tuan_De_Hieu.xlsx`](Badminton_Manager_Ke_Hoach_10_Tuan_De_Hieu.xlsx)
-  - File CSV chuẩn UTF-8: [`ke_hoach_badminton_de_hieu.csv`](ke_hoach_badminton_de_hieu.csv)
-- **Báo cáo môn học tổng thể:** [`reports/README.md`](reports/README.md)
-  - [Tuần 4 — Kế hoạch, bài toán và nghiệp vụ](reports/WEEK_04.md)
-  - [Tuần 5 — Kiến trúc, dữ liệu và contract](reports/WEEK_05.md)
-  - [Tuần 6 — Khung hệ thống và chạy local thành công](reports/WEEK_06.md)
-  - [Kế hoạch các tuần tiếp theo 7–13](reports/PLAN_WEEK_04_13.md)
-- **Hồ sơ chi tiết theo tuần của 5 thành viên (Weekly Deliverables):**
-  - [**Tuần 4 (Business Discovery)**](week-4/README.md): Khảo sát nghiệp vụ, phân tích bối cảnh, 8 user stories, quy tắc chat/thông báo, RBAC, POS và use cases AI.
-  - [**Tuần 5 (Architecture Baseline)**](week-5/README.md): Sơ đồ kiến trúc C4, ERD database, hợp đồng API/Socket, ma trận phân quyền, đặc tả AI tools.
-  - [**Tuần 6 (Foundation Skeleton)**](week-6/README.md): Báo cáo nghiệm thu hoàn thành 100% Gate Tuần 6 (Booking Core, React Web, Social Service, Content Service, AI Service, Docker Compose, cụm k3d local và CI/CD).
+- [**Tổng quan Kế hoạch 10 Tuần (planning/README.md)**](planning/README.md): Bản đồ tổng thể lộ trình từ Tuần 4 đến Tuần 13 và vai trò của 5 kỹ sư.
+- [**Bảng tính Kế hoạch Chi tiết (.xlsx)**](planning/Badminton_Manager_Ke_Hoach_10_Tuan_De_Hieu.xlsx): File Excel trực quan, phân định rõ Mã việc, Người làm, Mô tả dễ hiểu, Đầu ra cụ thể, Tiêu chí xong và Giờ dự kiến.
+- [**Bảng dữ liệu Kế hoạch (.csv)**](planning/ke_hoach_badminton_de_hieu.csv): File CSV UTF-8 phục vụ tự động hóa kiểm tra tiến độ.
+- [**Đặc tả Phân rã Kế hoạch (PLAN_WEEK_04_13.md)**](planning/PLAN_WEEK_04_13.md): Tài liệu kỹ thuật quy định ranh giới và tiêu chuẩn bàn giao giữa các tuần.
+- [**Truy xuất Nguồn gốc Kế hoạch (source-provenance.json)**](planning/source-provenance.json): Checksum SHA256 và bằng chứng nguồn gốc của kế hoạch.
 
 ---
 
-## 2. Yêu cầu Nghiệp vụ & Hợp đồng Tích hợp (Business Requirements)
+## 2. Các Cột mốc Thực thi Theo Tuần (Weekly Milestones & Artifacts)
 
-Tài liệu định nghĩa bài toán kinh doanh, ranh giới actor, 25 yêu cầu chức năng (V2-F01 đến V2-F25) và các quy tắc giao dịch:
+### [Tuần 4 — Khảo sát Nghiệp vụ & Phạm vi MVP (week-4/)](week-4/README.md)
+Giai đoạn nghiên cứu bài toán, phân tích hiện trạng hệ thống cũ và chốt phạm vi sản phẩm:
+- [**Master BRD (BRD.md)**](week-4/BRD.md): **Tài liệu Yêu cầu Nghiệp vụ Cốt lõi của Toàn hệ thống** (4 phân hệ, 25 yêu cầu chức năng V2-F01 đến V2-F25, quy tắc thanh toán PayOS và chuyển nhượng vé).
+- [**BRD Kỹ thuật Bổ trợ (BRD_SYSTEM_V2.md)**](week-4/BRD_SYSTEM_V2.md): Bản tổng hợp nghiệp vụ từ 5 artifact kỹ thuật.
+- **5 Artifact Phân tích Cá nhân**:
+  - `W04-N1`: [Khung BRD & Bối cảnh nghiệp vụ](week-4/W04-N1_business-discovery.md) (Người 1)
+  - `W04-N2`: [User Stories & Wireflow nhượng sân](week-4/W04-N2_pass-ux.md) (Người 2)
+  - `W04-N3`: [Quy tắc Chat & Kịch bản thông báo](week-4/W04-N3_social-notification.md) (Người 3)
+  - `W04-N4`: [Dự thảo RBAC & Use cases Admin/POS](week-4/W04-N4_identity-commerce-content.md) (Người 4)
+  - `W04-N5`: [AI Use cases & Yêu cầu phi chức năng NFR](week-4/W04-N5_ai-nfr.md) (Người 5)
 
-- [**Tài liệu Yêu cầu Nghiệp vụ Toàn diện (BRD.md)**](BRD.md): Bản đặc tả yêu cầu nghiệp vụ chính thức, invariant chống trùng sân, máy trạng thái thanh toán PayOS và luồng sang nhượng vé.
-- [**Bản phân tích BRD V2 Tuần 4**](week-4/BRD_SYSTEM_V2.md): Đầu ra khảo sát nghiệp vụ ban đầu của nhóm 5 người.
-- [**Cẩm nang Hợp đồng Hệ thống (SYSTEM_CONTRACTS.md)**](SYSTEM_CONTRACTS.md): Danh mục hợp đồng REST, WebSockets, Domain Events trên RabbitMQ và quy tắc tương thích ngược.
-- [**Kế thừa Giao diện Cũ (LEGACY_UI.md)**](LEGACY_UI.md): Bố cục màn hình và các luồng giao diện kế thừa từ repository nguồn.
+### [Tuần 5 — Thiết kế Kỹ thuật & System Contracts (week-5/)](week-5/README.md)
+Giai đoạn chuẩn hóa kiến trúc và các hợp đồng giao tiếp trước khi viết code:
+- [**Master Architecture Baseline (ARCHITECTURE.md)**](week-5/ARCHITECTURE.md): **Tài liệu Kiến trúc Chuẩn Toàn hệ thống V2** (Phân rã 9 microservices, Database-per-Service, Event-Driven Outbox).
+- [**Cẩm nang Hợp đồng Hệ thống (SYSTEM_CONTRACTS.md)**](week-5/SYSTEM_CONTRACTS.md): Chuẩn JWT, ranh giới dữ liệu, idempotency key và cơ chế retry Exponential Backoff.
+- [**Hồ sơ 9 Quyết định Kiến trúc (adr/)**](week-5/adr/README.md): Bộ quyết định ADR-001 đến ADR-009 đã được phê duyệt (Accepted).
+- [**Thư viện Phân tích Chuyên sâu (architecture/)**](week-5/architecture/SYSTEM_ARCHITECTURE.md): Bao gồm [Ánh xạ Mã nguồn Cũ (SKELETON_MAPPING.md)](week-5/architecture/SKELETON_MAPPING.md) và [Cấu trúc Tổ chức Codebase (CODEBASE_ARCHITECTURE.md)](week-5/architecture/CODEBASE_ARCHITECTURE.md).
+- **5 Artifact Thiết kế Cá nhân**:
+  - `W05-N1`: [Kiến trúc C4, ADR & ERD Booking Core](week-5/W05-N1_architecture.md) (Người 1)
+  - `W05-N2`: [Wireframes, Pass OpenAPI Contract](week-5/W05-N2_pass-ui-api.md) (Người 2)
+  - `W05-N3`: [Socket.IO Contract & Event Catalog](week-5/W05-N3_social-events.md) (Người 3)
+  - `W05-N4`: [Database Schemas V1 & RBAC Matrix](week-5/W05-N4_data-rbac.md) (Người 4)
+  - `W05-N5`: [AI API/Tool Spec & Kế hoạch Deployment](week-5/W05-N5_ai-platform.md) (Người 5)
+
+### [Tuần 6 — Khung Hệ thống (Skeleton) & Chạy Local (week-6/)](week-6/README.md)
+Hiện thực hóa thành công 100% khung ứng dụng trên môi trường local (Đạt chuẩn Quality Gate G03):
+- **5 Artifact Thực thi Cá nhân**:
+  - `W06-N1`: [Booking Core skeleton, schema & migration](week-6/W06-N1_booking-core.md) (Người 1)
+  - `W06-N2`: [React frontend shell & marketplace mocks](week-6/W06-N2_frontend-shell.md) (Người 2)
+  - `W06-N3`: [Social service skeleton, Mongo & Socket.IO PoC](week-6/W06-N3_social-realtime.md) (Người 3)
+  - `W06-N4`: [Content service, Admin shell & Docker hardening](week-6/W06-N4_content-admin.md) (Người 4)
+  - `W06-N5`: [AI service FastAPI, Dual Runtime & CI/CD](week-6/W06-N5_ai-platform.md) (Người 5)
 
 ---
 
-## 3. Kiến trúc Hệ thống & Quyết định Kỹ thuật (Architecture & ADRs)
+## 3. Báo cáo Tiến độ Thảo luận (Reports)
 
-Kiến trúc Hybrid kết hợp Modular Monolith cho Booking Core và các Bounded Microservices:
+Tập trung các bản báo cáo hàng tuần phục vụ đăng bài trên chuyên mục GitHub Discussions của môn học:
 
-- [**Kiến trúc Đích Tổng thể V2 (ARCHITECTURE.md)**](ARCHITECTURE.md): Phân tích toàn diện 11 service cũ từ legacy repo, thiết kế ranh giới giao dịch mới, lược đồ quan hệ và mô hình triển khai.
-- [**Đối chiếu Hiện trạng & Khoảng cách (architecture/SYSTEM_ARCHITECTURE.md)**](architecture/SYSTEM_ARCHITECTURE.md): Sơ đồ C4 Container, ranh giới dữ liệu và lộ trình di chuyển.
-- [**Cấu trúc Codebase & Trách nhiệm Module (architecture/CODEBASE_ARCHITECTURE.md)**](architecture/CODEBASE_ARCHITECTURE.md): Hướng dẫn tổ chức thư mục trong Monorepo và quy tắc phụ thuộc.
-- [**Ánh xạ Skeleton Hệ thống (architecture/SKELETON_MAPPING.md)**](architecture/SKELETON_MAPPING.md): Bảng đối chiếu các service mới trong thư mục `services/`.
-- [**Hồ sơ Quyết định Kiến trúc (adr/README.md)**](adr/README.md): Bộ 9 quyết định kỹ thuật cốt lõi (ADR-001 đến ADR-009) về Database, Message Queue, Framework và bảo mật.
-
----
-
-## 4. Hướng Dẫn Kỹ Thuật Dịch Vụ (Service Guides)
-
-Tài liệu chi tiết cho từng dịch vụ nghiệp vụ trong hệ thống:
-
-- [**Booking Core Service (BOOKING_CORE.md)**](BOOKING_CORE.md): Hướng dẫn thiết lập Prisma ORM, migrations, seed dữ liệu, khóa giữ chỗ tạm thời và chống double-booking.
-- [**API Gateway (API_GATEWAY.md)**](API_GATEWAY.md): Cổng tiếp nhận tập trung (Port 8081), định tuyến request, xác thực JWT và kiểm tra phân quyền RBAC.
-- [**Trợ lý Ảo AI (AI_SERVICE.md)**](AI_SERVICE.md): Kiến trúc dịch vụ AI (FastAPI + LangGraph), hướng dẫn khởi chạy offline và cấu hình LLM provider.
-- [**Nâng cấp AI Khuyến nghị & Đàm phán (AI_SERVICE_UPGRADE.md)**](AI_SERVICE_UPGRADE.md): Thuật toán trích xuất ràng buộc (constraints), gợi ý gần đúng (near-miss) và revalidation.
-- [**Walkthrough Chi tiết Code AI Service (AI_SERVICE_CODE_WALKTHROUGH.md)**](AI_SERVICE_CODE_WALKTHROUGH.md): Hướng dẫn giải thích từng dòng mã nguồn và workflow LangGraph.
-- [**Tính năng Trợ lý AI Đặt sân (AI_ASSISTANCE_FEATURES.md)**](AI_ASSISTANCE_FEATURES.md): Các ca sử dụng tra cứu FAQ, so sánh cơ sở sân và hủy lịch tự phục vụ.
+- [**Chỉ mục Báo cáo Tiến độ (reports/README.md)**](reports/README.md): Hướng dẫn quy trình đăng báo cáo định kỳ mỗi thứ Hai.
+- [**Báo cáo Tuần 4 (reports/WEEK_04.md)**](reports/WEEK_04.md): Kết quả khảo sát nghiệp vụ và hoàn thành Master BRD.
+- [**Báo cáo Tuần 5 (reports/WEEK_05.md)**](reports/WEEK_05.md): Kết quả thiết kế kỹ thuật, hợp đồng dịch vụ và bộ 9 ADR.
+- [**Báo cáo Tuần 6 (reports/WEEK_06.md)**](reports/WEEK_06.md): Kết quả chạy thử nghiệm hệ thống kép (Compose + k3d) và vượt qua Gate G03.
+- [**Biên bản Bàn giao Tuần 4–5 (reports/DELIVERY_W04_W05.md)**](reports/DELIVERY_W04_W05.md): Biên bản đối chiếu bàn giao giữa hai giai đoạn.
 
 ---
 
-## 5. Vận Hành, CI/CD & Giám Sát (DevOps, CI/CD & Observability)
+## 4. Hướng Dẫn Kỹ Thuật Các Dịch Vụ (Services)
 
-Quy trình tự động hóa kiểm thử, đóng gói container và giám sát thời gian thực:
+Toàn bộ hướng dẫn phát triển và tài liệu từng dịch vụ trong [`docs/services/`](services/README.md):
 
-- [**Quy chuẩn CI/CD Pipeline (CI.md)**](CI.md): Bộ kiểm định hợp đồng Node, Unit/Contract/Integration tests, quét bảo mật container Trivy (0 CVEs) và luồng Continuous Delivery (`publish-and-deploy.yml`).
-- [**Quy chuẩn Giám sát & Đo lường (MONITORING.md)**](MONITORING.md): Cấu hình Prometheus thu thập metrics, Alertmanager và Grafana dashboards giám sát ứng dụng.
-- [**Kiểm chứng Môi trường Local (VALIDATION.md)**](VALIDATION.md): Bảng kiểm tra sức khỏe hệ thống và kết quả nghiệm thử thực tế.
-- [**Cẩm nang Vận hành (runbooks/README.md)**](runbooks/README.md): Hướng dẫn xử lý sự cố và vận hành hệ thống.
+- [**Booking Core Service (services/booking-core.md)**](services/booking-core.md): Cài đặt NestJS, Prisma, PostgreSQL, khóa giữ chỗ 10 phút và bảo vệ ACID.
+- [**API Gateway (services/api-gateway.md)**](services/api-gateway.md): Cơ chế Reverse Proxy định tuyến tập trung, kiểm tra JWT và rate limiting.
+- [**Kế thừa Giao diện Cũ (services/legacy-ui.md)**](services/legacy-ui.md): Quy trình kế thừa giao diện từ repo gốc và [hồ sơ nguồn gốc (legacy-ui-provenance.json)](services/legacy-ui-provenance.json).
+- [**Chỉ mục Hợp đồng API (services/api/README.md)**](services/api/README.md): Danh mục OpenAPI contracts của 9 microservices.
+- [**Phân hệ Trợ lý Thông minh (services/ai/)**](services/ai/README.md):
+  - [Tổng quan AI Service (ai/README.md)](services/ai/README.md): FastAPI, LangGraph workflow và bộ nhớ đàm thoại.
+  - [Nâng cấp Khuyến nghị & Đàm phán (ai/UPGRADE.md)](services/ai/UPGRADE.md): Đề xuất nới lỏng điều kiện tìm sân khi hết giờ.
+  - [Tính năng Trợ lý AI (ai/FEATURES.md)](services/ai/FEATURES.md): Tra cứu lịch sử, hủy vé 2 bước và giải đáp FAQ.
+  - [Code Walkthrough Chi tiết (ai/CODE_WALKTHROUGH.md)](services/ai/CODE_WALKTHROUGH.md): Phân tích chi tiết từng tầng code.
+
+---
+
+## 5. Vận Hành, CI/CD & Giám Sát (DevOps & Platform)
+
+Toàn bộ tài liệu tự động hóa và giám sát trong [`docs/devops/`](devops/README.md):
+
+- [**Quy trình CI/CD Tự động hóa (devops/ci-cd.md)**](devops/ci-cd.md): Cơ chế phát hiện thay đổi theo đồ thị (`detect_changes.py`), ma trận kiểm thử 22 components và quy chuẩn merge PR.
+- [**Quy chuẩn Giám sát Toàn diện (devops/monitoring.md)**](devops/monitoring.md): Chuẩn Prometheus metrics, Alertmanager rules, Grafana dashboards và Loki logging.
+- [**Biên bản Kiểm chứng Local (devops/validation.md)**](devops/validation.md): Kết quả khởi động các container và smoke tests local.
+- [**Nghiệm thu Artifacts (devops/artifact-validation.md)**](devops/artifact-validation.md): Bảng kiểm tra tính đầy đủ của các artifacts Tuần 4 và Tuần 5.
+- [**Cẩm nang Xử lý Sự cố (devops/runbooks/)**](devops/runbooks/README.md): Quy trình vận hành và ứng cứu sự cố khẩn cấp.

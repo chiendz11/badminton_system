@@ -69,4 +69,4 @@ Nếu có Prometheus tooling native:
 python monitoring/check.py --promtool /path/to/promtool
 ```
 
-CI kiểm tra chart, cấu hình Compose, rule bằng promtool và đối chiếu nội dung Helm render với chính nguồn local. Kiểm tra cấu hình không thay thế việc mở dashboard, xác nhận targets UP và thử chu kỳ cảnh báo khi stack thực sự chạy. Quy ước toàn nhóm nằm ở [docs/MONITORING.md](../docs/MONITORING.md).
+CI kiểm tra chart, cấu hình Compose, rule bằng promtool và đối chiếu nội dung Helm render với chính nguồn local. Kiểm tra cấu hình không thay thế việc mở dashboard, xác nhận targets UP và thử chu kỳ cảnh báo khi stack thực sự chạy. Quy ước toàn nhóm nằm ở [docs/devops/monitoring.md](../docs/devops/monitoring.md).

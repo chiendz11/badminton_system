@@ -1,34 +1,36 @@
-# Báo cáo tiến độ môn học — Badminton Manager
+# Báo cáo Tiến độ Môn học — Badminton Manager V2
 
-## Quy ước số tuần
+Thư mục này lưu trữ các bản báo cáo tiến độ hàng tuần được chuẩn bị để thảo luận và đăng lên chuyên mục Discussions của môn học theo quy chuẩn đào tạo.
 
-Kế hoạch Excel, báo cáo môn học, mã task và thư mục artifact dùng **một hệ số tuần: 4–13**, gồm 10 tuần. Không cộng thêm 3 vào số tuần Excel. Mã task dùng `W04-N1` đến `W13-N5`.
+---
 
-| Tuần | Báo cáo / mục tiêu | Artifact |
-| --- | --- | --- |
-| 4 | [Kế hoạch, bài toán và nghiệp vụ](WEEK_04.md) | [week-4](../week-4/README.md) |
-| 5 | [Kiến trúc, dữ liệu và contract](WEEK_05.md) | [week-5](../week-5/README.md) |
-| 6 | [Khung hệ thống và chạy local thành công](WEEK_06.md) | [week-6](../week-6/README.md) |
-| 7–13 | [Phát triển, tích hợp, staging và bàn giao](PLAN_WEEK_04_13.md) | Theo công việc/output của từng người trong Excel |
+## 1. Quy ước Đánh số Tuần
 
-## Cách đối chiếu tiến độ
+Dự án áp dụng thống nhất **chuỗi số tuần từ 4 đến 13** trên tất cả tài liệu, file Excel kế hoạch và mã công việc (`W04-N1` $\rightarrow$ `W13-N5`).
 
-Các báo cáo tổng hợp từ artifact/code và kết quả thực tế. Đầu ra phân tích/thiết kế được mô tả bằng các kết quả như đã xây dựng tài liệu, thiết kế hoặc đặc tả; việc phê duyệt quyết định theo hồ sơ review/ADR. Runtime, benchmark và deployment cần bằng chứng chạy tương ứng.
+| Tuần | Trọng tâm báo cáo môn học | Báo cáo chi tiết | Bộ Artifact kỹ thuật tương ứng |
+| :---: | :--- | :--- | :--- |
+| **Tuần 4** | Khảo sát bài toán, xác định phạm vi MVP & Master BRD | [**Báo cáo Tuần 4 (WEEK_04.md)**](WEEK_04.md) | [**Bộ Artifact Tuần 4**](../week-4/README.md) |
+| **Tuần 5** | Thiết kế kiến trúc V2, ERD dữ liệu & System Contracts | [**Báo cáo Tuần 5 (WEEK_05.md)**](WEEK_05.md) | [**Bộ Artifact Tuần 5**](../week-5/README.md) |
+| **Tuần 6** | Hiện thực hóa khung hệ thống (Skeleton) & Chạy Local | [**Báo cáo Tuần 6 (WEEK_06.md)**](WEEK_06.md) | [**Bộ Artifact Tuần 6**](../week-6/README.md) |
+| **Tuần 7–13** | Lộ trình phát triển tính năng, tích hợp, staging & bàn giao | [**Kế hoạch 10 tuần**](../planning/PLAN_WEEK_04_13.md) | [**Hồ sơ Kế hoạch Tổng thể**](../planning/README.md) |
 
-Cập nhật cách đánh số ngày 25/10/2026. Công việc, người phụ trách, reviewer, giờ dự kiến và trạng thái trong Excel được giữ nguyên; đây không phải thay đổi kết quả nghiệm thu.
+---
 
-## Đăng báo cáo theo yêu cầu môn học
+## 2. Quy trình Đăng Báo cáo Discussions Môn học
 
-1. Nhóm tạo một thread Discussions theo format `<tên nhóm>_<Tên chủ đề>`, ví dụ `<tên nhóm>_Badminton_Manager`.
-2. Tuần 4 đăng kế hoạch 10 tuần, gồm công việc và output tương ứng; tham chiếu [PLAN_WEEK_04_13](PLAN_WEEK_04_13.md).
-3. Từ tuần 4 đến tuần 13, mỗi thứ Hai thêm một reply trong cùng thread cho tuần tương ứng.
-4. Nội dung tập trung vào kết quả đạt được và kế hoạch tiếp theo; ghi phần chuyển tiếp nếu có thay đổi tiến độ thực tế. Đại diện nhóm dùng báo cáo để trình bày trong buổi học.
+1. **Khởi tạo Thread Thảo luận**: Nhóm trưởng tạo một bài thảo luận (thread) trên GitHub Discussions theo định dạng tiêu đề: `<Tên_Nhóm>_Badminton_Manager`.
+2. **Công bố Kế hoạch**: Đăng kế hoạch 10 tuần phân công chi tiết 50 tasks cho 5 thành viên (tham chiếu [PLAN_WEEK_04_13](../planning/PLAN_WEEK_04_13.md)).
+3. **Cập nhật Tiến độ Định kỳ**: Vào mỗi sáng thứ Hai hàng tuần, phản hồi (reply) vào cùng thread với nội dung tóm tắt kết quả đạt được của tuần trước và kế hoạch tuần tiếp theo.
+4. **Báo cáo Buổi học**: Đại diện nhóm trình bày báo cáo tuần trước giảng viên và lớp dựa trên nội dung đã đăng.
 
-Các file được chuẩn bị local; việc đăng Discussions và ngày báo cáo cụ thể theo lịch môn học của nhóm.
+---
 
-## Tài liệu đối chiếu
+## 3. Tài liệu Tham chiếu & Đối chiếu
 
-- [Bộ artifact tuần 4–5](../DELIVERY_W04_W05.md), [BRD tổng hợp](../week-4/BRD_SYSTEM_V2.md).
-- [Kiến trúc](../architecture/SYSTEM_ARCHITECTURE.md), [system contracts](../SYSTEM_CONTRACTS.md), [hồ sơ ADR](../adr/README.md).
-- [Skeleton mapping](../architecture/SKELETON_MAPPING.md), [kiểm tra artifact](../ARTIFACT_VALIDATION.md), [CI](../CI.md).
-- Workbook `Badminton_Manager_TechCorp_10_Week_Plan.xlsx`; metadata và checksum tại [source provenance](../source-provenance.json).
+- [**Biên bản Bàn giao Tuần 4–5 (DELIVERY_W04_W05.md)**](DELIVERY_W04_W05.md): Biên bản đối chiếu kết quả bàn giao giữa giai đoạn phân tích nghiệp vụ và thiết kế kiến trúc.
+- [**Master BRD**](../week-4/BRD.md) & [**BRD Tổng hợp V2**](../week-4/BRD_SYSTEM_V2.md): Hồ sơ yêu cầu nghiệp vụ chuẩn của hệ thống.
+- [**Kiến trúc Chuẩn Hệ thống V2**](../week-5/ARCHITECTURE.md) & [**System Contracts**](../week-5/SYSTEM_CONTRACTS.md): Hồ sơ thiết kế kỹ thuật và hợp đồng giao tiếp giữa các services.
+- [**Bộ Quyết định Kiến trúc (ADRs)**](../week-5/adr/README.md): 9 quyết định công nghệ và ranh giới hệ thống.
+- [**Kiểm chứng Môi trường Local**](../devops/validation.md) & [**Quy trình CI/CD**](../devops/ci-cd.md): Kết quả kiểm tra sức khỏe và pipeline tự động.
+- [**Hồ sơ Nguồn gốc Provenance**](../planning/source-provenance.json): Bảng băm SHA256 và truy xuất kế hoạch gốc.

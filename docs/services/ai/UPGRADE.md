@@ -48,16 +48,16 @@ Sơ đồ thể hiện các bước logic. Code gộp evaluation/ranking vào c�
 
 | File | Trách nhiệm |
 | --- | --- |
-| [schemas.py](../services/ai-service/app/schemas.py) | `Candidate`, `ConstraintViolation`, `NearMissOption`, `SearchResult`, `NegotiationContext`, response và actions mới |
-| [candidates.py](../services/ai-service/app/recommendation/candidates.py) | Tạo chuỗi slot trống liên tiếp, cùng court, có giá và đúng ngày; từ chối dữ liệu sai/stale |
-| [constraints.py](../services/ai-service/app/recommendation/constraints.py) | Đánh giá từng field, tính delta, phân biệt soft/locked và ngưỡng đề xuất |
-| [ranking.py](../services/ai-service/app/recommendation/ranking.py) | Tách Option/Proposal, score chuẩn hóa và stable tie-breaker |
-| [negotiation.py](../services/ai-service/app/recommendation/negotiation.py) | Resolve snapshot server, kiểm expiry/version/evidence, chỉ chấp thuận suggested changes được lưu |
-| [tools.py](../services/ai-service/app/tools.py) | Discovery có pagination cap, semaphore, deadline; kết quả và coverage có kiểu |
-| [workflow.py](../services/ai-service/app/workflow.py) | Routing, proposal lifecycle, revalidation; giữ luồng BOOK an toàn |
-| [providers.py](../services/ai-service/app/providers.py) | LLM/Fake parser đọc context đề xuất, số thứ tự và evidence; không tự cấp quyền |
-| [response_composer.py](../services/ai-service/app/response_composer.py) | Template tiếng Việt chỉ dùng structured facts |
-| [service.py](../services/ai-service/app/service.py), [store.py](../services/ai-service/app/db/store.py) | Lock, dedupe, state JSON, resume và tương thích lượt V1 |
+| [schemas.py](../../../services/ai-service/app/schemas.py) | `Candidate`, `ConstraintViolation`, `NearMissOption`, `SearchResult`, `NegotiationContext`, response và actions mới |
+| [candidates.py](../../../services/ai-service/app/recommendation/candidates.py) | Tạo chuỗi slot trống liên tiếp, cùng court, có giá và đúng ngày; từ chối dữ liệu sai/stale |
+| [constraints.py](../../../services/ai-service/app/recommendation/constraints.py) | Đánh giá từng field, tính delta, phân biệt soft/locked và ngưỡng đề xuất |
+| [ranking.py](../../../services/ai-service/app/recommendation/ranking.py) | Tách Option/Proposal, score chuẩn hóa và stable tie-breaker |
+| [negotiation.py](../../../services/ai-service/app/recommendation/negotiation.py) | Resolve snapshot server, kiểm expiry/version/evidence, chỉ chấp thuận suggested changes được lưu |
+| [tools.py](../../../services/ai-service/app/tools.py) | Discovery có pagination cap, semaphore, deadline; kết quả và coverage có kiểu |
+| [workflow.py](../../../services/ai-service/app/workflow.py) | Routing, proposal lifecycle, revalidation; giữ luồng BOOK an toàn |
+| [providers.py](../../../services/ai-service/app/providers.py) | LLM/Fake parser đọc context đề xuất, số thứ tự và evidence; không tự cấp quyền |
+| [response_composer.py](../../../services/ai-service/app/response_composer.py) | Template tiếng Việt chỉ dùng structured facts |
+| [service.py](../../../services/ai-service/app/service.py), [store.py](../../../services/ai-service/app/db/store.py) | Lock, dedupe, state JSON, resume và tương thích lượt V1 |
 
 ### Candidate và dữ liệu Core
 
@@ -103,9 +103,9 @@ Không thêm endpoint Core. Endpoint AI/Gateway cũ nhận thêm:
 
 Từ chối dùng `action=reject_proposal`. Proposal action phải có `proposal_id` và không kèm option/confirmation ID. Response thêm `proposals`, `diagnostics`, `search_metadata`, `pending_negotiation`. `REPLAN` cũ khi không có nghiệm được thay bằng `ASK_CONSTRAINT_CHANGE`; proposal dùng `ALTERNATIVES_PROPOSED`.
 
-Contract hiện hành: [AI OpenAPI](../contracts/ai/openapi.json), [public Gateway](../contracts/gateway/openapi.json), [message schema](../contracts/ai-tools/conversation-message.schema.json). Các endpoint `/v1/chat` còn Proposed không được tự coi là đã triển khai.
+Contract hiện hành: [AI OpenAPI](../../../contracts/ai/openapi.json), [public Gateway](../../../contracts/gateway/openapi.json), [message schema](../../../contracts/ai-tools/conversation-message.schema.json). Các endpoint `/v1/chat` còn Proposed không được tự coi là đã triển khai.
 
-Trang [BookingAssistant](../apps/web/src/features/assistant/pages/BookingAssistant.tsx) giữ layout hiện có, thêm thẻ đề xuất khác màu và giải thích độ lệch. Nút **Đồng ý đổi điều kiện** khác với **Chọn sân** và **Xác nhận đặt sân**; proposal hết hạn bị vô hiệu hóa ở UI và server vẫn kiểm lại. Reload lấy snapshot hiện hành từ state, không dùng đề xuất cũ trong lịch sử làm authority.
+Trang [BookingAssistant](../../../apps/web/src/features/assistant/pages/BookingAssistant.tsx) giữ layout hiện có, thêm thẻ đề xuất khác màu và giải thích độ lệch. Nút **Đồng ý đổi điều kiện** khác với **Chọn sân** và **Xác nhận đặt sân**; proposal hết hạn bị vô hiệu hóa ở UI và server vẫn kiểm lại. Reload lấy snapshot hiện hành từ state, không dùng đề xuất cũ trong lịch sử làm authority.
 
 ## 6. Cấu hình và giới hạn
 
@@ -134,7 +134,7 @@ Giữ HTTP/planner/tool/token metrics, bổ sung search outcomes, near-miss cand
 
 Trace/log có request ID, conversation/turn/search/proposal ID, constraints version và decision reason; không log API key, bearer hay toàn bộ prompt/transcript. BOOK không được thay bằng log/checkpoint đơn thuần: business-state persistence vẫn là authority của ý định bền vững.
 
-Rule và dashboard được bổ sung ngay trong nguồn [monitoring/chart](../monitoring/README.md) của app, dùng chung local/GitOps theo quy ước nhóm. Có panel search outcomes, proposal lifecycle, latency theo stage, revalidation/guard/parser failures và số lượt negotiation. Ngưỡng cảnh báo ban đầu cần được review sau baseline; không coi chúng là SLO đã đạt.
+Rule và dashboard được bổ sung ngay trong nguồn [monitoring/chart](../../../monitoring/README.md) của app, dùng chung local/GitOps theo quy ước nhóm. Có panel search outcomes, proposal lifecycle, latency theo stage, revalidation/guard/parser failures và số lượt negotiation. Ngưỡng cảnh báo ban đầu cần được review sau baseline; không coi chúng là SLO đã đạt.
 
 ## 8. Kiểm tra và evaluation
 

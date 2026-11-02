@@ -375,7 +375,7 @@ Các tình huống dưới đây là bộ UAT tối thiểu. Một ca có test t
 | GAP-05 | Đã có logs/metrics/health/outbox; chưa có stack monitoring, publisher và quy trình backup/restore được nghiệm thu | Chốt nhu cầu vận hành; triển khai phần cần cho chạy thật. Publisher/thông báo chỉ làm khi được bổ sung phạm vi | P1; không phải cam kết chức năng thông báo |
 | GAP-06 | Chưa có mục tiêu tải, SLO, RPO/RTO, retention và danh sách thiết bị hỗ trợ được phê duyệt | Chủ hệ thống/người vận hành chốt tiêu chí và tổ chức đo/diễn tập | Cần chốt trước production |
 
-GAP-02 được đối chiếu trực tiếp trong [client đặt ngày Web](../apps/web/src/features/booking/api/booking_service/rest/booking.js), [HTTP transport Web](../apps/web/src/shared/api/http.js) và [Gateway booking adapter](../services/api-gateway/src/modules/booking/booking-adapter.ts). GAP-03 đối chiếu [date picker](../apps/web/src/features/booking/ui/datepicker.jsx) và cùng adapter. BRD ghi nhận khoảng trống; việc lập tài liệu không sửa code các luồng đó.
+GAP-02 được đối chiếu trực tiếp trong [client đặt ngày Web](../../apps/web/src/features/booking/api/booking_service/rest/booking.js), [HTTP transport Web](../../apps/web/src/shared/api/http.js) và [Gateway booking adapter](../../services/api-gateway/src/modules/booking/booking-adapter.ts). GAP-03 đối chiếu [date picker](../../apps/web/src/features/booking/ui/datepicker.jsx) và cùng adapter. BRD ghi nhận khoảng trống; việc lập tài liệu không sửa code các luồng đó.
 
 ## 14. Quyết định nghiệp vụ còn mở
 
@@ -417,7 +417,7 @@ Không gán ngày kết thúc, ngân sách hoặc phân công tên người khi 
 
 | Tài liệu/nguồn | Nội dung đối chiếu |
 | --- | --- |
-| [README](../README.md) | Phạm vi ứng dụng và cách chạy; phần mô tả nhánh trong README có thể phản ánh lịch sử trước merge |
+| [README](../../README.md) | Phạm vi ứng dụng và cách chạy; phần mô tả nhánh trong README có thể phản ánh lịch sử trước merge |
 | [BOOKING_CORE](BOOKING_CORE.md) | Quy tắc đặt sân, giữ chỗ, giá, phân quyền và transaction |
 | [API_GATEWAY](API_GATEWAY.md) | Giữ hợp đồng UI gốc, danh tính, quyền và giới hạn adapter |
 | [AI_SERVICE](AI_SERVICE.md) | Hội thoại, ràng buộc, xác nhận cuối, phục hồi, tìm kiếm và giới hạn AI |
@@ -425,8 +425,8 @@ Không gán ngày kết thúc, ngân sách hoặc phân công tên người khi 
 | [ARCHITECTURE](ARCHITECTURE.md) | Ranh giới sở hữu dữ liệu và trách nhiệm các thành phần |
 | [MONITORING](MONITORING.md) | Instrumentation hiện có và các thành phần vận hành chưa triển khai |
 | [VALIDATION](VALIDATION.md), [CI](CI.md) | Bằng chứng kiểm tra và cách chạy gate; không thay thế biên bản UAT |
-| [Domain Core](../services/booking-core/src/common/domain/calendar.ts), [Reservations](../services/booking-core/src/modules/reservations/reservations.service.ts), [Booking commands](../services/booking-core/src/modules/bookings/bookings-command.service.ts) | Thời gian, giới hạn, giữ chỗ, xác nhận/hủy/ẩn |
-| [Domain AI](../services/ai-service/app/domain.py), [Conversation service](../services/ai-service/app/service.py) | Kiểm tra điều kiện, tìm phương án, quyền xác nhận và phục hồi hội thoại |
+| [Domain Core](../../services/booking-core/src/common/domain/calendar.ts), [Reservations](../../services/booking-core/src/modules/reservations/reservations.service.ts), [Booking commands](../../services/booking-core/src/modules/bookings/bookings-command.service.ts) | Thời gian, giới hạn, giữ chỗ, xác nhận/hủy/ẩn |
+| [Domain AI](../../services/ai-service/app/domain.py), [Conversation service](../../services/ai-service/app/service.py) | Kiểm tra điều kiện, tìm phương án, quyền xác nhận và phục hồi hội thoại |
 
 Khi tài liệu mô tả chưa khớp code, cột hiện trạng và GAP phải nêu khác biệt, không tự sửa yêu cầu để hợp thức hóa một thiếu hụt triển khai. Đổi quy tắc kinh doanh vẫn cần chủ thể có thẩm quyền chấp thuận.
 

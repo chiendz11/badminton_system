@@ -46,6 +46,6 @@ python .github/scripts/validate_contracts.py contracts/gateway
 python .github/scripts/validate_contracts.py contracts/sockets
 ```
 
-Sửa contract tại provider owner, cập nhật examples và consumer/provider tests tương ứng. Thay file OpenAPI không tự thêm route hoặc đổi auth của runtime. Tham khảo [system contract](../docs/SYSTEM_CONTRACTS.md) và [ADRs](../docs/adr/README.md) cho transaction/policy đang mở.
+Sửa contract tại provider owner, cập nhật examples và consumer/provider tests tương ứng. Thay file OpenAPI không tự thêm route hoặc đổi auth của runtime. Tham khảo [system contract](../docs/week-5/SYSTEM_CONTRACTS.md) và [ADRs](../docs/week-5/adr/README.md) cho transaction/policy đang mở.
 
 Có thể bundle từng entry cho Swagger UI/client generation khi cần; chưa thêm bundler hoặc build output vào repo. Không duy trì thêm một bản OpenAPI toàn hệ thống chép tay song song. Các schema chung đã dùng `$ref` để có một nguồn định nghĩa.

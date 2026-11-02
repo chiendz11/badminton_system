@@ -4,7 +4,7 @@
 
 ## Trạng thái và cách đọc
 
-Ngày 18/10/2026, baseline repo mới fbd3d4d538692b8ae383f561165c844fdf9d0bf2. Tài liệu đính kèm “kien_truc_va_trien_khai_badminton_manager_v2 (1).md” là thiết kế đích dựa trên legacy, không mô tả nguyên trạng repo mới. Sơ đồ dưới ghi rõ current/target; skeleton không phải service chạy được. [Source provenance](../source-provenance.json), [mapping](SKELETON_MAPPING.md), [ADRs](../adr/README.md) và [contract](../SYSTEM_CONTRACTS.md) cung cấp căn cứ.
+Ngày 18/10/2026, baseline repo mới fbd3d4d538692b8ae383f561165c844fdf9d0bf2. Tài liệu đính kèm “kien_truc_va_trien_khai_badminton_manager_v2 (1).md” là thiết kế đích dựa trên legacy, không mô tả nguyên trạng repo mới. Sơ đồ dưới ghi rõ current/target; skeleton không phải service chạy được. [Source provenance](../../planning/source-provenance.json), [mapping](SKELETON_MAPPING.md), [ADRs](../adr/README.md) và [contract](../SYSTEM_CONTRACTS.md) cung cấp căn cứ.
 
 ## C4 — system context
 
@@ -124,10 +124,10 @@ Current có JSON logs/metrics và contract/unit/integration/golden checks theo c
 
 Target metrics: HTTP throughput/error/p95, DB pool/slow queries, slot/transfer conflict, POS stock reject, outbox age/backlog, broker retry/DLQ, socket connections/message latency, AI extraction/schema/tool errors/tokencost. Log correlation requestId/traceId/eventId; redact secrets/PII; không userId/conversationId metric labels. Retention/SLO/thresholds cần tải thật để chốt.
 
-Hạ tầng AWS thuộc `badminton-infras`; GitOps quản lý manifests triển khai và cài stack monitoring. Repo app sở hữu nguồn rule/dashboard và templates ServiceMonitor/PrometheusRule trong `monitoring/chart`. Profile Compose `monitoring` đọc cùng nguồn; GitOps tham chiếu chart bằng app commit đã review thay vì giữ bản rule riêng. Skeleton platform ở root đã bỏ. Staging/K8s vẫn cần image digest, secret delivery, migrations job và rollout/rollback/backup evidence. [Quy ước monitoring](../MONITORING.md) mô tả nguồn cấu hình và giới hạn kiểm chứng.
+Hạ tầng AWS thuộc `badminton-infras`; GitOps quản lý manifests triển khai và cài stack monitoring. Repo app sở hữu nguồn rule/dashboard và templates ServiceMonitor/PrometheusRule trong `monitoring/chart`. Profile Compose `monitoring` đọc cùng nguồn; GitOps tham chiếu chart bằng app commit đã review thay vì giữ bản rule riêng. Skeleton platform ở root đã bỏ. Staging/K8s vẫn cần image digest, secret delivery, migrations job và rollout/rollback/backup evidence. [Quy ước monitoring](../../devops/monitoring.md) mô tả nguồn cấu hình và giới hạn kiểm chứng.
 
 ## Migration và trạng thái bàn giao
 
 Đi từng context: target song song → ETL/mapping → shadow/read compare → một writer cutover → read cutover → legacy read-only → decommission khi có reconcile. Backup và rollback trước thay đổi dữ liệu; không xóa source legacy hoặc migrate dữ liệu thật trong lần này.
 
-Skeleton hiện chỉ cây thư mục/README/.gitkeep. Không đạt gate W6 full Compose/health/FE stub APIs. ADR-001..009 Proposed, G01/G02 chưa ký. Xung đột lớn nhất là AI read-only theo kiến trúc so với execution current; payment CONFIRMED≠paid và Web thiếu Idempotency-Key cũng chưa được sửa. [Danh mục bàn giao](../DELIVERY_W04_W05.md) có đủ task/owner/file và các bước review tiếp theo.
+Skeleton hiện chỉ cây thư mục/README/.gitkeep. Không đạt gate W6 full Compose/health/FE stub APIs. ADR-001..009 Proposed, G01/G02 chưa ký. Xung đột lớn nhất là AI read-only theo kiến trúc so với execution current; payment CONFIRMED≠paid và Web thiếu Idempotency-Key cũng chưa được sửa. [Danh mục bàn giao](../../reports/DELIVERY_W04_W05.md) có đủ task/owner/file và các bước review tiếp theo.

@@ -146,7 +146,7 @@ Targeted cross-service/nightly integration và ECR/GitOps release sẽ thêm khi
 
 Cập nhật 19/10/2026: Gateway public proposals tham chiếu provider Path Items. `gateway_api.depends_on` liệt kê provider contracts để kiểm `$ref` bị ảnh hưởng; schema lỗi chung có component `http_common`, AI runtime phụ thuộc `ai_api`.
 
-Validator dùng `validate(..., base_uri=...)` để resolve file tương đối. Mỗi OpenAPI có `openapi.examples.json`; JSON Schema có `.schema.examples.json`. Positive phải hợp lệ, negative phải bị từ chối. Contract job kiểm cấu trúc/shape, không chứng nhận endpoint Proposed chạy được. Consumer/provider tests hiện có tiếp tục kiểm behavior; xem [catalog](../contracts/README.md).
+Validator dùng `validate(..., base_uri=...)` để resolve file tương đối. Mỗi OpenAPI có `openapi.examples.json`; JSON Schema có `.schema.examples.json`. Positive phải hợp lệ, negative phải bị từ chối. Contract job kiểm cấu trúc/shape, không chứng nhận endpoint Proposed chạy được. Consumer/provider tests hiện có tiếp tục kiểm behavior; xem [catalog](../../contracts/README.md).
 
 ---
 

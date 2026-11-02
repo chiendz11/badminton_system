@@ -6,7 +6,7 @@ Kế hoạch gồm 10 tuần, đánh số thống nhất từ **tuần 4 đến 
 
 Đây là bản ánh xạ kế hoạch gốc, không phải bảng nghiệm thu. Không tự đặt ngày lịch vì chưa có ngày bắt đầu tuần môn học. Status gốc của 50 task trong Excel là “Chưa bắt đầu”; việc đã có code hoặc tài liệu hiện nay không tự chứng minh hoàn thành đúng tuần lịch sử.
 
-Nguồn: `Badminton_Manager_TechCorp_10_Week_Plan.xlsx`, sheet **Kế hoạch 10 tuần**. Metadata và SHA256 đầu vào ở [source provenance](../source-provenance.json). Người1..5 theo workbook, chưa có tên thật được cung cấp.
+Nguồn: `Badminton_Manager_TechCorp_10_Week_Plan.xlsx`, sheet **Kế hoạch 10 tuần**. Metadata và SHA256 đầu vào ở [source provenance](source-provenance.json). Người1..5 theo workbook, chưa có tên thật được cung cấp.
 
 ## Tổng quan 10 tuần
 

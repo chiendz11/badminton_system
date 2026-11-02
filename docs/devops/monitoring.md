@@ -75,12 +75,12 @@ Luồng mong muốn: ứng dụng xuất metrics/logs/spans → hệ thống thu
 
 Nguồn quản lý cấu hình được thống nhất trong **app repo**:
 
-- [monitoring/chart](../monitoring/chart/Chart.yaml): Helm chart của ứng dụng; templates ServiceMonitor/PrometheusRule và dashboard ConfigMap.
-- [Rule nguồn Core](../monitoring/chart/rules/booking-core.yml), [Gateway](../monitoring/chart/rules/api-gateway.yml), [AI](../monitoring/chart/rules/ai-service.yml): cùng file được Compose mount và Helm đọc; không còn bản production sao chép trong GitOps.
-- [Dashboard nguồn](../monitoring/chart/dashboards/backend-overview.json): cùng JSON được provision local và đóng vào ConfigMap cho Grafana sidecar.
-- [monitoring/prometheus.yml](../monitoring/prometheus.yml): địa chỉ thu thập trong network Compose; Kubernetes dùng ServiceMonitor từ chart thay cho DNS local.
-- [compose.yml](../compose.yml): profile `monitoring`, volume/config mounts, port và token local.
-- [Hướng dẫn chạy và phát hành](../monitoring/README.md): lệnh local, kiểm tra tĩnh và bước pin chart trước khi sync.
+- [monitoring/chart](../../monitoring/chart/Chart.yaml): Helm chart của ứng dụng; templates ServiceMonitor/PrometheusRule và dashboard ConfigMap.
+- [Rule nguồn Core](../../monitoring/chart/rules/booking-core.yml), [Gateway](../../monitoring/chart/rules/api-gateway.yml), [AI](../../monitoring/chart/rules/ai-service.yml): cùng file được Compose mount và Helm đọc; không còn bản production sao chép trong GitOps.
+- [Dashboard nguồn](../../monitoring/chart/dashboards/backend-overview.json): cùng JSON được provision local và đóng vào ConfigMap cho Grafana sidecar.
+- [monitoring/prometheus.yml](../../monitoring/prometheus.yml): địa chỉ thu thập trong network Compose; Kubernetes dùng ServiceMonitor từ chart thay cho DNS local.
+- [compose.yml](../../compose.yml): profile `monitoring`, volume/config mounts, port và token local.
+- [Hướng dẫn chạy và phát hành](../../monitoring/README.md): lệnh local, kiểm tra tĩnh và bước pin chart trước khi sync.
 
 | Phần | Nguồn quản lý | Cách dùng |
 | --- | --- | --- |
@@ -182,7 +182,7 @@ Web/Admin hiển thị mã lỗi/request ID để hỗ trợ tra cứu; không h
 
 ### 6.2. Event và socket cần triển khai
 
-Event catalog theo [contracts/events](../contracts/events/). Envelope tương lai dùng `id`, `correlationId`, `type`; `eventId` trong log ánh xạ từ `id`. Core outbox hiện có ID bản ghi, type và `payload.correlationId`, chưa phải toàn bộ envelope tương lai.
+Event catalog theo [contracts/events](../../contracts/events/). Envelope tương lai dùng `id`, `correlationId`, `type`; `eventId` trong log ánh xạ từ `id`. Core outbox hiện có ID bản ghi, type và `payload.correlationId`, chưa phải toàn bộ envelope tương lai.
 
 Publisher/consumer phải giữ correlation ID, event ID, event type và attempt khi chuyển qua RabbitMQ. Không thêm tùy tiện field vào JSON Schema đang `additionalProperties: false`; trace context mới phải có contract/header mapping được version và review. Broker publish ack không có nghĩa Notification đã xử lý thành công. Consumer chỉ báo processed/ack sau persist thành công; duplicate được ghi nhận riêng, không tăng số notification nghiệp vụ mới.
 
@@ -252,7 +252,7 @@ p95 tính từ tổng bucket counters sau `rate`, giữ label `le`; không lấy
 
 ### 8.1. Booking Core
 
-Source: [packages/observability](../packages/observability/src/index.ts), [request middleware](../services/booking-core/src/common/observability/request-telemetry.middleware.ts), [health controller](../services/booking-core/src/modules/health/health.controller.ts).
+Source: [packages/observability](../../packages/observability/src/index.ts), [request middleware](../../services/booking-core/src/common/observability/request-telemetry.middleware.ts), [health controller](../../services/booking-core/src/modules/health/health.controller.ts).
 
 | Metric | Type / labels | Ý nghĩa |
 | --- | --- | --- |
@@ -274,7 +274,7 @@ Outbox đã được ghi cùng transaction booking nhưng **publisher chưa đư
 
 ### 8.2. API Gateway
 
-Source: [request telemetry](../services/api-gateway/src/middleware/request-telemetry.ts), [app](../services/api-gateway/src/app.ts).
+Source: [request telemetry](../../services/api-gateway/src/middleware/request-telemetry.ts), [app](../../services/api-gateway/src/app.ts).
 
 | Metric | Labels | Ý nghĩa |
 | --- | --- | --- |
@@ -287,7 +287,7 @@ Dashboard hiện phải loại probe/scrape rõ ràng. Gateway mất kết nối
 
 ### 8.3. AI Service
 
-Source: [observability.py](../services/ai-service/app/observability.py), [main.py](../services/ai-service/app/main.py), [workflow.py](../services/ai-service/app/workflow.py). Diễn giải chi tiết tại [AI service walkthrough](AI_SERVICE_CODE_WALKTHROUGH.md).
+Source: [observability.py](../../services/ai-service/app/observability.py), [main.py](../../services/ai-service/app/main.py), [workflow.py](../../services/ai-service/app/workflow.py). Diễn giải chi tiết tại [AI service walkthrough](../services/ai/CODE_WALKTHROUGH.md).
 
 | Metric | Labels | Ý nghĩa / giới hạn |
 | --- | --- | --- |
@@ -363,7 +363,7 @@ Hai Nginx UI hiện dùng template proxy Gateway và serve static assets; chưa 
 
 Dashboard AI tách 3 nhóm: service health, chất lượng trên bộ dữ liệu có nhãn, usage/cost. Provider/model/prompt/corpus version gắn với report/build; không lấy confidence của model làm accuracy.
 
-Hiện CI có fake-provider golden: schema_validity ≥ 1.0, constraint_f1 ≥ 0.90, critical_field_accuracy ≥ 0.95 theo [CI manifest](../.github/ci/components.yml). Small 30 mẫu, full 40 mẫu. Critical metric hiện xét expected date/duration/budget; xem [evaluator](../services/ai-service/evaluation/evaluate.py) để hiểu mẫu số. Đây là regression gate parser, không phải benchmark LLM thật hay tỷ lệ đặt sân thành công.
+Hiện CI có fake-provider golden: schema_validity ≥ 1.0, constraint_f1 ≥ 0.90, critical_field_accuracy ≥ 0.95 theo [CI manifest](../../.github/ci/components.yml). Small 30 mẫu, full 40 mẫu. Critical metric hiện xét expected date/duration/budget; xem [evaluator](../../services/ai-service/evaluation/evaluate.py) để hiểu mẫu số. Đây là regression gate parser, không phải benchmark LLM thật hay tỷ lệ đặt sân thành công.
 
 Khi có RAG/model mới: thêm schema validity, constraint/critical accuracy, retrieval Recall@k/MRR, grounded-answer/no-write checks theo profile được duyệt, p95 và chi phí trên tập đánh giá versioned. Runtime hiện chưa có RAG. Không vẽ Recall@k bằng 0 khi chưa triển khai; hiển thị N/A.
 
@@ -396,7 +396,7 @@ Worker expiry hiện tại chạy trong Core bằng timer; không mô tả như 
 
 ### 11.1. Các target trong profile Compose
 
-[Prometheus local](../monitoring/prometheus.yml) đặt scrape interval 15 giây; target là DNS trong network container, không phải host localhost. Bật bằng `docker compose --profile monitoring up -d --build`. Grafana: http://localhost:3001; Prometheus: http://localhost:9090; Alertmanager: http://localhost:9093. Receiver local không gửi thông báo ra ngoài.
+[Prometheus local](../../monitoring/prometheus.yml) đặt scrape interval 15 giây; target là DNS trong network container, không phải host localhost. Bật bằng `docker compose --profile monitoring up -d --build`. Grafana: http://localhost:3001; Prometheus: http://localhost:9090; Alertmanager: http://localhost:9093. Receiver local không gửi thông báo ra ngoài.
 
 | Job | Target trong Compose network | Host local | Bearer file trong Prometheus |
 | --- | --- | --- | --- |
@@ -516,7 +516,7 @@ Mục tiêu ban đầu **đề xuất để chạy baseline trên staging**: ava
 
 ### 13.2. Rule hiện có và rule cần bổ sung
 
-[Rule nguồn Core](../monitoring/chart/rules/booking-core.yml), [Gateway](../monitoring/chart/rules/api-gateway.yml) và [AI](../monitoring/chart/rules/ai-service.yml) được dùng chung local/Helm. Target down giữ 2 phút; HTTP 5xx >5% và p95 Core/Gateway >1 giây, AI >2 giây giữ 5 phút, chỉ khi ít nhất 20 request trong 5 phút. HTTP rule loại health/metrics và tổng hợp theo environment/service. Core có thêm DB down và conflict spike. AI tool hiện có outcome started/success, chưa có counter lỗi hoàn chỉnh nên không bật rule coi started là failure. Chưa xác nhận rule đã được nạp trên môi trường Docker/Kubernetes. Các điều kiện còn lại trong bảng là chuẩn cần bổ sung khi runtime có metric phù hợp.
+[Rule nguồn Core](../../monitoring/chart/rules/booking-core.yml), [Gateway](../../monitoring/chart/rules/api-gateway.yml) và [AI](../../monitoring/chart/rules/ai-service.yml) được dùng chung local/Helm. Target down giữ 2 phút; HTTP 5xx >5% và p95 Core/Gateway >1 giây, AI >2 giây giữ 5 phút, chỉ khi ít nhất 20 request trong 5 phút. HTTP rule loại health/metrics và tổng hợp theo environment/service. Core có thêm DB down và conflict spike. AI tool hiện có outcome started/success, chưa có counter lỗi hoàn chỉnh nên không bật rule coi started là failure. Chưa xác nhận rule đã được nạp trên môi trường Docker/Kubernetes. Các điều kiện còn lại trong bảng là chuẩn cần bổ sung khi runtime có metric phù hợp.
 
 | Alert / điều kiện khởi điểm | Mức / thời gian giữ | Điều kiện bật và owner |
 | --- | --- | --- |
