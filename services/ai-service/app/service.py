@@ -1,5 +1,6 @@
 import asyncio
 import copy
+import json
 from datetime import datetime, timezone
 
 from fastapi import HTTPException
@@ -121,3 +122,22 @@ class ConversationService:
                 )
             await session.commit()
             return response
+
+    async def message_stream(self, id, request, actor, token, request_id):
+        try:
+            yield f"event: start\ndata: {json.dumps({'conversation_id': id, 'status': 'processing'})}\n\n"
+            yield f"event: status\ndata: {json.dumps({'step': 'workflow', 'message': 'Đang xử lý yêu cầu...'}, ensure_ascii=False)}\n\n"
+            response = await self.message(id, request, actor, token, request_id)
+            reply = response.get("assistant_message", "")
+            if reply:
+                words = reply.split(" ")
+                for i, word in enumerate(words):
+                    chunk = word if i == len(words) - 1 else word + " "
+                    yield f"event: token\ndata: {json.dumps({'delta': chunk}, ensure_ascii=False)}\n\n"
+                    await asyncio.sleep(0.01)
+            yield f"event: result\ndata: {json.dumps(response, ensure_ascii=False)}\n\n"
+            yield "event: done\ndata: [DONE]\n\n"
+        except HTTPException as exc:
+            yield f"event: error\ndata: {json.dumps({'status': exc.status_code, 'detail': exc.detail}, ensure_ascii=False)}\n\n"
+        except Exception as exc:
+            yield f"event: error\ndata: {json.dumps({'status': 500, 'detail': str(exc)}, ensure_ascii=False)}\n\n"

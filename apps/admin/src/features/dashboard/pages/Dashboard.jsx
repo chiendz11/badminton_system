@@ -2,6 +2,8 @@ import React, { useContext, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { SessionContext } from "../../../shared/session/SessionContext.jsx";
 import { ROLES } from "../../../shared/constants/roles.js";
+import { Sparkles } from "lucide-react";
+import { useChat } from "../../../shared/chat/ChatContext.jsx";
 
 // IMPORT LOADING SPINNER
 import LoadingSpinner from "../../../shared/ui/LoadingSpinner.jsx";
@@ -67,6 +69,7 @@ const featureCardStyle = {
 const DashboardAdmin = () => {
   const navigate = useNavigate();
   const { admin } = useContext(SessionContext);
+  const { openChat } = useChat();
 
   const [isNavigating, setIsNavigating] = useState(false);
 
@@ -176,6 +179,20 @@ const DashboardAdmin = () => {
             </h1>
           </div>
         </div>
+
+        {/* Amazon Q style AI Launch Button (AWS Console Header style) */}
+        <button
+          type="button"
+          onClick={openChat}
+          className="flex items-center gap-2 px-3.5 py-2 rounded-xl bg-gradient-to-tr from-purple-600 via-indigo-600 to-emerald-400 p-0.5 shadow-md hover:scale-105 active:scale-95 transition-all text-white text-sm font-semibold"
+          title="Mở Trợ lý AI (Amazon Q style)"
+          aria-label="Trợ lý AI ĐẶT SÂN 247"
+        >
+          <div className="w-full h-full bg-slate-950 px-3 py-1.5 rounded-[10px] flex items-center gap-2">
+            <Sparkles size={16} className="text-emerald-400" />
+            <span className="text-slate-100 text-xs font-medium">Trợ lý AI</span>
+          </div>
+        </button>
       </header>
 
       <h2

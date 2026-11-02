@@ -2,8 +2,10 @@ import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import "../styles/footer.css";
 import { MessageSquare } from "lucide-react";
+import { useChat } from "../chat/ChatContext.jsx";
 
 const Footer = () => {
+  const { openChat } = useChat() || { openChat: () => {} };
   const [footerScale, setFooterScale] = useState(1);
   const [footerOpacity, setFooterOpacity] = useState(1);
 
@@ -127,13 +129,15 @@ const Footer = () => {
         </div>
       </footer>
 
-      <Link
-        to="/booking-assistant"
+      <button
+        type="button"
+        onClick={openChat}
         className="chat-toggle-btn"
         aria-label="Trợ lý đặt sân"
+        title="Trợ lý AI ĐẶT SÂN 247"
       >
         <MessageSquare size={24} />
-      </Link>
+      </button>
 
       <button onClick={scrollToTop} className="scroll-to-top">
         <i className="fas fa-arrow-up"></i>
