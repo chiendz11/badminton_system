@@ -180,3 +180,29 @@ it("keeps cancellation consent separate and forwards only the server-issued nonc
   }
   expect(transport).toHaveBeenCalledTimes(1);
 });
+  it("proxies streaming SSE messages with event-stream headers", async () => {
+    const sseData = "event: start\ndata: {}\n\nevent: token\ndata: {\"delta\":\"chào\"}\n\nevent: done\ndata: [DONE]\n\n";
+    const transport = vi.fn(
+      async () =>
+        new Response(sseData, {
+          status: 200,
+          headers: { "Content-Type": "text/event-stream" },
+        }),
+    );
+    const server = createApp(config, transport);
+    const body = {
+      text: "Xin chào",
+      client_message_id: "stream-message-001",
+    };
+    const res = await request(server)
+      .post(`/api/conversations/${id}/messages`)
+      .set("Authorization", "Bearer " + token())
+      .set("Accept", "text/event-stream")
+      .send(body)
+      .expect(200);
+
+    expect(res.headers["content-type"]).toContain("text/event-stream");
+    expect(res.headers["cache-control"]).toContain("no-cache");
+    expect(res.text).toContain("event: token");
+    expect(res.text).toContain("[DONE]");
+  });

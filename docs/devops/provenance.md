@@ -189,3 +189,4 @@ Mọi Pull Request trước khi được phê duyệt merge vào nhánh chính c
   - [ ] Bộ golden test suite (`evaluate.py`) chạy đạt yêu cầu độ chính xác.
   - [ ] Không commit model weights hoặc credential vào Git.
 - [ ] **GitOps Compatible**: Service tương thích với cơ chế override tag tự động qua `kustomization.yaml`.
+

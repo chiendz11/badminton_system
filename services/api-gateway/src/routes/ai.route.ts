@@ -139,7 +139,65 @@ export function aiRoutes(
     );
     res.json(r.data);
   });
-  router.post("/conversations/:id/messages", all, async (req, res) => {
+  router.post("/conversations/:id/messages", all, async (req, res, next) => {
+    const isStream = req.headers.accept === "text/event-stream";
+    if (isStream) {
+      try {
+        const parsedBody = message.parse(req.body);
+        const controller = new AbortController();
+        req.on("close", () => controller.abort());
+
+        const response = await transport(
+          (config.aiUrl || "http://localhost:8000") +
+            "/api/conversations/" +
+            uuid.parse(req.params.id) +
+            "/messages",
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              Accept: "text/event-stream",
+              Authorization: req.headers.authorization!,
+              "X-Request-Id": req.requestId,
+            },
+            body: JSON.stringify(parsedBody),
+            signal: controller.signal,
+          },
+        );
+
+        if (!response.ok) {
+          let data: any;
+          try {
+            data = await response.json();
+          } catch {
+            throw new GatewayError(response.status, "AI service từ chối yêu cầu");
+          }
+          throw new GatewayError(
+            response.status,
+            typeof data.detail === "string" ? data.detail : "AI service từ chối yêu cầu",
+          );
+        }
+
+        res.setHeader("Content-Type", "text/event-stream");
+        res.setHeader("Cache-Control", "no-cache, no-transform");
+        res.setHeader("Connection", "keep-alive");
+        res.setHeader("X-Accel-Buffering", "no");
+
+        const reader = response.body?.getReader();
+        if (reader) {
+          while (true) {
+            const { done, value } = await reader.read();
+            if (done) break;
+            res.write(value);
+          }
+        }
+        res.end();
+      } catch (err) {
+        next(err);
+      }
+      return;
+    }
+
     const r = await call(
       req,
       "/api/conversations/" + uuid.parse(req.params.id) + "/messages",

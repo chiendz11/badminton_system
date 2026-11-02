@@ -36,6 +36,8 @@ class Settings(BaseSettings):
     near_miss_top_k: int = 3
     near_miss_weights: dict[str, float] = {"time": 0.4, "price": 0.4, "area": 0.2}
     nearby_areas: dict[str, list[str]] = {}
+    ai_rate_limit_requests: int = 20
+    ai_rate_limit_window_seconds: int = 60
 
     @model_validator(mode="after")
     def valid(self):
@@ -82,6 +84,8 @@ class Settings(BaseSettings):
             raise ValueError("Invalid discovery/concurrency bounds")
         if not 1 <= self.search_timeout_seconds <= 12:
             raise ValueError("Search must fit the gateway turn budget")
+        if not 1 <= self.ai_rate_limit_requests <= 1000 or not 1 <= self.ai_rate_limit_window_seconds <= 3600:
+            raise ValueError("Invalid rate limit bounds")
         if not 1 <= self.availability_max_age_seconds <= 300:
             raise ValueError("Invalid availability freshness policy")
         if (

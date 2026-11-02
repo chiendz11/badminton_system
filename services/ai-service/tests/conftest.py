@@ -190,6 +190,7 @@ async def env(tmp_path):
                 base_url="http://ai", transport=httpx.ASGITransport(app=app)
             ) as client:
                 yield {
+                    "app": app,
                     "client": client,
                     "core": core,
                     "service": service,

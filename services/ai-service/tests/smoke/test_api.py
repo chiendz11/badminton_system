@@ -44,3 +44,61 @@ async def test_message_limits_no_extra_authority_fields(env):
         json={"text": "x" * 9000, "client_message_id": str(uuid4())},
     )
     assert r.status_code == 413
+
+
+async def test_message_rate_limiting(env):
+    id = await create(env)
+    headers = {"Authorization": "Bearer " + token()}
+    # Max requests is configured as 20 by default. Set quota temporarily to 2.
+    limiter = env["app"].state.rate_limiter
+    limiter.reset("customer")
+    limiter.max_requests = 2
+
+    # Request 1 & 2 succeed
+    r1 = await env["client"].post(
+        "/api/conversations/" + id + "/messages",
+        headers=headers,
+        json={"text": "tìm sân", "client_message_id": str(uuid4())},
+    )
+    assert r1.status_code == 200
+
+    r2 = await env["client"].post(
+        "/api/conversations/" + id + "/messages",
+        headers=headers,
+        json={"text": "tìm sân tối nay", "client_message_id": str(uuid4())},
+    )
+    assert r2.status_code == 200
+
+    # Request 3 should be blocked with 429
+    r3 = await env["client"].post(
+        "/api/conversations/" + id + "/messages",
+        headers=headers,
+        json={"text": "tìm sân ngày mai", "client_message_id": str(uuid4())},
+    )
+    assert r3.status_code == 429
+    assert "Retry-After" in r3.headers
+    assert r3.headers["X-RateLimit-Remaining"] == "0"
+    limiter.reset("customer")
+    limiter.max_requests = 20
+
+
+async def test_message_sse_streaming(env):
+    id = await create(env)
+    headers = {
+        "Authorization": "Bearer " + token(),
+        "Accept": "text/event-stream",
+    }
+    r = await env["client"].post(
+        "/api/conversations/" + id + "/messages",
+        headers=headers,
+        json={"text": "tìm sân tối mai 19:00", "client_message_id": str(uuid4())},
+    )
+    assert r.status_code == 200
+    assert "text/event-stream" in r.headers.get("content-type", "")
+    assert "no-cache" in r.headers.get("cache-control", "")
+    content = r.text
+    assert "event: start" in content
+    assert "event: token" in content
+    assert "event: result" in content
+    assert "event: done" in content
+    assert "[DONE]" in content
