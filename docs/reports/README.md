@@ -8,7 +8,7 @@ Kế hoạch Excel, báo cáo môn học, mã task và thư mục artifact dùng
 | --- | --- | --- |
 | 4 | [Kế hoạch, bài toán và nghiệp vụ](WEEK_04.md) | [week-4](../week-4/README.md) |
 | 5 | [Kiến trúc, dữ liệu và contract](WEEK_05.md) | [week-5](../week-5/README.md) |
-| 6 | [Skeleton và mức sẵn sàng triển khai](WEEK_06.md) | [Skeleton mapping](../architecture/SKELETON_MAPPING.md) |
+| 6 | [Khung hệ thống và chạy local thành công](WEEK_06.md) | [week-6](../week-6/README.md) |
 | 7–13 | [Phát triển, tích hợp, staging và bàn giao](PLAN_WEEK_04_13.md) | Theo công việc/output của từng người trong Excel |
 
 ## Cách đối chiếu tiến độ
