@@ -1,6 +1,6 @@
 # Tuần 6 — Dựng khung hệ thống (Foundation & Skeleton Baseline)
 
-Kế hoạch Excel, tên thư mục và báo cáo môn học đều dùng **tuần 6** cho giai đoạn hiện thực hóa bộ khung xương (Skeleton) của toàn bộ hệ thống trên môi trường local. Tham chiếu [báo cáo tuần 6](../reports/WEEK_06.md) và [kế hoạch tuần 4–13](../reports/README.md).
+Kế hoạch Excel, tên thư mục và báo cáo môn học đều dùng **tuần 6** cho giai đoạn hiện thực hóa bộ khung xương (Skeleton) của toàn bộ hệ thống trên môi trường local. Tham chiếu [báo cáo tuần 6](../reports/WEEK_06.md) và [kế hoạch tuần 4–13](../planning/README.md).
 
 Nguồn phân công: workbook "Badminton_Manager_TechCorp_10_Week_Plan.xlsx", sheet **Kế hoạch 10 tuần**, các dòng 12–16. Phạm vi tuần này là dựng thành công toàn bộ khung ứng dụng Monorepo, 5 microservices, 2 web apps, cơ sở dữ liệu ban đầu, môi trường chạy thử nghiệm kép (Docker Compose + cụm k3d local) và pipeline CI/CD tự động.
 

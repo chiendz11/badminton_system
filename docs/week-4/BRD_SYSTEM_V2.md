@@ -106,4 +106,4 @@ BRD cung cấp danh sách actor, 25 yêu cầu chức năng, quy tắc nghiệp 
 - [Schema và JWT/RBAC](../week-5/W05-N4_data-rbac.md).
 - [AI/platform và kế hoạch deployment](../week-5/W05-N5_ai-platform.md).
 
-[SYSTEM_CONTRACTS](../SYSTEM_CONTRACTS.md) tổng hợp giao tiếp giữa các thành phần. Đây là đầu vào cho triển khai theo từng tuần; review/ADR được lưu trong hồ sơ riêng của nhóm.
+[SYSTEM_CONTRACTS](../week-5/SYSTEM_CONTRACTS.md) tổng hợp giao tiếp giữa các thành phần. Đây là đầu vào cho triển khai theo từng tuần; review/ADR được lưu trong hồ sơ riêng của nhóm.

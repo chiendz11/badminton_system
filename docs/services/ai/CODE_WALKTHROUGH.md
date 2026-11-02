@@ -118,7 +118,7 @@ Các `__init__.py` là package markers, hiện không chứa logic nghiệp vụ
 
 ## 4. `main.py`: mở tài nguyên và nhận HTTP request
 
-Source: [app/main.py](../services/ai-service/app/main.py).
+Source: [app/main.py](../../../services/ai-service/app/main.py).
 
 ### 4.1. `lifespan(app)`
 
@@ -185,7 +185,7 @@ Readiness không gọi LLM và không chứng minh model trả lời được. N
 
 ### 5.1. `Settings`
 
-Source: [app/config.py](../services/ai-service/app/config.py). Pydantic Settings đọc cấu hình môi trường/`.env`; `extra="ignore"` ở Settings cho phép file môi trường có biến ngoài phạm vi service. Đây không phải policy của HTTP message schema.
+Source: [app/config.py](../../../services/ai-service/app/config.py). Pydantic Settings đọc cấu hình môi trường/`.env`; `extra="ignore"` ở Settings cho phép file môi trường có biến ngoài phạm vi service. Đây không phải policy của HTTP message schema.
 
 | Tên cấu hình môi trường | Mặc định trong class / vai trò |
 | --- | --- |
@@ -217,7 +217,7 @@ Source: [app/config.py](../services/ai-service/app/config.py). Pydantic Settings
 
 ### 5.2. `Actor` và `verify_actor()`
 
-Source: [app/auth.py](../services/ai-service/app/auth.py).
+Source: [app/auth.py](../../../services/ai-service/app/auth.py).
 
 `Actor` là frozen dataclass chứa `user_id`, `role`, `name`, `loyalty_points`. Nó là danh tính đã kiểm chứng của request, không là dữ liệu do LLM trả ra.
 
@@ -234,7 +234,7 @@ Xác thực và quyền tài nguyên khác nhau: token hợp lệ chưa cho phé
 
 ## 6. `schemas.py`: các object đi xuyên suốt hệ thống
 
-Source: [app/schemas.py](../services/ai-service/app/schemas.py).
+Source: [app/schemas.py](../../../services/ai-service/app/schemas.py).
 
 ### 6.1. `StrictModel`
 
@@ -311,7 +311,7 @@ Hàm trả object mới mỗi lần; không dùng một dict global dùng chung 
 
 ## 7. `providers.py`: hiểu ngôn ngữ tự nhiên
 
-Source: [app/providers.py](../services/ai-service/app/providers.py).
+Source: [app/providers.py](../../../services/ai-service/app/providers.py).
 
 ### 7.1. `Parser` protocol
 
@@ -357,7 +357,7 @@ Nested helper `change()` gom các thay đổi thành Change objects. Không matc
 
 ## 8. `domain.py`: điều kiện, thời gian, thuật toán tìm sân
 
-Source: [app/domain.py](../services/ai-service/app/domain.py).
+Source: [app/domain.py](../../../services/ai-service/app/domain.py).
 
 ### 8.1. `normalized()`
 
@@ -422,7 +422,7 @@ Xếp phương án theo độ lệch với giờ ưu tiên, tổng giá, tên ce
 
 ### 9.1. `BookingCoreClient`
 
-Source: [app/core_client.py](../services/ai-service/app/core_client.py).
+Source: [app/core_client.py](../../../services/ai-service/app/core_client.py).
 
 | Method | Request Core | Vai trò |
 | --- | --- | --- |
@@ -440,7 +440,7 @@ Token gốc được giữ trong object client của request để forward, khô
 
 ### 9.2. `SearchArguments`
 
-Source: [app/tools.py](../services/ai-service/app/tools.py). Gói Constraints và relax_area, kiểm ngày/duration/whole-hour preferred_start trước khi search tool chạy. Đây là lớp typed interface bổ sung; không thay thế toàn bộ clarification theo clock/horizon trong planner.
+Source: [app/tools.py](../../../services/ai-service/app/tools.py). Gói Constraints và relax_area, kiểm ngày/duration/whole-hour preferred_start trước khi search tool chạy. Đây là lớp typed interface bổ sung; không thay thế toàn bộ clarification theo clock/horizon trong planner.
 
 ### 9.3. `BookingTools`
 
@@ -457,7 +457,7 @@ ALLOWLIST hiện là khai báo được tests kiểm tra. Ranh giới thực thi
 
 ## 10. `service.py`: xử lý trọn một lượt hội thoại
 
-Source: [app/service.py](../services/ai-service/app/service.py). `ConversationService.__init__()` nhận Store, checkpointer, parser factory, Core HTTP client, config và optional clock. Clock mặc định UTC hiện tại; test thay clock cố định.
+Source: [app/service.py](../../../services/ai-service/app/service.py). `ConversationService.__init__()` nhận Store, checkpointer, parser factory, Core HTTP client, config và optional clock. Clock mặc định UTC hiện tại; test thay clock cố định.
 
 `message()` là application service, không phải endpoint và cũng không phải một node LangGraph:
 
@@ -496,7 +496,7 @@ Không có response_model cho các handler này trong FastAPI hiện tại; resp
 
 ## 11. `workflow.py`: toàn bộ state machine
 
-Source: [app/workflow.py](../services/ai-service/app/workflow.py).
+Source: [app/workflow.py](../../../services/ai-service/app/workflow.py).
 
 ### 11.1. `Run`, constructor và `trace()`
 
@@ -625,7 +625,7 @@ Tạo StateGraph(Run), đăng ký chín node, add edges/conditional edges như s
 
 ### 12.1. Các model SQLAlchemy
 
-Source: [models.py](../services/ai-service/app/db/models.py).
+Source: [models.py](../../../services/ai-service/app/db/models.py).
 
 | Model/table | Fields và vai trò |
 | --- | --- |
@@ -647,7 +647,7 @@ State JSON được gán deep copy khi persist; không phụ thuộc ORM tự ph
 
 ### 12.2. `Store.__init__()` và `locked()`
 
-Source: [store.py](../services/ai-service/app/db/store.py). Tạo async engine với pool_pre_ping và một map asyncio.Lock dùng cho môi trường không phải PostgreSQL.
+Source: [store.py](../../../services/ai-service/app/db/store.py). Tạo async engine với pool_pre_ping và một map asyncio.Lock dùng cho môi trường không phải PostgreSQL.
 
 PostgreSQL dùng `pg_try_advisory_lock` với key int64 từ 8 bytes đầu SHA256(conversation_id). Không lấy được lock thì trả 409 ngay. Lock nằm ở **session/connection**, nên vẫn giữ qua các session.commit() cần cho durable intent; một row/transaction lock thông thường sẽ không có cùng vòng đời đó.
 
@@ -732,16 +732,16 @@ Không có distributed transaction giữa AI DB và Core DB. Không hứa exactl
 
 ### 14.1. Alembic
 
-- [alembic.ini](../services/ai-service/alembic.ini): trỏ thư mục migration, thêm project root vào import path.
-- [alembic/env.py](../services/ai-service/alembic/env.py): tạo async engine từ Settings; `run()` mở connection, `run_sync(migrate)` chạy Alembic trong transaction rồi dispose engine. Đây là luồng online, không có nhánh xuất SQL offline riêng.
-- [20261009_01_conversations.py](../services/ai-service/alembic/versions/20261009_01_conversations.py): revision đầu, down_revision=None; `upgrade()` tạo ba bảng/indexes/unique constraint; `downgrade()` drop theo thứ tự trace → turn → conversation.
-- [app/migrate.py](../services/ai-service/app/migrate.py): `checkpoint_setup()` mở AsyncPostgresSaver và chạy setup cho bảng checkpoint; không thay thế migration ba bảng ORM.
+- [alembic.ini](../../../services/ai-service/alembic.ini): trỏ thư mục migration, thêm project root vào import path.
+- [alembic/env.py](../../../services/ai-service/alembic/env.py): tạo async engine từ Settings; `run()` mở connection, `run_sync(migrate)` chạy Alembic trong transaction rồi dispose engine. Đây là luồng online, không có nhánh xuất SQL offline riêng.
+- [20261009_01_conversations.py](../../../services/ai-service/alembic/versions/20261009_01_conversations.py): revision đầu, down_revision=None; `upgrade()` tạo ba bảng/indexes/unique constraint; `downgrade()` drop theo thứ tự trace → turn → conversation.
+- [app/migrate.py](../../../services/ai-service/app/migrate.py): `checkpoint_setup()` mở AsyncPostgresSaver và chạy setup cho bảng checkpoint; không thay thế migration ba bảng ORM.
 
 `Base.metadata.create_all()` chỉ xuất hiện trong fixtures test, không phải chiến lược migration production. Cần chạy Alembic rồi checkpoint setup trước Uvicorn.
 
 ### 14.2. `pyproject.toml`, `uv.lock`, `.env.example`
 
-Source: [pyproject.toml](../services/ai-service/pyproject.toml), [uv.lock](../services/ai-service/uv.lock), [.env.example](../services/ai-service/.env.example).
+Source: [pyproject.toml](../../../services/ai-service/pyproject.toml), [uv.lock](../../../services/ai-service/uv.lock), [.env.example](../../../services/ai-service/.env.example).
 
 pyproject khai báo Python>=3.12,<3.13, runtime deps và dev group; cấu hình pytest asyncio auto, Ruff, mypy; section `tool.badminton-ci.commands` là interface cho CI gọi lint/typecheck/unit/contract/integration/golden/smoke.
 
@@ -766,17 +766,17 @@ uv.lock cố định phiên bản đã resolve. Một số phiên bản đọc t
 
 ### 14.3. `Dockerfile`
 
-Source: [Dockerfile](../services/ai-service/Dockerfile).
+Source: [Dockerfile](../../../services/ai-service/Dockerfile).
 
 Build stage dùng Python 3.12-slim, copy uv 0.8.22 và cài dependency bằng `uv sync --locked --no-dev --no-install-project`. Không cài dev tools và không cần package hóa app để import từ WORKDIR.
 
 Runtime stage tạo user app UID 10001, copy `.venv`, app và migration files, đặt APP_ENV=production, tắt bytecode/bật stdout unbuffered, expose cổng 8000. Uvicorn chạy `app.main:app`, không bật access log vì service đã có structured middleware logs. Container không tự chạy migration trong CMD.
 
-Trong [Compose](../compose.yml), ai-migrate đợi AI PostgreSQL healthy rồi chạy Alembic + app.migrate; ai đợi migration thành công và Core healthy. Compose đặt cấu hình phát triển để có thể chạy fake; Dockerfile mặc định production không cho fake theo Settings.valid().
+Trong [Compose](../../../compose.yml), ai-migrate đợi AI PostgreSQL healthy rồi chạy Alembic + app.migrate; ai đợi migration thành công và Core healthy. Compose đặt cấu hình phát triển để có thể chạy fake; Dockerfile mặc định production không cho fake theo Settings.valid().
 
 ## 15. Logs, metrics, trace và timeouts
 
-Source: [app/observability.py](../services/ai-service/app/observability.py).
+Source: [app/observability.py](../../../services/ai-service/app/observability.py).
 
 ### 15.1. Logs
 
@@ -818,7 +818,7 @@ Graph có nhiều request Core/checkpoint, nên tổng không chỉ là một ti
 
 ## 16. Evaluation: `evaluation/evaluate.py` và `scenarios.jsonl`
 
-Source: [evaluate.py](../services/ai-service/evaluation/evaluate.py), [scenarios.jsonl](../services/ai-service/evaluation/scenarios.jsonl).
+Source: [evaluate.py](../../../services/ai-service/evaluation/evaluate.py), [scenarios.jsonl](../../../services/ai-service/evaluation/scenarios.jsonl).
 
 File JSONL có 40 mẫu, mỗi dòng có text, expected map field/value và intent. Small dùng 30 mẫu đầu; full dùng cả 40. Clock cố định `2030-01-07T00:00:00Z` để “mai/thứ bảy” có đáp án tái lập.
 
@@ -845,7 +845,7 @@ Mục này mô tả **test code đang tồn tại**, không tuyên bố mọi te
 
 ### 17.1. `tests/conftest.py`
 
-Source: [conftest.py](../services/ai-service/tests/conftest.py).
+Source: [conftest.py](../../../services/ai-service/tests/conftest.py).
 
 | Thành phần | Vai trò |
 | --- | --- |
@@ -860,7 +860,7 @@ CoreFixture có state thật trong bộ nhớ của test, nhưng nó không thay
 
 ### 17.2. Unit tests
 
-Source: [test_domain.py](../services/ai-service/tests/unit/test_domain.py), [test_llm_adapter.py](../services/ai-service/tests/unit/test_llm_adapter.py).
+Source: [test_domain.py](../../../services/ai-service/tests/unit/test_domain.py), [test_llm_adapter.py](../../../services/ai-service/tests/unit/test_llm_adapter.py).
 
 | Case | Điều cần bảo vệ |
 | --- | --- |
@@ -879,7 +879,7 @@ Test tên “real LangChain adapter” dùng SDK thật nhưng HTTP fixture, kh�
 
 ### 17.3. Contract tests
 
-Source: [test_contract.py](../services/ai-service/tests/contract/test_contract.py).
+Source: [test_contract.py](../../../services/ai-service/tests/contract/test_contract.py).
 
 1. Published AI OpenAPI: operation implemented và MessageRequest schema khớp FastAPI, `/v1/chat` vẫn Proposed; không chạy lifespan.
 2. JSON Schema/valid-invalid samples trong contracts/ai-tools khớp MessageRequest/SearchArguments.
@@ -888,7 +888,7 @@ Source: [test_contract.py](../services/ai-service/tests/contract/test_contract.p
 
 ### 17.4. Conversation integration tests dùng fixture
 
-Source: [test_conversation.py](../services/ai-service/tests/integration/test_conversation.py).
+Source: [test_conversation.py](../../../services/ai-service/tests/integration/test_conversation.py).
 
 | Test scenario | Điều xác minh |
 | --- | --- |
@@ -908,7 +908,7 @@ Source: [test_conversation.py](../services/ai-service/tests/integration/test_con
 
 ### 17.5. Live Core/PostgreSQL integration
 
-Source: [test_live_core.py](../services/ai-service/tests/integration/test_live_core.py).
+Source: [test_live_core.py](../../../services/ai-service/tests/integration/test_live_core.py).
 
 `live_urls()` dùng Docker/Testcontainers để tạo Core PostgreSQL 16 và AI PostgreSQL riêng, build/run Core thật và đợi readiness. Nếu cung cấp AI_LIVE_* thì phải đủ URL và database test có suffix `_test`. Local thiếu Docker có thể skip; CI=true thiếu Docker phải fail.
 
@@ -918,7 +918,7 @@ Ba case live: booking hai slot có row allocation/booking/outbox và checkpoint 
 
 ### 17.6. Smoke API tests
 
-Source: [test_api.py](../services/ai-service/tests/smoke/test_api.py).
+Source: [test_api.py](../../../services/ai-service/tests/smoke/test_api.py).
 
 Kiểm health/readiness/metrics credential, bảo vệ conversation, không có login route, actor header giả/token thiếu claim bị chặn, extra userId bị 422 và body quá lớn bị 413. Smoke ở đây chạy ASGI app với fixture, không chứng minh đã deploy production hoặc có HTTP ingress thật.
 
@@ -998,16 +998,16 @@ AI_PROVIDER=fake AI_OFFLINE=true GOLDEN_SUITE=full uv run python -m evaluation.e
 
 | File ngoài service | Vai trò |
 | --- | --- |
-| [Gateway AI routes](../services/api-gateway/src/routes/ai.route.ts) | JWT/RBAC, schema body, timeout 45 giây; chuyển conversation routes và booking chatbot tới AI |
-| [Web chat API client](../apps/web/src/features/assistant/api/chat.ts) | Typed payload, timeout 65 giây, create/read/send/trace calls |
-| [BookingAssistant page](../apps/web/src/features/assistant/pages/BookingAssistant.tsx) | Render hội thoại/options/consent/retry, dùng session hiện có |
-| [AI OpenAPI](../contracts/ai/openapi.json) | Current routes + read-only Proposed, có status rõ |
-| [Gateway OpenAPI](../contracts/gateway/openapi.json) | Public interface mà frontend sử dụng |
-| [AI tool schemas](../contracts/ai-tools/) | Request/search constraints schemas và examples cho contract tests |
-| [Compose](../compose.yml) | Database, migration dependency và networking local |
-| [CI manifest](../.github/ci/components.yml) | API/schema/deployable dependency graph, golden thresholds |
-| [Python CI](../.github/workflows/reusable-python-ci.yml) | Locked install, lint/typecheck/unit/contract/integration/golden/smoke/build-scan |
-| [Golden gate](../.github/scripts/check_golden_report.py) | Kiểm sample count, suite, metric finite/range và thresholds |
+| [Gateway AI routes](../../../services/api-gateway/src/routes/ai.route.ts) | JWT/RBAC, schema body, timeout 45 giây; chuyển conversation routes và booking chatbot tới AI |
+| [Web chat API client](../../../apps/web/src/features/assistant/api/chat.ts) | Typed payload, timeout 65 giây, create/read/send/trace calls |
+| [BookingAssistant page](../../../apps/web/src/features/assistant/pages/BookingAssistant.tsx) | Render hội thoại/options/consent/retry, dùng session hiện có |
+| [AI OpenAPI](../../../contracts/ai/openapi.json) | Current routes + read-only Proposed, có status rõ |
+| [Gateway OpenAPI](../../../contracts/gateway/openapi.json) | Public interface mà frontend sử dụng |
+| [AI tool schemas](../../../contracts/ai-tools/) | Request/search constraints schemas và examples cho contract tests |
+| [Compose](../../../compose.yml) | Database, migration dependency và networking local |
+| [CI manifest](../../../.github/ci/components.yml) | API/schema/deployable dependency graph, golden thresholds |
+| [Python CI](../../../.github/workflows/reusable-python-ci.yml) | Locked install, lint/typecheck/unit/contract/integration/golden/smoke/build-scan |
+| [Golden gate](../../../.github/scripts/check_golden_report.py) | Kiểm sample count, suite, metric finite/range và thresholds |
 
 AI route đọc booking qua Gateway là `/api/ai/bookings/{id}`, còn AI provider là `/api/bookings/{id}`. `/api/conversations` hiện thuộc AI; Social REST được thiết kế namespace khác để không va route.
 
@@ -1023,43 +1023,43 @@ Danh sách sau được đối chiếu với `git ls-files services/ai-service` 
 
 | File | Số dòng | Nội dung và nơi giải thích |
 | --- | ---: | --- |
-| [.env.example](../services/ai-service/.env.example) | 15 | Mẫu cấu hình môi trường; xem mục 5 và 14.2. Không phải file chứa secret thực tế của máy. |
-| [Dockerfile](../services/ai-service/Dockerfile) | 16 | Build hai stage, dependency lock, runtime user và Uvicorn; mục 14.3. |
-| [alembic.ini](../services/ai-service/alembic.ini) | 3 | Đường dẫn Alembic và import path; mục 14.1. |
-| [alembic/env.py](../services/ai-service/alembic/env.py) | 23 | Kết nối async DB để chạy migration; mục 14.1. |
-| [alembic/versions/20261009_01_conversations.py](../services/ai-service/alembic/versions/20261009_01_conversations.py) | 54 | Tạo/xóa ba bảng AI và indexes/constraint; mục 12 và 14.1. |
-| [app/__init__.py](../services/ai-service/app/__init__.py) | 1 | Package marker; không chứa logic. |
-| [app/auth.py](../services/ai-service/app/auth.py) | 38 | Actor và xác thực JWT; mục 5.2. |
-| [app/config.py](../services/ai-service/app/config.py) | 85 | Settings, validation và URL checkpointer; mục 5.1. |
-| [app/core_client.py](../services/ai-service/app/core_client.py) | 64 | CoreError và HTTP client tới Booking Core; mục 9.1. |
-| [app/db/__init__.py](../services/ai-service/app/db/__init__.py) | 1 | Package marker cho lớp lưu trữ. |
-| [app/db/models.py](../services/ai-service/app/db/models.py) | 44 | Base, timestamp helper, Conversation, Turn, Trace; mục 12.1. |
-| [app/db/store.py](../services/ai-service/app/db/store.py) | 115 | Engine, lock, ownership, tạo/đọc hội thoại và trace; mục 12.2–12.3. |
-| [app/domain.py](../services/ai-service/app/domain.py) | 163 | Chuẩn hóa, merge DIFF, hỏi lại và tìm chuỗi slot; mục 8. |
-| [app/main.py](../services/ai-service/app/main.py) | 192 | Lifespan, dependencies, middleware và tám endpoint; mục 4. |
-| [app/migrate.py](../services/ai-service/app/migrate.py) | 14 | Setup bảng checkpoint LangGraph; mục 14.1. |
-| [app/observability.py](../services/ai-service/app/observability.py) | 25 | JSON logger và năm nhóm metric Prometheus; mục 15. |
-| [app/providers.py](../services/ai-service/app/providers.py) | 162 | Parser protocol, LLM adapter và FakeParser; mục 7. |
-| [app/schemas.py](../services/ai-service/app/schemas.py) | 87 | Sáu schema và hàm tạo state ban đầu; mục 6. |
-| [app/service.py](../services/ai-service/app/service.py) | 108 | Điều phối một lượt, dedupe, persist intent/response/trace; mục 10 và 13. |
-| [app/tools.py](../services/ai-service/app/tools.py) | 67 | SearchArguments, tool tìm sân và đọc option; mục 9.2–9.3. |
-| [app/workflow.py](../services/ai-service/app/workflow.py) | 358 | Run, chín node, trace, graph edges và booking recovery; mục 11. |
-| [evaluation/__init__.py](../services/ai-service/evaluation/__init__.py) | 0 | Package marker để chạy evaluator bằng `python -m`. |
-| [evaluation/evaluate.py](../services/ai-service/evaluation/evaluate.py) | 75 | Đọc scenario, chạy parser, tính metric và xuất report; mục 16. |
-| [evaluation/scenarios.jsonl](../services/ai-service/evaluation/scenarios.jsonl) | 40 | Bộ câu đầu vào và nhãn kỳ vọng cho evaluator; mục 16. |
-| [pyproject.toml](../services/ai-service/pyproject.toml) | 26 | Python/dependencies/tooling và các lệnh CI; mục 14.2. |
-| [tests/__init__.py](../services/ai-service/tests/__init__.py) | 0 | Package marker của tests. |
-| [tests/conftest.py](../services/ai-service/tests/conftest.py) | 211 | Settings/JWT/clock test, CoreFixture, SQLite và API helpers; mục 17.1. |
-| [tests/contract/__init__.py](../services/ai-service/tests/contract/__init__.py) | 0 | Package marker của contract tests. |
-| [tests/contract/test_contract.py](../services/ai-service/tests/contract/test_contract.py) | 83 | Kiểm schema/tool allowlist, examples và route parity; mục 17.3. |
-| [tests/integration/__init__.py](../services/ai-service/tests/integration/__init__.py) | 0 | Package marker của integration tests. |
-| [tests/integration/test_conversation.py](../services/ai-service/tests/integration/test_conversation.py) | 258 | Hội thoại nhiều lượt, consent, lỗi và phục hồi với Core fixture; mục 17.4. |
-| [tests/integration/test_live_core.py](../services/ai-service/tests/integration/test_live_core.py) | 295 | Tích hợp Core/PostgreSQL thật trong môi trường test; mục 17.5. |
-| [tests/smoke/__init__.py](../services/ai-service/tests/smoke/__init__.py) | 0 | Package marker của smoke tests. |
-| [tests/smoke/test_api.py](../services/ai-service/tests/smoke/test_api.py) | 46 | Health/metrics, auth, ownership và HTTP validation; mục 17.6. |
-| [tests/unit/__init__.py](../services/ai-service/tests/unit/__init__.py) | 0 | Package marker của unit tests. |
-| [tests/unit/test_domain.py](../services/ai-service/tests/unit/test_domain.py) | 142 | Thuật toán slot/giá, merge, validation và parser regression; mục 17.2. |
-| [tests/unit/test_llm_adapter.py](../services/ai-service/tests/unit/test_llm_adapter.py) | 79 | LangChain SDK với HTTP giả lập, structured output và usage; mục 17.2. |
-| [uv.lock](../services/ai-service/uv.lock) | 1373 | Dependency graph đã resolve, phiên bản và hashes; mục 14.2. Không sửa tay để đổi dependency. |
+| [.env.example](../../../services/ai-service/.env.example) | 15 | Mẫu cấu hình môi trường; xem mục 5 và 14.2. Không phải file chứa secret thực tế của máy. |
+| [Dockerfile](../../../services/ai-service/Dockerfile) | 16 | Build hai stage, dependency lock, runtime user và Uvicorn; mục 14.3. |
+| [alembic.ini](../../../services/ai-service/alembic.ini) | 3 | Đường dẫn Alembic và import path; mục 14.1. |
+| [alembic/env.py](../../../services/ai-service/alembic/env.py) | 23 | Kết nối async DB để chạy migration; mục 14.1. |
+| [alembic/versions/20261009_01_conversations.py](../../../services/ai-service/alembic/versions/20261009_01_conversations.py) | 54 | Tạo/xóa ba bảng AI và indexes/constraint; mục 12 và 14.1. |
+| [app/__init__.py](../../../services/ai-service/app/__init__.py) | 1 | Package marker; không chứa logic. |
+| [app/auth.py](../../../services/ai-service/app/auth.py) | 38 | Actor và xác thực JWT; mục 5.2. |
+| [app/config.py](../../../services/ai-service/app/config.py) | 85 | Settings, validation và URL checkpointer; mục 5.1. |
+| [app/core_client.py](../../../services/ai-service/app/core_client.py) | 64 | CoreError và HTTP client tới Booking Core; mục 9.1. |
+| [app/db/__init__.py](../../../services/ai-service/app/db/__init__.py) | 1 | Package marker cho lớp lưu trữ. |
+| [app/db/models.py](../../../services/ai-service/app/db/models.py) | 44 | Base, timestamp helper, Conversation, Turn, Trace; mục 12.1. |
+| [app/db/store.py](../../../services/ai-service/app/db/store.py) | 115 | Engine, lock, ownership, tạo/đọc hội thoại và trace; mục 12.2–12.3. |
+| [app/domain.py](../../../services/ai-service/app/domain.py) | 163 | Chuẩn hóa, merge DIFF, hỏi lại và tìm chuỗi slot; mục 8. |
+| [app/main.py](../../../services/ai-service/app/main.py) | 192 | Lifespan, dependencies, middleware và tám endpoint; mục 4. |
+| [app/migrate.py](../../../services/ai-service/app/migrate.py) | 14 | Setup bảng checkpoint LangGraph; mục 14.1. |
+| [app/observability.py](../../../services/ai-service/app/observability.py) | 25 | JSON logger và năm nhóm metric Prometheus; mục 15. |
+| [app/providers.py](../../../services/ai-service/app/providers.py) | 162 | Parser protocol, LLM adapter và FakeParser; mục 7. |
+| [app/schemas.py](../../../services/ai-service/app/schemas.py) | 87 | Sáu schema và hàm tạo state ban đầu; mục 6. |
+| [app/service.py](../../../services/ai-service/app/service.py) | 108 | Điều phối một lượt, dedupe, persist intent/response/trace; mục 10 và 13. |
+| [app/tools.py](../../../services/ai-service/app/tools.py) | 67 | SearchArguments, tool tìm sân và đọc option; mục 9.2–9.3. |
+| [app/workflow.py](../../../services/ai-service/app/workflow.py) | 358 | Run, chín node, trace, graph edges và booking recovery; mục 11. |
+| [evaluation/__init__.py](../../../services/ai-service/evaluation/__init__.py) | 0 | Package marker để chạy evaluator bằng `python -m`. |
+| [evaluation/evaluate.py](../../../services/ai-service/evaluation/evaluate.py) | 75 | Đọc scenario, chạy parser, tính metric và xuất report; mục 16. |
+| [evaluation/scenarios.jsonl](../../../services/ai-service/evaluation/scenarios.jsonl) | 40 | Bộ câu đầu vào và nhãn kỳ vọng cho evaluator; mục 16. |
+| [pyproject.toml](../../../services/ai-service/pyproject.toml) | 26 | Python/dependencies/tooling và các lệnh CI; mục 14.2. |
+| [tests/__init__.py](../../../services/ai-service/tests/__init__.py) | 0 | Package marker của tests. |
+| [tests/conftest.py](../../../services/ai-service/tests/conftest.py) | 211 | Settings/JWT/clock test, CoreFixture, SQLite và API helpers; mục 17.1. |
+| [tests/contract/__init__.py](../../../services/ai-service/tests/contract/__init__.py) | 0 | Package marker của contract tests. |
+| [tests/contract/test_contract.py](../../../services/ai-service/tests/contract/test_contract.py) | 83 | Kiểm schema/tool allowlist, examples và route parity; mục 17.3. |
+| [tests/integration/__init__.py](../../../services/ai-service/tests/integration/__init__.py) | 0 | Package marker của integration tests. |
+| [tests/integration/test_conversation.py](../../../services/ai-service/tests/integration/test_conversation.py) | 258 | Hội thoại nhiều lượt, consent, lỗi và phục hồi với Core fixture; mục 17.4. |
+| [tests/integration/test_live_core.py](../../../services/ai-service/tests/integration/test_live_core.py) | 295 | Tích hợp Core/PostgreSQL thật trong môi trường test; mục 17.5. |
+| [tests/smoke/__init__.py](../../../services/ai-service/tests/smoke/__init__.py) | 0 | Package marker của smoke tests. |
+| [tests/smoke/test_api.py](../../../services/ai-service/tests/smoke/test_api.py) | 46 | Health/metrics, auth, ownership và HTTP validation; mục 17.6. |
+| [tests/unit/__init__.py](../../../services/ai-service/tests/unit/__init__.py) | 0 | Package marker của unit tests. |
+| [tests/unit/test_domain.py](../../../services/ai-service/tests/unit/test_domain.py) | 142 | Thuật toán slot/giá, merge, validation và parser regression; mục 17.2. |
+| [tests/unit/test_llm_adapter.py](../../../services/ai-service/tests/unit/test_llm_adapter.py) | 79 | LangChain SDK với HTTP giả lập, structured output và usage; mục 17.2. |
+| [uv.lock](../../../services/ai-service/uv.lock) | 1373 | Dependency graph đã resolve, phiên bản và hashes; mục 14.2. Không sửa tay để đổi dependency. |
 
 Tổng cộng **38 file được Git theo dõi**, gồm **32 file Python** và **6 file cấu hình/dữ liệu/build/lock**. File không chứa logic vẫn có vai trò đóng gói hoặc cấu hình; không phải một service hay module nghiệp vụ riêng.

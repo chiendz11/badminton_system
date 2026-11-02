@@ -37,4 +37,4 @@ Báo cáo dùng số tuần 6 thống nhất với kế hoạch Excel và bảng
 - **Người 4:** Hoàn thiện API đăng ký, đăng nhập JWT, phân quyền tài khoản (User, Owner, Admin) trong `identity-service`.
 - **Người 5:** Xây dựng bộ dữ liệu câu hỏi thường gặp (FAQ Dataset) và lập trình module AI tra cứu câu trả lời chuẩn.
 
-Tài liệu chi tiết kèm theo: [Thư mục báo cáo Tuần 6](../week-6/README.md), [Kế hoạch 10 tuần chi tiết](../Badminton_Manager_Ke_Hoach_10_Tuan_De_Hieu.xlsx), [Hồ sơ ADR](../adr/README.md).
+Tài liệu chi tiết kèm theo: [Thư mục báo cáo Tuần 6](../week-6/README.md), [Kế hoạch 10 tuần chi tiết](../planning/Badminton_Manager_Ke_Hoach_10_Tuan_De_Hieu.xlsx), [Hồ sơ ADR](../week-5/adr/README.md).

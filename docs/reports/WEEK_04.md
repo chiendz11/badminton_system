@@ -29,4 +29,4 @@ Báo cáo dùng số tuần 4 thống nhất với kế hoạch Excel. Nội dun
 - Thiết kế contract REST/Socket/events, auth/authorization, error codes và idempotency; viết ADR cho các quyết định chính.
 - Chuẩn bị thiết kế AI retrieval/evaluation và ánh xạ môi trường local/staging; chưa coi thiết kế RAG là benchmark đã chạy.
 
-Tài liệu kèm: [kế hoạch 10 tuần](PLAN_WEEK_04_13.md), [artifact nghiệp vụ](../week-4/README.md), [BRD V2](../week-4/BRD_SYSTEM_V2.md), [CI](../CI.md).
+Tài liệu kèm: [kế hoạch 10 tuần](../planning/PLAN_WEEK_04_13.md), [Master BRD](../week-4/BRD.md), [artifact nghiệp vụ](../week-4/README.md), [BRD V2](../week-4/BRD_SYSTEM_V2.md), [CI/CD](../devops/ci-cd.md).
