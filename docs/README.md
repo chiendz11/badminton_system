@@ -97,6 +97,7 @@ Toàn bộ hướng dẫn phát triển và tài liệu từng dịch vụ trong
 Toàn bộ tài liệu tự động hóa và giám sát trong [`docs/devops/`](devops/README.md):
 
 - [**Quy trình CI/CD Tự động hóa (devops/ci-cd.md)**](devops/ci-cd.md): Cơ chế phát hiện thay đổi theo đồ thị (`detect_changes.py`), ma trận kiểm thử 22 components và quy chuẩn merge PR.
+- [**Quy chuẩn Truy xuất Nguồn gốc Provenance (devops/provenance.md)**](devops/provenance.md): Tiêu chuẩn 6 mục tiêu Traceability, Reproducibility, Security, Audit, Debugging, Rollback; quy chuẩn lockfile, immutable image tags, AI model/prompt versioning và GitOps promotion.
 - [**Quy chuẩn Giám sát Toàn diện (devops/monitoring.md)**](devops/monitoring.md): Chuẩn Prometheus metrics, Alertmanager rules, Grafana dashboards và Loki logging.
 - [**Biên bản Kiểm chứng Local (devops/validation.md)**](devops/validation.md): Kết quả khởi động các container và smoke tests local.
 - [**Nghiệm thu Artifacts (devops/artifact-validation.md)**](devops/artifact-validation.md): Bảng kiểm tra tính đầy đủ của các artifacts Tuần 4 và Tuần 5.
