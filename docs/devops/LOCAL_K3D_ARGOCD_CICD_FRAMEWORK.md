@@ -300,7 +300,124 @@ Mỗi microservice bắt buộc phải đóng gói theo tiêu chuẩn:
 
 ---
 
-## 5. Quy Chuẩn Bổ Sung Microservice Mới Vào Hệ Thống (Onboarding Checklist)
+## 5. Phân Tích Toàn Diện AWS Cloud Parity: Cấu Trúc Local vs Production
+
+Mặc dù cả **`badminton-infras`** và **`badminton-gitops`** đều dùng chung một repository cho cả môi trường Local lẫn Production, bên trong mỗi repo đều được tổ chức thành **2 nhánh thư mục riêng biệt** để xử lý sự khác biệt vật lý giữa máy trạm cá nhân (`k3d`) và đám mây AWS (`EKS`).
+
+### 5.1. Sơ Đồ Phân Nhánh Local vs Production Trong 2 Repositories
+
+```mermaid
+flowchart TB
+    subgraph InfrasRepo["Repo 1: badminton-infras (Tạo Cụm & Hạ Tầng)"]
+        direction LR
+        subgraph InfrasLocal["Nhánh Local (k3d)"]
+            IL1["terraform/local/<br/>(Gọi CLI dựng k3d)"]
+            IL2["local/config/k3d.yaml<br/>local/.local/state (PVC)<br/>local/manifests/ (Parity)"]
+            IL3["localdev/ (Python CLI)"]
+        end
+        subgraph InfrasProd["Nhánh Production (AWS Cloud)"]
+            IP1["terraform/bootstrap/<br/>(S3 State, DynamoDB Lock)"]
+            IP2["terraform/platform/<br/>(VPC, EKS, RDS, Redis, MQ, IAM)"]
+            IP3["terraform/domain/<br/>(Route 53, ACM SSL)"]
+        end
+    end
+
+    subgraph GitOpsRepo["Repo 2: badminton-gitops (Trạng Thái K8s Do Argo CD Quản Lý)"]
+        direction LR
+        subgraph GitOpsLocal["Nhánh Local (Argo CD trên k3d đọc)"]
+            GL1["environments/local/platform<br/>──► local/platform/<br/>(Pod Postgres, Pod Mongo)"]
+            GL2["environments/local/apps<br/>──► local/workloads/*<br/>(6 Services: Deployment, Service)"]
+        end
+        subgraph GitOpsProd["Nhánh Production (Argo CD trên AWS EKS đọc)"]
+            GP1["applications/platform-*.yaml<br/>──► platform/* + Helm Charts<br/>(ALB Controller, ESO, Prometheus,<br/>Cert-Manager, ExternalDNS)"]
+            GP2["applications/workload-*.yaml<br/>──► environments/production/*<br/>(11 Services × 10 files đầy đủ:<br/>HPA, PDB, NetPol, ExternalSecret,<br/>ServiceMonitor, PrometheusRule)"]
+        end
+    end
+
+    InfrasLocal ==>|Cài Argo CD trỏ vào| GitOpsLocal
+    InfrasProd ==>|Cài Argo CD trỏ vào| GitOpsProd
+```
+
+### 5.2. Tại Sao `badminton-gitops` Phải Tách `local/` và `environments/production/`?
+
+Argo CD ở cụm Local `k3d` và Argo CD ở cụm AWS `EKS` không thể trỏ chung vào một thư mục duy nhất vì **4 khác biệt kiến trúc cốt lõi**:
+
+1. **Cơ sở dữ liệu (Datastores: Postgres, Mongo, Redis, RabbitMQ)**:
+   - **Trên AWS Production (`environments/production/`)**: Hoàn toàn không có manifest tạo Pod Database trong K8s. Trên AWS, PostgreSQL (Amazon RDS), Redis/Valkey (Amazon ElastiCache) và RabbitMQ (Amazon MQ) là các dịch vụ Managed nằm ngoài cụm K8s, được khởi tạo bởi Terraform (`terraform/platform/database.tf`, `cache.tf`, `messaging.tf`).
+   - **Dưới Local (`local/platform/`)**: Vì không có AWS RDS vật lý, GitOps bắt buộc phải có `local/platform/postgres.yaml` và `local/platform/mongo.yaml` để chạy Database bằng container ngay trong cụm `k3d`.
+2. **Các Bộ Điều Khiển Hạ Tầng (Platform Controllers)**:
+   - **Trên AWS Production (`applications/platform-*.yaml`)**: Argo CD cài đặt `aws-load-balancer-controller` (gọi AWS API tạo ALB thật) và `external-dns` (gọi AWS Route 53 tạo bản ghi DNS thật) thông qua quyền IAM Role (`eks.amazonaws.com/role-arn`). Nếu chạy các manifest này dưới `k3d`, Pod sẽ crash ngay lập tức vì không có môi trường mạng AWS VPC/EC2.
+   - **Dưới Local**: Sử dụng `ingress-nginx` (giả lập `ingressClassName: alb`) và `LocalStack` (giả lập AWS Secrets Manager).
+3. **Địa chỉ Đích trong `network-policy.yaml`**:
+   - **Trên AWS Production**: Luật Egress cổng `5432` và `6379` khóa cứng vào dải IP riêng (`ipBlock: cidr`) của máy chủ Amazon RDS / ElastiCache trong VPC.
+   - **Dưới Local**: Luật Egress phải trỏ vào `podSelector: matchLabels: { app: postgres }` nằm chung namespace `badminton`.
+4. **Quy trình Phát hành Độc lập (CI/CD Promotion)**:
+   - Khi `badminton-system` vừa build xong image mới, CI/CD tự động cập nhật tag vào `environments/local/apps/kustomization.yaml` trước để kiểm thử trên Local/Staging. Chỉ khi vượt qua kiểm thử mới promote tag đó sang `environments/production/*/kustomization.yaml`.
+
+### 5.3. Bảng Đối Chiếu 1-1: Thư Mục `/local` vs Dịch Vụ AWS Cloud Production
+
+| Thư mục / File Local | Chức năng ở Local (`k3d`) | Dịch vụ thay thế trên AWS Cloud | Cơ chế hoạt động trên AWS Production |
+| :--- | :--- | :--- | :--- |
+| `local/.local/credentials.json` + `LocalStack` | Lưu trữ mật khẩu DB, JWT Secret, `LLM_API_KEY` giả lập Secrets Manager | **AWS Secrets Manager** + **AWS KMS** | Mã hóa at-rest bằng khóa KMS CMK; phân quyền truy cập qua IAM Policies & IRSA. |
+| `local/.local/state/` (PVCs) | Bind-mount ổ cứng máy dev vào container k3d qua `local-path-provisioner` | **Amazon RDS Multi-AZ** + **DocumentDB** + **Amazon EBS (gp3)** | Database quan hệ chạy trên RDS Multi-AZ tự động failover trong 60s; Pod stateful dùng EBS CSI Driver. |
+| `local/.local/kubeconfig` | File chứng chỉ CA và private key tĩnh của admin cụm k3d | **AWS IAM EKS Authentication** | Dùng `aws eks update-kubeconfig`. Xác thực bằng short-lived STS tokens (15 phút), tích hợp IAM SSO & MFA. |
+| `local/.local/cluster-owner.json` | Ghi nhận user sở hữu cụm k3d trên máy cá nhân | **AWS EKS Access Entries** & **IAM Roles** | Quản lý định danh truy cập cụm thông qua IAM Roles liên kết trực tiếp với Kubernetes RBAC. |
+| `local/.local/settings.json` & `config/settings.example.json` | Tham số cấu hình môi trường local (tên cụm, CIDR, ports) | **Terraform Variables (`terraform.tfvars`)** & **AWS SSM Parameter Store** | Quản lý biến hạ tầng qua IaC và biến cấu hình qua AWS Systems Manager / ConfigMaps. |
+| `local/config/k3d.yaml` | Khai báo cấu hình cụm k3d (1 server node, port mappings) | **Amazon EKS Managed Cluster** + **Managed Node Groups** | File `terraform/platform/eks.tf` khởi tạo EKS Control Plane và EC2 Auto Scaling Groups đa vùng (Multi-AZ). |
+| `local/config/contract.json` & `versions/platform.lock.json` | Khóa phiên bản add-ons và contract giao tiếp local | **EKS Managed Add-ons** & **`.terraform.lock.hcl`** | Quản lý phiên bản VPC-CNI, CoreDNS, Kube-Proxy, EBS CSI qua EKS API; khóa provider hashes bằng Terraform lockfile. |
+| `localdev/` (Python CLI scripts) | Tự động hóa gọi Docker, k3d, nạp secret và cài Argo CD | **Terraform AWS Provider** + **Argo CD** + **GitHub Actions** | Provisioning toàn bộ hạ tầng AWS tự động và triển khai ứng dụng qua GitOps pipeline. |
+
+### 5.4. Phân Loại Các Hạng Mục AWS Parity Còn Lại & Lộ Trình Mở Rộng
+
+Ngoài 4 bước cốt lõi đã kích hoạt (**LocalStack + ESO**, **Real Groq LLM**, **ALB Ingress**, **HPA + Metrics Server + NetworkPolicies**), các thành phần còn lại của kiến trúc Production được chia làm 3 nhóm:
+
+#### Nhóm 1: Các Thành Phần Cloud-Native Có Thể Bật Thêm Ngay Trên `k3d` Local
+1. **PodDisruptionBudget — Chống sập khi bảo trì Node (`pdb.yaml`)**:
+   - **Trên AWS Production**: Mọi microservice trong `environments/production/*/` đều có `pdb.yaml` với `minAvailable: 1`.
+   - **Vai trò**: Kết hợp với HPA (`minReplicas: 2`), đảm bảo khi nâng cấp K8s hoặc drain node, Kubernetes luôn giữ lại tối thiểu 1 Pod sống phục vụ người dùng, không bao giờ xóa cả 2 Pod cùng lúc.
+2. **In-Memory Cache & Message Broker: Redis (ElastiCache) & RabbitMQ (Amazon MQ)**:
+   - **Trên AWS Production**: `terraform/platform/cache.tf` tạo cụm **Amazon ElastiCache (Valkey / Redis)** cổng `6379` (Distributed Lock giữ chỗ sân, Rate Limiting); `terraform/platform/messaging.tf` tạo cụm **Amazon MQ (RabbitMQ)** cổng `5671/5672` (Event-Driven Outbox).
+   - **Ở Local**: Trong `local/platform/` hiện đang chạy **PostgreSQL** và **MongoDB**; có thể bổ sung thêm Pod `redis.yaml` và `rabbitmq.yaml` khi kích hoạt các luồng bất đồng bộ.
+3. **Giám sát Chuyên sâu: Prometheus + Grafana + ServiceMonitor + PrometheusRule**:
+   - **Trên AWS Production**: Cài đặt `applications/platform-monitoring.yaml` (`kube-prometheus-stack`). Mỗi service đều có `servicemonitor.yaml` (tự động thu thập `/metrics`) và `prometheusrule.yaml` (báo động khi lỗi HTTP 5xx > 1% hoặc độ trễ AI p95 > 2s).
+   - **Ở Local**: Đã có `metrics-server` cho HPA; có thể cài thêm `kube-prometheus-stack` nếu muốn xem biểu đồ Grafana trực quan.
+4. **Mã hóa HTTPS / TLS với `cert-manager` (Mô phỏng AWS ACM)**:
+   - **Trên AWS Production**: ALB gắn chứng chỉ SSL từ **AWS Certificate Manager (ACM)** kết hợp `applications/platform-cert-manager.yaml` để ép kết nối `HTTPS` cổng `443`.
+   - **Ở Local**: Có thể cài `cert-manager` với Self-Signed ClusterIssuer để Ingress-NGINX chạy đầy đủ `https://web.badminton.local` trên cổng `443`.
+
+#### Nhóm 2: 5 Microservices Thuộc Lộ Trình Các Tuần Tiếp Theo
+Hệ thống thiết kế tổng cộng **11 workloads** trong `environments/production/`:
+- **6 dịch vụ ĐÃ CHẠY trên Local**: `web`, `admin`, `api-gateway`, `booking-core`, `ai-service`, `content-service`.
+- **5 dịch vụ còn lại** (sẽ lần lượt bật trong `environments/local/apps` khi hoàn thiện code):
+  1. `identity-service` (Xác thực tập trung & OAuth)
+  2. `commerce-service` (POS bán lẻ cầu, nước uống, phụ kiện tại sân)
+  3. `social-service` (Ghép kèo giao lưu & Chat thời gian thực qua Socket.IO)
+  4. `notification-service` (Gửi thông báo Email / Push)
+  5. `storage-service` (Quản lý tải ảnh lên Cloudinary / S3)
+
+#### Nhóm 3: Các Thành Phần Hạ Tầng Vật Lý Thuần AWS (Không Cần Giả Lập Ở Local)
+| Thành phần AWS | File định nghĩa | Lý do chỉ chạy trên Cloud thật |
+| :--- | :--- | :--- |
+| **Multi-AZ VPC & NAT Gateways** | `terraform/platform/network.tf` | Chia mạng qua 3 trung tâm dữ liệu vật lý (Availability Zones) chống mất điện/thiên tai. Local dùng Docker bridge. |
+| **AWS IAM OIDC & IRSA** | `terraform/platform/iam.tf` | Đổi Kubernetes JWT lấy quyền tạm thời của AWS STS. Local dùng `secretRef` kết nối LocalStack tương đương. |
+| **ExternalDNS + Route 53** | `terraform/platform/edge.tf` | Tự động đăng ký tên miền thật trên Internet toàn cầu. Local dùng `/etc/hosts`. |
+| **EC2 Node Auto Scaling** | `terraform/platform/eks.tf` | Tự động thuê thêm máy chủ EC2 mới khi hết RAM vật lý. Local cố định trên phần cứng máy tính cá nhân. |
+
+#### Bảng Tổng Hợp Mức Độ Tương Thích (Parity Matrix) Hiện Tại
+
+| Hạng mục Kiến trúc | Mức độ Local Parity | Ghi chú trạng thái |
+| :--- | :---: | :--- |
+| **GitOps (Argo CD + GHCR)** | **100%** | Tự động đồng bộ & self-heal |
+| **Secrets (LocalStack + ESO)** | **100%** | Chuẩn `aws-secrets-manager` |
+| **AI Cloud (Groq OpenAI-compatible)** | **100%** | Chạy inference thật qua API key |
+| **Edge Routing (ALB Ingress)** | **95%** | Đã chạy HTTP domain; có thể thêm TLS 443 (`cert-manager`) |
+| **Autoscaling & K8s Policies** | **90%** | Đã có HPA + Metrics Server + NetworkPolicy; có thể thêm `PDB` |
+| **Datastores** | **70%** | Đã có Postgres + Mongo; có thể thêm `Redis` & `RabbitMQ` |
+| **Observability** | **50%** | Đã có `metrics-server`; có thể thêm `Prometheus + Grafana` |
+
+---
+
+## 6. Quy Chuẩn Bổ Sung Microservice Mới Vào Hệ Thống (Onboarding Checklist)
 
 Khi một thành viên trong nhóm phát triển bổ sung một microservice mới (ví dụ: `payment-service` hoặc `notification-service`), cần thực hiện đúng 5 bước sau:
 
@@ -340,7 +457,7 @@ Commit và push lên Git. Argo CD sẽ tự động phát hiện và triển kha
 
 ---
 
-## 6. Sổ Tay Vận Hành & Khắc Phục Sự Cố (Troubleshooting Runbook)
+## 7. Sổ Tay Vận Hành & Khắc Phục Sự Cố (Troubleshooting Runbook)
 
 | Hiện tượng | Nguyên nhân phổ biến | Lệnh kiểm tra & Cách khắc phục |
 | :--- | :--- | :--- |
