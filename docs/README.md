@@ -96,6 +96,7 @@ Toàn bộ hướng dẫn phát triển và tài liệu từng dịch vụ trong
 
 Toàn bộ tài liệu tự động hóa và giám sát trong [`docs/devops/`](devops/README.md):
 
+- [**Framework k3d Local, Argo CD & CI/CD Toàn Diện (devops/LOCAL_K3D_ARGOCD_CICD_FRAMEWORK.md)**](devops/LOCAL_K3D_ARGOCD_CICD_FRAMEWORK.md): **Cẩm nang chuẩn hóa toàn diện 3-Tier Multi-Repo**, hướng dẫn cài đặt k3d local, cấu hình Argo CD GitOps, tích hợp LocalStack Secrets Manager, Ingress ALB, HPA scaling và quy chuẩn bổ sung microservice mới.
 - [**Quy trình CI/CD Tự động hóa (devops/ci-cd.md)**](devops/ci-cd.md): Cơ chế phát hiện thay đổi theo đồ thị (`detect_changes.py`), ma trận kiểm thử 22 components và quy chuẩn merge PR.
 - [**Quy chuẩn Truy xuất Nguồn gốc Provenance (devops/provenance.md)**](devops/provenance.md): Tiêu chuẩn 6 mục tiêu Traceability, Reproducibility, Security, Audit, Debugging, Rollback; quy chuẩn lockfile, immutable image tags, AI model/prompt versioning và GitOps promotion.
 - [**Quy chuẩn Giám sát Toàn diện (devops/monitoring.md)**](devops/monitoring.md): Chuẩn Prometheus metrics, Alertmanager rules, Grafana dashboards và Loki logging.
