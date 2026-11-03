@@ -115,6 +115,99 @@ Sau khi cụm k3d khởi động, các thành phần mô phỏng AWS được n�
    - Tự động co giãn Pods từ 2 đến 6 replicas dựa theo số liệu từ `metrics-server`.
    - Cách ly phân vùng mạng Pod-to-Pod, bảo vệ cơ sở dữ liệu và mở egress 443 cho AI suy luận ra Groq Cloud.
 
+### 2.4. Phân Hệ Thu Thập Số Liệu Hạ Tầng: Metrics Server & Resource Metrics API
+
+`metrics-server` là mắt xích thiết yếu nhưng thường bị xem nhẹ trong cụm Kubernetes. Nếu không có thành phần này, HPA hoàn toàn bị "mù" và không thể thực hiện co giãn tự động.
+
+```mermaid
+flowchart LR
+    subgraph Nodes["Kubernetes Nodes / Pods"]
+        Kubelet["Kubelet Summary API<br/>(Port 10250)"]
+        Pods["Container cgroups<br/>(CPU / Memory Usage)"]
+        Pods --> Kubelet
+    end
+
+    subgraph MetricsServer["metrics-server (kube-system)"]
+        Scraper["Scraper Loop (mỗi 15s)"]
+        MemCache[("In-Memory Buffer<br/>(Không lưu đĩa)")]
+        Scraper --> MemCache
+    end
+
+    subgraph APILayer["Kubernetes API Aggregator"]
+        APIService["v1beta1.metrics.k8s.io"]
+    end
+
+    subgraph Consumers["Metric Consumers"]
+        KubeTop["kubectl top nodes / pods"]
+        HPAController["HPA Controller<br/>(Tự động tính toán Replicas)"]
+    end
+
+    Kubelet -->|Scrape /stats/summary| Scraper
+    MemCache --> APIService
+    APIService --> KubeTop
+    APIService --> HPAController
+```
+
+#### 1. Bản chất & Cơ chế Hoạt động của Metrics Server
+- **In-Memory Aggregator**: `metrics-server` thu thập số liệu tài nguyên tính toán (CPU cores và Memory bytes) từ Kubelet Summary API trên từng Worker Node (thông qua cgroups của container).
+- **Không phải cơ sở dữ liệu**: Dữ liệu chỉ được lưu trữ tạm thời trong bộ nhớ đệm RAM (chu kỳ scrape 15 giây – 60 giây). Nó không có ổ đĩa lưu trữ (non-persistent) và không lưu dữ liệu lịch sử.
+- **Đăng ký Aggregated API**: Cung cấp API endpoint `v1beta1.metrics.k8s.io` trực tiếp vào API Server của Kubernetes. Khi người dùng gõ `kubectl top` hoặc HPA Controller truy vấn, Kubernetes API Server sẽ ủy quyền (proxy) yêu cầu đến `metrics-server`.
+
+#### 2. Vai trò đối với Horizontal Pod Autoscaler (HPA)
+HPA không thể tự đọc CPU của Pod. Controller Manager định kỳ (mặc định 15 giây một lần) gọi `metrics.k8s.io` để lấy giá trị CPU thực tế của từng Pod trong Deployment. Sau đó đối chiếu với ngưỡng `averageUtilization`:
+
+$$\text{Tỷ lệ sử dụng CPU (\%)} = \frac{\text{CPU thực tế đo bởi metrics-server}}{\text{resources.requests.cpu khai báo trong Deployment}} \times 100\%$$
+
+Nếu tỷ lệ thực tế vượt qua ngưỡng mục tiêu (ví dụ: `70%`), HPA Controller sẽ tự động tính toán số Pod cần thiết và gọi API scale Deployment lên:
+
+$$\text{Replicas mong muốn} = \left\lceil \text{Replicas hiện tại} \times \frac{\text{Tỷ lệ CPU hiện tại}}{\text{Tỷ lệ CPU mục tiêu}} \right\rceil$$
+
+> [!IMPORTANT]
+> **Điều kiện tiên quyết để HPA hoạt động**:
+> Mọi Deployment muốn co giãn theo CPU/RAM **bắt buộc phải khai báo trường `resources.requests.cpu` (hoặc `memory`)**. Nếu thiếu trường này, `metrics-server` dù có đo được CPU cũng không thể tính ra tỷ lệ phần trăm, dẫn đến trạng thái lỗi `TARGETS: cpu: <unknown>/70%`.
+
+#### 3. So sánh: `metrics-server` (k3d Local) vs `metrics-server` (AWS EKS Production)
+
+| Tiêu chí | k3d Local Cluster (`badminton-infras`) | AWS EKS Production Cluster |
+| :--- | :--- | :--- |
+| **Nguồn gốc cài đặt** | Tích hợp sẵn mặc định trong bản phân phối k3s (`rancher/mirrored-metrics-server:v0.8.1`). | EKS **không cài sẵn**; phải triển khai qua Helm chart hoặc EKS Managed Add-on (`badminton-gitops/applications/platform-metrics-server.yaml`). |
+| **Namespace** | `kube-system` | `kube-system` |
+| **Cấu hình chứng chỉ TLS** | Tự động tin cậy chứng chỉ Kubelet nội bộ của k3s container qua `--secure-port=10250` và `--cert-dir=/tmp`. | Cần cấu hình chứng chỉ TLS hợp lệ hoặc cờ `--kubelet-insecure-tls` (chỉ dùng khi dev) / xác thực Kubelet CA chính quy trên AWS EC2. |
+| **Quyền truy cập K8s** | ServiceAccount `metrics-server` gắn `ClusterRole: system:aggregated-metrics-reader`. | Cấp quyền RBAC tương đương, gắn IAM Role nếu cần audit log qua CloudWatch. |
+| **Tần suất Scrape** | Mặc định 15 giây (`--metric-resolution=15s`). | Tùy biến từ 15s đến 60s tùy quy mô cụm node. |
+
+#### 4. Phân Biệt Rạch Ròi: Metrics Server vs Prometheus
+
+Rất nhiều kỹ sư mới tiếp cận thường nhầm lẫn giữa `metrics-server` và `Prometheus`. Bảng sau phân định rõ ranh giới kiến trúc:
+
+| Đặc tính | Metrics Server | Prometheus Stack (`kube-prometheus-stack`) |
+| :--- | :--- | :--- |
+| **Bản chất** | Công cụ đo lường lõi nhẹ (Lightweight Core Aggregator). | Nền tảng giám sát phân tán toàn diện (Enterprise Observability Platform). |
+| **Lưu trữ** | **Ngắn hạn trong RAM** (In-memory, xóa sạch khi restart). | **Dài hạn trên đĩa** (Time-Series Database - TSDB, lưu nhiều tuần/tháng). |
+| **Số liệu đo đạc** | **Duy nhất 2 chỉ số**: CPU và Memory của Node/Pod. | **Hàng ngàn chỉ số**: HTTP requests/s, p99 latency, DB connections, AI token count, OS metrics, custom app counters. |
+| **Mục đích sử dụng** | Phục vụ trực tiếp cho `kubectl top` và **HPA cơ bản** (Resource Metrics). | Phục vụ **Grafana Dashboards**, **Alertmanager Cảnh báo**, và **Custom Metrics HPA** (thông qua Prometheus Adapter). |
+| **Tải tài nguyên** | Cực kỳ thấp (~100m CPU, 70Mi RAM). | Trung bình đến cao (Cần 1Gi+ RAM và Persistent Volume gp3). |
+
+#### 5. Các Lệnh Vận Hành & Kiểm Tra Metrics Server
+
+```bash
+export KUBECONFIG="local/.local/kubeconfig"
+
+# 1. Kiểm tra trạng thái sẵn sàng của Metrics API Service
+kubectl get apiservice v1beta1.metrics.k8s.io
+# Kết quả mong đợi: AVAILABLE = True
+
+# 2. Xem trực tiếp mức tiêu thụ CPU/RAM của Worker Node
+kubectl top nodes
+
+# 3. Xem mức tiêu thụ CPU/RAM của các Pods trong dự án
+kubectl top pods -n badminton
+
+# 4. Kiểm tra xem HPA đã nhận số liệu đo đạc hay chưa
+kubectl get hpa -n badminton
+# Kết quả mong đợi: Cột TARGETS hiển thị rõ % (ví dụ: cpu: 2%/70%), không được là <unknown>
+```
+
 ---
 
 ## 3. Kiến Trúc & Vận Hành Argo CD GitOps
@@ -256,3 +349,5 @@ Commit và push lên Git. Argo CD sẽ tự động phát hiện và triển kha
 | **Ingress trả về `404 Not Found`** | Header `Host` không khớp với rules Ingress, hoặc Service backend chưa sẵn sàng. | Kiểm tra Ingress rules: `kubectl get ingress -n badminton -o yaml`. Thử nghiệm curl với flag `--resolve <domain>:80:172.24.0.2` hoặc kiểm tra file `/etc/hosts`. |
 | **Argo CD `OutOfSync` liên tục** | Can thiệp sửa ConfigMap/Deployment trực tiếp trong k8s làm kích hoạt cơ chế `selfHeal`. | Không sửa trực tiếp trong cụm bằng `kubectl edit`. Hãy commit thay đổi vào repo `badminton-gitops`, Argo CD sẽ tự động đồng bộ sạch sẽ. |
 | **HPA hiển thị `cpu: <unknown>/70%`** | `metrics-server` chưa kịp thu thập dữ liệu (mới bật < 30s) hoặc Deployment thiếu `resources.requests.cpu`. | Kiểm tra `kubectl top pods -n badminton`. Đảm bảo `deployment.yaml` có khai báo `resources.requests.cpu`. |
+| **`kubectl top` báo lỗi `Metrics API not available`** | Pod `metrics-server` trong `kube-system` bị dừng hoặc `APIService` mất đăng ký. | Kiểm tra `kubectl get apiservice v1beta1.metrics.k8s.io` và `kubectl logs -n kube-system deployment/metrics-server`. Nếu lỗi chứng chỉ Kubelet, khởi động lại pod metrics-server. |
+
