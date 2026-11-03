@@ -8,6 +8,7 @@ Thư mục này tập trung toàn bộ tài liệu về tự động hóa kiểm
 
 | Tài liệu | Định dạng | Mục đích & Trách nhiệm |
 | :--- | :--- | :--- |
+| [**LOCAL_K3D_ARGOCD_CICD_FRAMEWORK.md**](LOCAL_K3D_ARGOCD_CICD_FRAMEWORK.md) | **Framework cốt lõi** | **Khung chuẩn hóa & Hướng dẫn tổng quát toàn diện**: Cài đặt cụm k3d local, cấu hình Argo CD GitOps, tự động hóa CI/CD xuyên suốt 3 repos, tích hợp LocalStack Secrets Manager, Ingress ALB routing, và bộ quy chuẩn thêm microservice mới. |
 | [**ci-cd.md**](ci-cd.md) | Tài liệu kỹ thuật | Quy trình tự động hóa kiểm thử và đóng gói CI/CD GitHub Actions: cơ chế phát hiện thay đổi (`detect_changes.py`), ma trận kiểm thử 22 components, kiểm tra hợp đồng `check_node_contract.mjs` / `check_python_contract.py` và quy chuẩn merge PR. |
 | [**provenance.md**](provenance.md) | Chuẩn mực kỹ thuật | Quy chuẩn truy xuất nguồn gốc (Provenance) & bảo mật chuỗi cung ứng: 6 mục tiêu Traceability, Reproducibility, Security, Audit, Debugging, Rollback; quy chuẩn lockfile, immutable image tags, AI model/prompt versioning và GitOps promotion. |
 | [**monitoring.md**](monitoring.md) | Chuẩn mực kỹ thuật | Tiêu chuẩn đo lường và giám sát toàn diện hệ thống: quy tắc đặt tên Prometheus metrics, thiết lập Alertmanager rules, Grafana dashboards, Loki logging labels và chuẩn phân tán OpenTelemetry W3C trace context. |
