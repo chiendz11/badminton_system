@@ -415,9 +415,6 @@ importers:
       '@badminton/auth-contracts':
         specifier: workspace:*
         version: link:../../packages/auth-contracts
-      '@prisma/client':
-        specifier: 6.19.3
-        version: 6.19.3(prisma@6.19.3(typescript@5.9.3))(typescript@5.9.3)
       bcryptjs:
         specifier: ^3.0.3
         version: 3.0.3
@@ -437,6 +434,9 @@ importers:
         specifier: ^9.0.3
         version: 9.0.3
     devDependencies:
+      '@prisma/client':
+        specifier: 6.19.3
+        version: 6.19.3(prisma@6.19.3(typescript@5.9.3))(typescript@5.9.3)
       '@types/express':
         specifier: ^5.0.3
         version: 5.0.6
