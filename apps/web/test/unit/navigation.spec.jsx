@@ -20,7 +20,10 @@ describe("upstream customer navigation without excluded flows", () => {
     ).toBeInTheDocument();
     for (const name of ["Trang Chủ", "Đặt Sân", "Trợ lý đặt sân"])
       expect(screen.getByRole("link", { name })).toBeInTheDocument();
-    expect(screen.queryByText(/Đăng Nhập|Pass Sân/i)).not.toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: /Đăng nhập/i }),
+    ).toBeInTheDocument();
+    expect(screen.queryByText(/Pass Sân/i)).not.toBeInTheDocument();
     expect(
       screen.queryByText(/Tin Tức|Chính Sách|Liên Hệ/i),
     ).not.toBeInTheDocument();

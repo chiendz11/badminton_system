@@ -1,28 +1,24 @@
 FROM node:22-alpine AS build
-RUN apk add --no-cache openssl
-WORKDIR /app/services/identity
-COPY services/identity/package.json services/identity/package-lock.json ./
-RUN npm ci
-COPY tsconfig.base.json /app/tsconfig.base.json
-COPY services/identity/tsconfig*.json ./
-COPY services/identity/prisma ./prisma
-RUN npm run prisma:generate
-COPY services/identity/src ./src
-RUN npm run build
+WORKDIR /app
+RUN apk add --no-cache openssl && npm install -g pnpm@10.25.0
+COPY package.json pnpm-lock.yaml pnpm-workspace.yaml tsconfig.base.json eslint.config.mjs ./
+COPY packages ./packages
+COPY services/identity ./services/identity
+RUN pnpm install --frozen-lockfile
+RUN pnpm --filter @badminton/identity prisma:generate
+RUN pnpm --filter @badminton/identity build
+RUN pnpm --filter @badminton/identity deploy --legacy --prod /out
+RUN cp -r services/identity/dist services/identity/generated /out/
 
 FROM build AS migrate
-CMD ["npm", "run", "prisma:migrate:deploy"]
-
-FROM build AS production-deps
-RUN npm prune --omit=dev
+WORKDIR /app/services/identity
+CMD ["pnpm", "prisma:migrate:deploy"]
 
 FROM node:22-alpine AS runtime
-RUN apk add --no-cache openssl dumb-init
-WORKDIR /app/services/identity
 ENV NODE_ENV=production
-COPY --from=production-deps /app/services/identity/node_modules ./node_modules
-COPY --from=build /app/services/identity/dist ./dist
-COPY --from=build /app/services/identity/generated ./generated
+WORKDIR /app
+RUN apk add --no-cache openssl dumb-init && rm -rf /usr/local/lib/node_modules /opt/yarn-* /usr/local/bin/npm /usr/local/bin/npx /usr/local/bin/corepack /usr/local/bin/yarn /usr/local/bin/yarnpkg
+COPY --from=build /out /app
 USER node
 EXPOSE 8084
 CMD ["dumb-init", "node", "dist/main.js"]
