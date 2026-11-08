@@ -372,15 +372,16 @@ async def test_live_self_service_history_stats_centers_and_confirmed_cancellatio
         action="confirm_cancellation",
         cancellation_id=preview["assistance"]["cancellation"]["cancellation_id"],
     )
-    assert result["action"] == "BOOKING_CANCELLED"
+    assert result["action"] == "CANCELLATION_REFUSED"
+    assert "Chợ Pass" in result["assistant_message"]
     with psycopg.connect(db) as conn:
         assert (
             conn.execute('SELECT status FROM "Booking" WHERE id=%s', (booked["id"],)).fetchone()[0]
-            == "CANCELLED"
+            == "CONFIRMED"
         )
         assert (
             conn.execute(
                 'SELECT count(*) FROM "SlotAllocation" WHERE "courtId"=%s', (court,)
             ).fetchone()[0]
-            == 0
+            == 2
         )
