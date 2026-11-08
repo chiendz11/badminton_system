@@ -136,9 +136,14 @@ async def execute(state, request, tools, persist):
             state["assistance"] = AssistanceResult(kind="cancellation").model_dump()
             await persist(state)
             metrics.labels("cancel_my_booking", "refused").inc()
+            message = (
+                "Booking đã xác nhận không thể tự hủy. Bạn vui lòng sử dụng tính năng Chợ Pass sân hoặc liên hệ quản lý trung tâm."
+                if error.status == 403
+                else "Core không cho phép xử lý booking này. Mình không báo hủy thành công; bạn tra cứu lại lịch của mình."
+            )
             return (
                 "cancellation_refused",
-                "Core không cho phép xử lý booking này. Mình không báo hủy thành công; bạn tra cứu lại lịch của mình.",
+                message,
             )
         metrics.labels("cancel_my_booking", "uncertain").inc()
         return (

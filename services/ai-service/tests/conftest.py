@@ -202,18 +202,18 @@ async def env(tmp_path):
     await store.engine.dispose()
 
 
-async def create(env, sub="customer"):
+async def create(env, sub="customer", role="user"):
     r = await env["client"].post(
-        "/api/conversations", headers={"Authorization": "Bearer " + token(sub)}
+        "/api/conversations", headers={"Authorization": "Bearer " + token(sub, role=role)}
     )
     assert r.status_code == 201, r.text
     return r.json()["conversation_id"]
 
 
-async def send(env, id, text, sub="customer", **extra):
+async def send(env, id, text, sub="customer", role="user", **extra):
     r = await env["client"].post(
         f"/api/conversations/{id}/messages",
-        headers={"Authorization": "Bearer " + token(sub), "X-Request-Id": "ai-test-correlation"},
+        headers={"Authorization": "Bearer " + token(sub, role=role), "X-Request-Id": "ai-test-correlation"},
         json={"text": text, "client_message_id": str(uuid4()), **extra},
     )
     assert r.status_code == 200, r.text
