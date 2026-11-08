@@ -4,6 +4,7 @@ WORKDIR /app
 COPY services/ai-service/pyproject.toml services/ai-service/uv.lock ./
 RUN uv sync --locked --no-dev --no-install-project --python /usr/local/bin/python
 FROM python:3.12-slim
+RUN apt-get update && apt-get install -y --no-install-recommends zlib1g && rm -rf /var/lib/apt/lists/*
 RUN useradd --create-home --uid 10001 app
 WORKDIR /app
 COPY --from=build --chown=app:app /app/.venv ./.venv
