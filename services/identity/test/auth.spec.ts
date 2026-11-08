@@ -10,6 +10,42 @@ beforeAll(async () => { user = { id: "ba0d0000-0000-4000-8000-000000000001", ema
 function app(current: AuthUser | null = user) { return createApp(async () => {}, authRouter({ byEmail: async email => email === current?.email ? current : null, byId: async id => id === current?.id ? current : null }, config)); }
 const login = (a: ReturnType<typeof app>, password = "example-password") => request(a).post("/api/auth/login").send({ email: "DUNG@example.com", password });
 describe("identity authentication", () => {
+  it.each(["super_admin", "center_manager"] as const)(
+    "uses the stored %s role for login and me",
+    async (role) => {
+      const a = app({ ...user, role });
+      const result = await request(a)
+        .post("/api/auth/login")
+        .send({
+          email: user.email,
+          password: "example-password",
+          role: "user",
+        });
+      expect(result.status).toBe(200);
+      expect(result.body.profile.role).toBe(role);
+      const claims = jwt.verify(
+        result.body.accessToken,
+        config.jwtSecret,
+      ) as jwt.JwtPayload;
+      expect(claims.role).toBe(role);
+      const me = await request(a)
+        .get("/api/auth/me")
+        .set("Authorization", `Bearer ${result.body.accessToken}`);
+      expect(me.body.profile.role).toBe(role);
+    },
+  );
+  it("does not accept a client-supplied administrator role", async () => {
+    const result = await request(app())
+      .post("/api/auth/login")
+      .send({
+        email: user.email,
+        password: "example-password",
+        role: "super_admin",
+      });
+    expect(result.status).toBe(200);
+    expect(result.body.profile.role).toBe("user");
+  });
+
   it("issues gateway-compatible claims and returns only public fields", async () => {
     const a = app(); const response = await login(a); expect(response.status).toBe(200);
     const payload = jwt.verify(response.body.accessToken, config.jwtSecret, { algorithms: ["HS256"], issuer: config.issuer, audience: config.audience }) as jwt.JwtPayload;

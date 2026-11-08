@@ -2,19 +2,19 @@ import { render, screen } from "@testing-library/react";
 import { MemoryRouter } from "react-router-dom";
 import { describe, it, expect } from "vitest";
 import Dashboard from "../../src/features/dashboard/pages/Dashboard.jsx";
-import { SessionProvider } from "../../src/shared/session/SessionContext.jsx";
+import { SessionContext } from "../../src/shared/session/SessionContext.jsx";
 function dashboard(role) {
   render(
     <MemoryRouter>
-      <SessionProvider
-        session={
+      <SessionContext.Provider
+        value={
           role
-            ? { profile: { userId: "manager", role, name: "Quản lý" } }
-            : null
+            ? { admin: { userId: "manager", role, name: "Quản lý" } }
+            : { admin: null }
         }
       >
         <Dashboard />
-      </SessionProvider>
+      </SessionContext.Provider>
     </MemoryRouter>,
   );
 }
@@ -46,7 +46,7 @@ describe("upstream admin dashboard", () => {
     expect(screen.getByText("Tạo Lịch cố định")).toBeInTheDocument();
     expect(screen.queryByText("Quản lý khách hàng")).not.toBeInTheDocument();
   });
-  it("can display the original dashboard without a login redirect while waiting for Identity integration", () => {
+  it("renders the dashboard in isolation; route authorization is tested separately", () => {
     dashboard();
     expect(screen.getByText("Xem trạng thái sân")).toBeInTheDocument();
   });

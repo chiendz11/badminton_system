@@ -1,7 +1,7 @@
 import { render, screen, fireEvent, waitFor } from "@testing-library/react";
 import { describe, it, expect, vi } from "vitest";
 import CenterModal from "../../src/features/centers/ui/CenterModal.jsx";
-import { SessionProvider } from "../../src/shared/session/SessionContext.jsx";
+import { SessionContext } from "../../src/shared/session/SessionContext.jsx";
 import { updateCenterGQL } from "../../src/features/centers/api/center_service/graphql/center.api.js";
 vi.mock(
   "../../src/features/centers/api/center_service/graphql/center.api.js",
@@ -25,8 +25,8 @@ describe("original centre editor scoped to Booking Core", () => {
       pricing: { weekday: [], weekend: [] },
     };
     const { container } = render(
-      <SessionProvider
-        session={{ profile: { userId: "admin", role: "super_admin" } }}
+      <SessionContext.Provider
+        value={{ admin: { userId: "admin", role: "super_admin" } }}
       >
         <CenterModal
           center={center}
@@ -37,7 +37,7 @@ describe("original centre editor scoped to Booking Core", () => {
           centerManagers={[]}
           allCenters={[center]}
         />
-      </SessionProvider>,
+      </SessionContext.Provider>,
     );
     expect(container.querySelector('input[type="file"]')).toBeNull();
     fireEvent.click(screen.getByRole("button", { name: "Lưu Lại" }));

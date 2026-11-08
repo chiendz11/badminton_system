@@ -5,6 +5,7 @@ import {
   Route,
   Navigate,
 } from "react-router-dom";
+import Login from "../features/identity/pages/Login.jsx";
 import AdminLayout from "../shared/ui/AdminLayout.jsx";
 const Dashboard = lazy(
   () => import("../features/dashboard/pages/Dashboard.jsx"),
@@ -26,6 +27,7 @@ export default function App() {
     <Router>
       <Suspense fallback={null}>
         <Routes>
+          <Route path="/login" element={<Login />} />
           <Route path="/" element={<Navigate to="/dashboard" replace />} />
           <Route element={<AdminLayout />}>
             <Route path="/dashboard" element={<Dashboard />} />

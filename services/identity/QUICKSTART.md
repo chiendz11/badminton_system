@@ -13,7 +13,7 @@ docker compose -f services/identity/compose.dev.yml ps -a
 
 ## Tạo tài khoản thử
 
-Chỉ dùng local, tài khoản role user. Nhập mật khẩu thử riêng, không dùng mật khẩu tài khoản thật. Tối thiểu 12 ký tự và tối đa 72 byte UTF-8.
+Chỉ dùng local; mặc định tạo tài khoản role `user`. Nhập mật khẩu thử riêng, không dùng mật khẩu tài khoản thật. Tối thiểu 12 ký tự và tối đa 72 byte UTF-8.
 
 ```powershell
 $env:IDENTITY_SEED_PASSWORD = Read-Host 'Nhap mat khau thu (12+ ky tu)'
@@ -63,3 +63,43 @@ docker compose -f services/identity/compose.dev.yml down
 Không thêm -v nếu muốn giữ tài khoản/DB thử.
 
 Đã kiểm tra build TypeScript, typecheck, unit tests bằng store giả. Chưa chạy Docker/PostgreSQL thật trong môi trường tạo bản này; các bước phía trên là kiểm tra tích hợp trên máy bạn.
+
+## Đăng nhập admin (bổ sung)
+
+Admin dùng cùng Identity và `/api/auth/login` như web. Chỉ `super_admin` và
+`center_manager` được vào giao diện quản trị. Role lấy từ database, không gửi
+role từ form đăng nhập.
+
+Sau khi rebuild Identity với code mới, tạo **tài khoản local mới**:
+
+```powershell
+$env:IDENTITY_SEED_PASSWORD = Read-Host 'Nhap mat khau thu (12+ ky tu)'
+docker compose -f services/identity/compose.dev.yml exec -e IDENTITY_SEED_PASSWORD -e IDENTITY_SEED_EMAIL=admin@example.com -e IDENTITY_SEED_ROLE=super_admin identity node dist/seed-dev.js
+Remove-Item Env:IDENTITY_SEED_PASSWORD
+```
+
+Để thử quản lý trung tâm, dùng email khác và `IDENTITY_SEED_ROLE=center_manager`.
+Script không sửa tài khoản đã tồn tại. Không đổi tài khoản `dung@example.com`
+thành admin bằng cách chạy lại seed; tạo email khác để kiểm tra từng role.
+
+Chạy Gateway cùng Identity, sau đó mở admin ở `http://localhost:8083/login`
+(nếu dùng Compose chính) hoặc `http://localhost:5174/login` (Vite).
+Chưa đăng nhập mà truy cập `/center-status` sẽ về `/login`; đăng nhập thành công
+sẽ quay lại trang vừa yêu cầu. Tài khoản `dung@example.com` role `user` bị từ chối.
+Nút Đăng xuất xóa cả state và access token phía admin.
+
+Phiên admin giữ trong bộ nhớ, tương tự luồng web hiện có. Tải lại trang cần
+đăng nhập lại; chưa có refresh token. Token hết hạn hoặc API trả 401 sẽ đưa về
+trang đăng nhập. Đăng xuất ở UI không thu hồi JWT đã cấp trên server; Identity
+hiện chưa có logout/revoke endpoint. Quyền API vẫn do Gateway/Booking Core kiểm
+tra, chặn route ở React chỉ phục vụ luồng giao diện.
+
+Chạy kiểm tra từ gốc repo bằng pnpm 10.25.0:
+
+```powershell
+pnpm --filter @badminton/admin test:unit
+pnpm --filter @badminton/admin test:contract
+pnpm --filter @badminton/admin typecheck
+pnpm --filter @badminton/admin build
+pnpm --filter @badminton/identity test:unit
+```

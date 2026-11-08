@@ -6,7 +6,8 @@ const axiosInstance = axios.create({
 });
 axiosInstance.interceptors.request.use((config) => {
   const token = window.__BADMINTON_SESSION__?.accessToken;
-  if (token) config.headers.Authorization = `Bearer ${token}`;
+  if (token && !config.skipAuth)
+    config.headers.Authorization = `Bearer ${token}`;
   if (import.meta.env.VITE_CLIENT_ID)
     config.headers["x-client-id"] = import.meta.env.VITE_CLIENT_ID;
   return config;
