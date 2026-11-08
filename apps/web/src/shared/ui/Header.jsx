@@ -2,6 +2,8 @@ import React, { useState, useEffect, useContext } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Sparkles, LogOut } from "lucide-react";
 import "../styles/header.css";
+import LoginModal from "./LoginModal.jsx";
+import { login } from "../api/auth.js";
 
 import { SessionContext } from "../session/SessionContext.jsx";
 import { useChat } from "../chat/ChatContext.jsx";
@@ -10,8 +12,10 @@ const Header = () => {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const [isLoginOpen, setIsLoginOpen] = useState(false);
 
-  const { user, loading, logout } = useContext(SessionContext) || {};
+  const { user, loading, updateSession, logout } =
+    useContext(SessionContext) || {};
   const { openChat } = useChat();
   const navigate = useNavigate();
 
@@ -35,6 +39,13 @@ const Header = () => {
 
   const closeMenu = () => {
     setIsMobileMenuOpen(false);
+  };
+
+  const handleLogin = async (credentials) => {
+    const session = await login(credentials);
+    if (updateSession) {
+      updateSession(session);
+    }
   };
 
   const navLinkClass =
@@ -161,7 +172,7 @@ const Header = () => {
                               setIsDropdownOpen(false);
                               navigate("/my-bookings");
                             }}
-                            className="flex items-center gap-3 w-full px-4 py-3 text-left text-gray-800 text-sm hover:bg-gray-50 transition-colors font-medium border-b border-gray-100"
+                            className="flex items-center gap-3 w-full px-4 py-3 text-left text-gray-800 text-sm hover:bg-gray-50 transition-colors font-medium border-b border-gray-100 cursor-pointer"
                           >
                             <i className="fas fa-user text-base text-gray-500"></i>
                             <span>Lịch đặt sân của tôi</span>
@@ -172,7 +183,7 @@ const Header = () => {
                               setIsDropdownOpen(false);
                               openChat();
                             }}
-                            className="flex items-center gap-3 w-full px-4 py-3 text-left text-emerald-700 text-sm hover:bg-emerald-50 transition-colors font-medium border-b border-gray-100"
+                            className="flex items-center gap-3 w-full px-4 py-3 text-left text-emerald-700 text-sm hover:bg-emerald-50 transition-colors font-medium border-b border-gray-100 cursor-pointer"
                           >
                             <Sparkles size={16} />
                             <span>Mở Trợ lý AI</span>
@@ -183,7 +194,7 @@ const Header = () => {
                               setIsDropdownOpen(false);
                               if (logout) logout();
                             }}
-                            className="flex items-center gap-3 w-full px-4 py-3 text-left text-red-600 text-sm hover:bg-red-50 transition-colors font-medium"
+                            className="flex items-center gap-3 w-full px-4 py-3 text-left text-red-600 text-sm hover:bg-red-50 transition-colors font-medium cursor-pointer"
                           >
                             <LogOut size={16} />
                             <span>Đăng xuất</span>
@@ -192,12 +203,31 @@ const Header = () => {
                       )}
                     </div>
                   </li>
-                ) : null}
+                ) : (
+                  <li>
+                    <button
+                      type="button"
+                      className="header-login-button cursor-pointer"
+                      onClick={() => {
+                        closeMenu();
+                        setIsLoginOpen(true);
+                      }}
+                    >
+                      <i className="fas fa-user" aria-hidden="true"></i>
+                      Đăng nhập
+                    </button>
+                  </li>
+                )}
               </ul>
             </nav>
           </div>
         </div>
       </header>
+      <LoginModal
+        isOpen={isLoginOpen}
+        onClose={() => setIsLoginOpen(false)}
+        onSubmit={handleLogin}
+      />
     </>
   );
 };

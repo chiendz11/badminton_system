@@ -5,6 +5,7 @@ import {
   Route,
   Navigate,
 } from "react-router-dom";
+import Login from "../features/identity/pages/Login.jsx";
 import AdminLayout from "../shared/ui/AdminLayout.jsx";
 import { ChatProvider } from "../shared/chat/ChatContext.jsx";
 import AssistantDrawer from "../features/assistant/components/AssistantDrawer.tsx";
@@ -36,6 +37,7 @@ export default function App() {
         <LoginModal />
         <Suspense fallback={null}>
           <Routes>
+            <Route path="/login" element={<Login />} />
             <Route path="/" element={<Navigate to="/dashboard" replace />} />
             <Route element={<AdminLayout />}>
               <Route path="/dashboard" element={<Dashboard />} />

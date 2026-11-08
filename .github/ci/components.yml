@@ -117,6 +117,17 @@ components:
       - observability
       - ai_tools
       - content_service
+      - identity_service
+    docker: true
+    enabled: true
+  identity_service:
+    path: services/identity
+    runtime: node
+    database: postgres
+    prisma: true
+    depends_on:
+      - identity_api
+      - auth_contracts
     docker: true
     enabled: true
   content_service:

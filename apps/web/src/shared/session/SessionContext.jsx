@@ -2,28 +2,30 @@ import { createContext, useCallback, useMemo, useState } from "react";
 
 export const SessionContext = createContext(null);
 
+function normalizeProfile(profile) {
+  if (!profile) return null;
+
+  return {
+    ...profile,
+    _id: profile._id || profile.userId,
+    userId: profile.userId || profile._id,
+  };
+}
+
 export function SessionProvider({
   children,
   session = window.__BADMINTON_SESSION__,
 }) {
   const [profile, setProfile] = useState(() => {
     if (session?.profile) {
-      return {
-        ...session.profile,
-        _id: session.profile._id || session.profile.userId,
-        userId: session.profile.userId || session.profile._id,
-      };
+      return normalizeProfile(session.profile);
     }
     try {
       const stored = localStorage.getItem("badminton_user");
       if (stored) {
         const parsed = JSON.parse(stored);
         if (parsed && (parsed.userId || parsed._id)) {
-          return {
-            ...parsed,
-            _id: parsed._id || parsed.userId,
-            userId: parsed.userId || parsed._id,
-          };
+          return normalizeProfile(parsed);
         }
       }
     } catch {
@@ -34,11 +36,7 @@ export function SessionProvider({
 
   const setUser = useCallback((user) => {
     if (user) {
-      const normalized = {
-        ...user,
-        _id: user._id || user.userId,
-        userId: user.userId || user._id,
-      };
+      const normalized = normalizeProfile(user);
       setProfile(normalized);
       try {
         localStorage.setItem("badminton_user", JSON.stringify(normalized));
@@ -65,6 +63,21 @@ export function SessionProvider({
     }
   }, []);
 
+  const updateSession = useCallback(
+    (nextSession) => {
+      window.__BADMINTON_SESSION__ = nextSession;
+      if (nextSession?.profile) {
+        setUser({
+          ...nextSession.profile,
+          accessToken: nextSession.accessToken,
+        });
+      } else {
+        setUser(null);
+      }
+    },
+    [setUser],
+  );
+
   const login = useCallback(
     (userData) => {
       const defaultUser = {
@@ -75,7 +88,9 @@ export function SessionProvider({
         role: "user",
         avatar_url: "/images/user_avatar.png",
       };
-      const finalUser = userData ? { ...defaultUser, ...userData } : defaultUser;
+      const finalUser = userData
+        ? { ...defaultUser, ...userData }
+        : defaultUser;
       setUser(finalUser);
       return finalUser;
     },
@@ -87,8 +102,15 @@ export function SessionProvider({
   }, [setUser]);
 
   const value = useMemo(
-    () => ({ user: profile, setUser, login, logout, loading: false }),
-    [profile, setUser, login, logout],
+    () => ({
+      user: profile,
+      setUser,
+      updateSession,
+      login,
+      logout,
+      loading: false,
+    }),
+    [profile, setUser, updateSession, login, logout],
   );
 
   return (

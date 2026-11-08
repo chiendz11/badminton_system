@@ -1,6 +1,7 @@
 
 export interface GatewayConfig {
   coreUrl: string;
+  identityUrl?: string;
   aiUrl?: string;
   aiTimeout?: number;
   contentUrl?: string;
@@ -39,6 +40,11 @@ export function configuration(): GatewayConfig {
     "BOOKING_CORE_URL",
   );
 
+  const identityUrl = validateHttpOrigin(
+    process.env.IDENTITY_SERVICE_URL || "http://localhost:8084",
+    "IDENTITY_SERVICE_URL",
+  );
+
   const aiUrl = validateHttpOrigin(
     process.env.AI_SERVICE_URL || "http://localhost:8000",
     "AI_SERVICE_URL",
@@ -52,7 +58,6 @@ export function configuration(): GatewayConfig {
   const aiTimeout = Number(
     process.env.AI_UPSTREAM_TIMEOUT_MS || 45000,
   );
-
   if (
     !Number.isInteger(aiTimeout) ||
     aiTimeout < 100 ||
@@ -105,6 +110,7 @@ export function configuration(): GatewayConfig {
 
   return {
     coreUrl,
+    identityUrl,
     aiUrl,
     aiTimeout,
     contentUrl,
