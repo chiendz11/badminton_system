@@ -3,6 +3,7 @@ import cors from "cors";
 import helmet from "helmet";
 import { timingSafeEqual } from "node:crypto";
 import { ZodError } from "zod";
+import { contentRoutes } from "./routes/content.route";
 import { configuration, type GatewayConfig } from "./configs/environment";
 import { BookingCoreClient } from "./clients/booking-core.client";
 import { authenticate } from "./middleware/authenticate.middleware";
@@ -67,7 +68,13 @@ export function createApp(
   app.use("/api/auth", identityRoutes(config, transport));
 
   app.use(authenticate(config));
-  app.post("/graphql", graphqlMiddleware(new CenterAdapter(core)));
+
+  app.post(
+    "/graphql",
+    graphqlMiddleware(new CenterAdapter(core)),
+  );
+
+  app.use("/api", contentRoutes(config, transport));
   app.use("/api", aiRoutes(config, transport));
   app.use("/api", bookingRoutes(new BookingAdapter(core)));
   app.use((_req, _res, next) =>

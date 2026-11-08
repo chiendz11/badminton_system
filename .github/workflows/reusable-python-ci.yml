@@ -75,6 +75,8 @@ jobs:
         run: python "$GITHUB_WORKSPACE/.github/scripts/check_python_contract.py" --run integration
       - name: Golden evaluation
         run: python "$GITHUB_WORKSPACE/.github/scripts/check_python_contract.py" --run golden
+      - name: Offline recommendation policy baselines
+        run: uv run python -m evaluation.evaluate_recommendation
       - name: Require golden metric thresholds
         run: python "$GITHUB_WORKSPACE/.github/scripts/check_golden_report.py"
       - name: FastAPI smoke test
@@ -86,11 +88,11 @@ jobs:
           name: ${{ inputs.component_name }}
           dockerfile: ${{ inputs.dockerfile }}
           context: ${{ inputs.docker_context }}
-      - name: Save golden evaluation report
+      - name: Save AI evaluation reports
         if: always()
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
         with:
           name: golden-${{ inputs.component_name }}-${{ github.sha }}
-          path: ${{ inputs.component_path }}/reports/golden.json
+          path: ${{ inputs.component_path }}/reports/*.json
           if-no-files-found: warn
           retention-days: 7

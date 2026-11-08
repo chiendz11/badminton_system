@@ -1,0 +1,11 @@
+global:
+  resolve_timeout: 5m
+route:
+  receiver: local-only
+  group_by: [alertname, service, environment]
+  group_wait: 10s
+  group_interval: 1m
+  repeat_interval: 4h
+# Local alerts are visible in the UI; this receiver sends no external messages.
+receivers:
+  - name: local-only

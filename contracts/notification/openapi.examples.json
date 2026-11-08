@@ -1,0 +1,30 @@
+{
+  "valid": [
+    {
+      "schema": "Notification",
+      "value": {
+        "id": "a1104000-0000-4000-8000-000000000001",
+        "recipientUserId": "user-one",
+        "eventId": "a1104000-0000-4000-8000-000000000001",
+        "type": "booking.confirmed",
+        "message": "Booking confirmed",
+        "isRead": false,
+        "createdAt": "2026-10-19T00:00:00Z"
+      }
+    }
+  ],
+  "invalid": [
+    {
+      "schema": "Notification",
+      "value": {
+        "id": "a1104000-0000-4000-8000-000000000001",
+        "recipientUserId": "user-one",
+        "eventId": "a1104000-0000-4000-8000-000000000001",
+        "type": "booking.confirmed",
+        "message": "Booking confirmed",
+        "isRead": "false",
+        "createdAt": "2026-10-19T00:00:00Z"
+      }
+    }
+  ]
+}

@@ -65,10 +65,26 @@
           "area"
         ]
       },
-      "uniqueItems": true
+      "uniqueItems": true,
+      "maxItems": 2
     },
     "sport": {
       "const": "badminton"
+    },
+    "locked_fields": {
+      "type": "array",
+      "maxItems": 7,
+      "items": {
+        "enum": [
+          "date",
+          "preferred_start",
+          "earliest_start",
+          "latest_start",
+          "duration_minutes",
+          "max_total_price_vnd",
+          "area"
+        ]
+      }
     }
   },
   "additionalProperties": false

@@ -27,7 +27,7 @@ jobs:
           node-version: '22'
       - name: Install pinned contract validation tools
         run: python -m pip install -r .github/ci/requirements.txt
-      - name: Validate OpenAPI, events and AI-tool JSON Schemas
+      - name: Validate service OpenAPI, JSON Schemas and positive/negative examples
         run: python .github/scripts/validate_contracts.py "$CONTRACT_PATH"
         env:
           CONTRACT_PATH: ${{ inputs.component_path }}

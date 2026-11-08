@@ -1,0 +1,699 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "Badminton Storage API",
+    "version": "0.1.0-proposed",
+    "description": "PROPOSED provider API, not implemented. Public Gateway routes are recorded as x-gateway-path. Decisions remain subject to ADR review."
+  },
+  "servers": [
+    {
+      "url": "http://storage-service:3007/api/v1",
+      "description": "Proposed provider base URL; no deployed host is claimed."
+    }
+  ],
+  "paths": {
+    "/files": {
+      "post": {
+        "operationId": "uploadFile",
+        "tags": [
+          "Storage"
+        ],
+        "summary": "Upload file",
+        "description": "PROPOSED — not implemented. Authenticated uploader + domain/center ACL, MIME/content/size allowlist; pending/cleanup for provider failures.",
+        "x-delivery-status": "proposed",
+        "x-owner-policy": "Authenticated uploader + domain/center ACL, MIME/content/size allowlist; pending/cleanup for provider failures.",
+        "responses": {
+          "201": {
+            "description": "Proposed success response",
+            "headers": {
+              "X-Request-Id": {
+                "schema": {
+                  "type": "string"
+                },
+                "description": "Correlation ID"
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FileMetadata"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/Error400"
+          },
+          "401": {
+            "$ref": "#/components/responses/Error401"
+          },
+          "403": {
+            "$ref": "#/components/responses/Error403"
+          },
+          "404": {
+            "$ref": "#/components/responses/Error404"
+          },
+          "409": {
+            "$ref": "#/components/responses/Error409"
+          },
+          "429": {
+            "$ref": "#/components/responses/Error429"
+          },
+          "503": {
+            "$ref": "#/components/responses/Error503"
+          }
+        },
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/XRequestId"
+          },
+          {
+            "$ref": "#/components/parameters/IdempotencyKey"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "$ref": "#/components/schemas/UploadRequest"
+              }
+            }
+          }
+        },
+        "x-implementation-status": "proposed",
+        "x-owner": "Proposed: Người 4 API + Người 5 platform",
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "x-gateway-path": "/api/storage/files"
+      }
+    },
+    "/files/{fileId}": {
+      "get": {
+        "operationId": "getFile",
+        "tags": [
+          "Storage"
+        ],
+        "summary": "Read authorized file metadata",
+        "description": "PROPOSED — not implemented. Public asset policy or uploader/domain ACL; invoice assets always private.",
+        "x-delivery-status": "proposed",
+        "x-owner-policy": "Public asset policy or uploader/domain ACL; invoice assets always private.",
+        "responses": {
+          "200": {
+            "description": "Proposed success response",
+            "headers": {
+              "X-Request-Id": {
+                "schema": {
+                  "type": "string"
+                },
+                "description": "Correlation ID"
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FileMetadata"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/Error400"
+          },
+          "401": {
+            "$ref": "#/components/responses/Error401"
+          },
+          "403": {
+            "$ref": "#/components/responses/Error403"
+          },
+          "404": {
+            "$ref": "#/components/responses/Error404"
+          },
+          "409": {
+            "$ref": "#/components/responses/Error409"
+          },
+          "429": {
+            "$ref": "#/components/responses/Error429"
+          },
+          "503": {
+            "$ref": "#/components/responses/Error503"
+          }
+        },
+        "parameters": [
+          {
+            "name": "fileId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "$ref": "#/components/parameters/XRequestId"
+          }
+        ],
+        "x-implementation-status": "proposed",
+        "x-owner": "Proposed: Người 4 API + Người 5 platform",
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "x-gateway-path": "/api/storage/files/{fileId}"
+      },
+      "delete": {
+        "operationId": "deleteFile",
+        "tags": [
+          "Storage"
+        ],
+        "summary": "Delete file",
+        "description": "PROPOSED — not implemented. Uploader/domain owner; reconcile provider/metadata, audit.",
+        "x-delivery-status": "proposed",
+        "x-owner-policy": "Uploader/domain owner; reconcile provider/metadata, audit.",
+        "responses": {
+          "204": {
+            "description": "No content",
+            "headers": {
+              "X-Request-Id": {
+                "schema": {
+                  "type": "string"
+                },
+                "description": "Correlation ID"
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/Error400"
+          },
+          "401": {
+            "$ref": "#/components/responses/Error401"
+          },
+          "403": {
+            "$ref": "#/components/responses/Error403"
+          },
+          "404": {
+            "$ref": "#/components/responses/Error404"
+          },
+          "409": {
+            "$ref": "#/components/responses/Error409"
+          },
+          "429": {
+            "$ref": "#/components/responses/Error429"
+          },
+          "503": {
+            "$ref": "#/components/responses/Error503"
+          }
+        },
+        "parameters": [
+          {
+            "name": "fileId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "$ref": "#/components/parameters/XRequestId"
+          }
+        ],
+        "x-implementation-status": "proposed",
+        "x-owner": "Proposed: Người 4 API + Người 5 platform",
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "x-gateway-path": "/api/storage/files/{fileId}"
+      }
+    },
+    "/files/bulk-urls": {
+      "post": {
+        "operationId": "bulkFileUrls",
+        "tags": [
+          "Storage"
+        ],
+        "summary": "Resolve authorized file URLs",
+        "description": "PROPOSED — not implemented. Authorize every file independently, no arbitrary Cloudinary identifiers.",
+        "x-delivery-status": "proposed",
+        "x-owner-policy": "Authorize every file independently, no arbitrary Cloudinary identifiers.",
+        "responses": {
+          "200": {
+            "description": "Proposed success response",
+            "headers": {
+              "X-Request-Id": {
+                "schema": {
+                  "type": "string"
+                },
+                "description": "Correlation ID"
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FileMetadataPage"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/Error400"
+          },
+          "401": {
+            "$ref": "#/components/responses/Error401"
+          },
+          "403": {
+            "$ref": "#/components/responses/Error403"
+          },
+          "404": {
+            "$ref": "#/components/responses/Error404"
+          },
+          "409": {
+            "$ref": "#/components/responses/Error409"
+          },
+          "429": {
+            "$ref": "#/components/responses/Error429"
+          },
+          "503": {
+            "$ref": "#/components/responses/Error503"
+          }
+        },
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/XRequestId"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BulkFilesRequest"
+              }
+            }
+          }
+        },
+        "x-implementation-status": "proposed",
+        "x-owner": "Proposed: Người 4 API + Người 5 platform",
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "x-gateway-path": "/api/storage/files/bulk-urls"
+      }
+    },
+    "/health/live": {
+      "get": {
+        "operationId": "healthLive",
+        "tags": [
+          "Operations"
+        ],
+        "summary": "Liveness per service",
+        "description": "PROPOSED — not implemented. Private network only; planned for new skeleton services.",
+        "x-delivery-status": "proposed",
+        "x-owner-policy": "Private network only; planned for new skeleton services.",
+        "responses": {
+          "200": {
+            "description": "Proposed success response",
+            "headers": {
+              "X-Request-Id": {
+                "schema": {
+                  "type": "string"
+                },
+                "description": "Correlation ID"
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Health"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/Error400"
+          },
+          "401": {
+            "$ref": "#/components/responses/Error401"
+          },
+          "403": {
+            "$ref": "#/components/responses/Error403"
+          },
+          "404": {
+            "$ref": "#/components/responses/Error404"
+          },
+          "409": {
+            "$ref": "#/components/responses/Error409"
+          },
+          "429": {
+            "$ref": "#/components/responses/Error429"
+          },
+          "503": {
+            "$ref": "#/components/responses/Error503"
+          }
+        },
+        "security": [],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/XRequestId"
+          }
+        ],
+        "x-implementation-status": "proposed",
+        "x-owner": "Proposed: Người 4 API + Người 5 platform",
+        "servers": [
+          {
+            "url": "http://storage-service:3007",
+            "description": "Proposed private service origin"
+          }
+        ]
+      }
+    },
+    "/health/ready": {
+      "get": {
+        "operationId": "healthReady",
+        "tags": [
+          "Operations"
+        ],
+        "summary": "Readiness per service",
+        "description": "PROPOSED — not implemented. Private network, fail when mandatory store unavailable.",
+        "x-delivery-status": "proposed",
+        "x-owner-policy": "Private network, fail when mandatory store unavailable.",
+        "responses": {
+          "200": {
+            "description": "Proposed success response",
+            "headers": {
+              "X-Request-Id": {
+                "schema": {
+                  "type": "string"
+                },
+                "description": "Correlation ID"
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Health"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/Error400"
+          },
+          "401": {
+            "$ref": "#/components/responses/Error401"
+          },
+          "403": {
+            "$ref": "#/components/responses/Error403"
+          },
+          "404": {
+            "$ref": "#/components/responses/Error404"
+          },
+          "409": {
+            "$ref": "#/components/responses/Error409"
+          },
+          "429": {
+            "$ref": "#/components/responses/Error429"
+          },
+          "503": {
+            "$ref": "#/components/responses/Error503"
+          }
+        },
+        "security": [],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/XRequestId"
+          }
+        ],
+        "x-implementation-status": "proposed",
+        "x-owner": "Proposed: Người 4 API + Người 5 platform",
+        "servers": [
+          {
+            "url": "http://storage-service:3007",
+            "description": "Proposed private service origin"
+          }
+        ]
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "FileMetadata": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "uploaderUserId": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 128
+          },
+          "type": {
+            "type": "string",
+            "enum": [
+              "AVATAR",
+              "CENTER_LOGO",
+              "COURT_IMAGE",
+              "PRODUCT_IMAGE",
+              "INVOICE",
+              "OTHER"
+            ]
+          },
+          "mimeType": {
+            "type": "string",
+            "minLength": 1
+          },
+          "sizeBytes": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "PENDING",
+              "READY",
+              "FAILED"
+            ]
+          },
+          "url": {
+            "type": "string",
+            "format": "uri"
+          }
+        },
+        "required": [
+          "id",
+          "uploaderUserId",
+          "type",
+          "mimeType",
+          "sizeBytes",
+          "status"
+        ],
+        "additionalProperties": false
+      },
+      "Error": {
+        "$ref": "../shared/error.schema.json"
+      },
+      "UploadRequest": {
+        "type": "object",
+        "properties": {
+          "file": {
+            "type": "string",
+            "format": "binary"
+          },
+          "type": {
+            "type": "string",
+            "enum": [
+              "AVATAR",
+              "CENTER_LOGO",
+              "COURT_IMAGE",
+              "PRODUCT_IMAGE",
+              "INVOICE",
+              "OTHER"
+            ]
+          },
+          "centerId": {
+            "type": "string",
+            "format": "uuid"
+          }
+        },
+        "required": [
+          "file",
+          "type"
+        ],
+        "additionalProperties": false
+      },
+      "FileMetadataPage": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/FileMetadata"
+            }
+          },
+          "nextCursor": {
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        },
+        "required": [
+          "items",
+          "nextCursor"
+        ],
+        "additionalProperties": false
+      },
+      "BulkFilesRequest": {
+        "type": "object",
+        "properties": {
+          "fileIds": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "minItems": 1,
+            "maxItems": 100,
+            "uniqueItems": true
+          }
+        },
+        "required": [
+          "fileIds"
+        ],
+        "additionalProperties": false
+      },
+      "Health": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string",
+            "enum": [
+              "live",
+              "ready"
+            ]
+          }
+        },
+        "required": [
+          "status"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "responses": {
+      "Error400": {
+        "description": "Validation error",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/Error"
+            }
+          }
+        }
+      },
+      "Error401": {
+        "description": "Authentication required/invalid",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/Error"
+            }
+          }
+        }
+      },
+      "Error403": {
+        "description": "Resource scope denied",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/Error"
+            }
+          }
+        }
+      },
+      "Error404": {
+        "description": "Resource not found",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/Error"
+            }
+          }
+        }
+      },
+      "Error409": {
+        "description": "State, stock or idempotency conflict",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/Error"
+            }
+          }
+        }
+      },
+      "Error429": {
+        "description": "Rate limit exceeded",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/Error"
+            }
+          }
+        }
+      },
+      "Error503": {
+        "description": "Dependency unavailable",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/Error"
+            }
+          }
+        }
+      }
+    },
+    "parameters": {
+      "XRequestId": {
+        "name": "X-Request-Id",
+        "in": "header",
+        "required": false,
+        "schema": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128
+        }
+      },
+      "IdempotencyKey": {
+        "name": "Idempotency-Key",
+        "in": "header",
+        "required": true,
+        "schema": {
+          "type": "string",
+          "minLength": 8,
+          "maxLength": 128,
+          "pattern": "^[A-Za-z0-9_-]+$"
+        },
+        "description": "Stable per user operation; replay same key/body, 409 for different body. Retention requires G02 approval."
+      }
+    },
+    "securitySchemes": {
+      "BearerAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "JWT",
+        "description": "Current claim profile sub/role/iss/aud/exp; issuer/algorithm rollout per ADR-006."
+      }
+    }
+  },
+  "x-owner": "Proposed: Người 4 API + Người 5 platform",
+  "x-implementation-status": "proposed"
+}

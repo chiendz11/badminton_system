@@ -13,11 +13,71 @@ const message = z
       .min(8)
       .max(128)
       .regex(/^[A-Za-z0-9_-]+$/),
-    action: z.enum(["select", "confirm", "retry"]).optional(),
+    action: z
+      .enum([
+        "select",
+        "confirm",
+        "retry",
+        "accept_proposal",
+        "reject_proposal",
+        "select_booking",
+        "confirm_cancellation",
+        "dismiss_cancellation",
+        "retry_cancellation",
+        "more_bookings",
+      ])
+      .optional(),
     option_id: uuid.optional(),
     confirmation_id: uuid.optional(),
+    proposal_id: uuid.optional(),
+    booking_choice_id: uuid.optional(),
+    cancellation_id: uuid.optional(),
   })
-  .strict();
+  .strict()
+  .superRefine((value, context) => {
+    const assistanceActions = [
+      "select_booking",
+      "confirm_cancellation",
+      "dismiss_cancellation",
+      "retry_cancellation",
+      "more_bookings",
+    ];
+    if (
+      assistanceActions.includes(value.action || "") &&
+      (value.option_id || value.confirmation_id || value.proposal_id)
+    ) {
+      context.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: "Self-service actions use separate consent",
+      });
+    }
+    for (const [field, action] of [
+      ["booking_choice_id", "select_booking"],
+      ["cancellation_id", "confirm_cancellation"],
+    ] as const) {
+      if (
+        (value.action === action && !value[field]) ||
+        (value[field] && value.action !== action)
+      ) {
+        context.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: `${field} belongs only to ${action}`,
+        });
+      }
+    }
+    const negotiating =
+      value.action === "accept_proposal" || value.action === "reject_proposal";
+    if (
+      (negotiating &&
+        (!value.proposal_id || value.option_id || value.confirmation_id)) ||
+      (value.proposal_id && !negotiating)
+    ) {
+      context.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: "Proposal actions require only a proposal_id",
+      });
+    }
+  });
 export function aiRoutes(
   config: GatewayConfig,
   transport: typeof fetch = fetch,
@@ -79,7 +139,65 @@ export function aiRoutes(
     );
     res.json(r.data);
   });
-  router.post("/conversations/:id/messages", all, async (req, res) => {
+  router.post("/conversations/:id/messages", all, async (req, res, next) => {
+    const isStream = req.headers.accept === "text/event-stream";
+    if (isStream) {
+      try {
+        const parsedBody = message.parse(req.body);
+        const controller = new AbortController();
+        req.on("close", () => controller.abort());
+
+        const response = await transport(
+          (config.aiUrl || "http://localhost:8000") +
+            "/api/conversations/" +
+            uuid.parse(req.params.id) +
+            "/messages",
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              Accept: "text/event-stream",
+              Authorization: req.headers.authorization!,
+              "X-Request-Id": req.requestId,
+            },
+            body: JSON.stringify(parsedBody),
+            signal: controller.signal,
+          },
+        );
+
+        if (!response.ok) {
+          let data: any;
+          try {
+            data = await response.json();
+          } catch {
+            throw new GatewayError(response.status, "AI service từ chối yêu cầu");
+          }
+          throw new GatewayError(
+            response.status,
+            typeof data.detail === "string" ? data.detail : "AI service từ chối yêu cầu",
+          );
+        }
+
+        res.setHeader("Content-Type", "text/event-stream");
+        res.setHeader("Cache-Control", "no-cache, no-transform");
+        res.setHeader("Connection", "keep-alive");
+        res.setHeader("X-Accel-Buffering", "no");
+
+        const reader = response.body?.getReader();
+        if (reader) {
+          while (true) {
+            const { done, value } = await reader.read();
+            if (done) break;
+            res.write(value);
+          }
+        }
+        res.end();
+      } catch (err) {
+        next(err);
+      }
+      return;
+    }
+
     const r = await call(
       req,
       "/api/conversations/" + uuid.parse(req.params.id) + "/messages",

@@ -5,9 +5,10 @@ from pathlib import Path
 import subprocess
 from urllib.parse import unquote, urlparse
 import yaml
-from jsonschema import validators
-from openapi_spec_validator import validate_spec
+from jsonschema import Draft202012Validator, validators
+from openapi_spec_validator import validate
 from referencing import Registry, Resource
+from referencing.jsonschema import DRAFT202012
 from ci_manifest import ROOT
 
 
@@ -22,7 +23,42 @@ def retrieve(uri):
     path = Path(unquote(parsed.path)).resolve()
     if not path.is_relative_to(ROOT.resolve()):
         raise ValueError('Contract references cannot escape the repository')
-    return Resource.from_contents(load(path))
+    return Resource.from_contents(load(path), default_specification=DRAFT202012)
+
+
+def validate_openapi_examples(path, document, registry):
+    """Check API fixtures against the same component schemas consumed by clients."""
+    examples_path = path.with_name(path.stem + '.examples.json')
+    if not examples_path.is_file():
+        raise ValueError(f'{path}: add {examples_path.name} with valid and invalid examples')
+    examples = json.loads(examples_path.read_text())
+    components = document.get('components', {})
+    schema_document = {
+        '$schema': 'https://json-schema.org/draft/2020-12/schema',
+        '$id': path.as_uri(),
+        'components': components,
+    }
+    registry = registry.with_resource(path.as_uri(), Resource.from_contents(schema_document))
+    for key in ['valid', 'invalid']:
+        samples = examples.get(key)
+        if not isinstance(samples, list) or not samples:
+            raise ValueError(f'{examples_path}: {key} examples must be a nonempty list')
+        for sample in samples:
+            if not isinstance(sample, dict) or set(sample) != {'schema', 'value'}:
+                raise ValueError(f'{examples_path}: expected schema/value example objects')
+            name = sample['schema']
+            if not isinstance(name, str) or name not in components.get('schemas', {}):
+                raise ValueError(f'{examples_path}: unknown component schema')
+            pointer = name.replace('~', '~0').replace('/', '~1')
+            validation = Draft202012Validator(
+                {'$ref': path.as_uri() + '#/components/schemas/' + pointer},
+                registry=registry,
+                format_checker=Draft202012Validator.FORMAT_CHECKER,
+            )
+            if key == 'valid':
+                validation.validate(sample['value'])
+            elif validation.is_valid(sample['value']):
+                raise ValueError(f'{examples_path}: a negative example unexpectedly passes')
 
 
 def main():
@@ -48,7 +84,8 @@ def main():
         if not isinstance(document, dict):
             raise ValueError(f'{path}: expected a schema object')
         if 'openapi' in document:
-            validate_spec(document, base_uri=path.as_uri())
+            validate(document, base_uri=path.as_uri())
+            validate_openapi_examples(path, document, registry)
         elif 'asyncapi' in document:
             subprocess.run(['npx', '--yes', '@asyncapi/cli@3.4.0', 'validate', str(path)], check=True)
         elif '$schema' in document:

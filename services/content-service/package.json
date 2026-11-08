@@ -1,0 +1,38 @@
+{
+    "name": "@badminton/content-service",
+    "version": "0.1.0",
+    "private": true,
+    "scripts": {
+        "dev": "nodemon --watch src --ext ts --exec ts-node src/main.ts",
+        "start": "node dist/main.js",
+        "build": "tsc -p tsconfig.build.json",
+        "typecheck": "tsc --noEmit",
+        "lint": "eslint src test",
+        "test:unit": "vitest run test/unit",
+        "test:contract": "vitest run test/contract",
+        "test:integration": "vitest run test/integration"
+    },
+    "dependencies": {
+        "@badminton/auth-contracts": "workspace:*",
+        "@nestjs/common": "^11.1.6",
+        "@nestjs/core": "^11.1.6",
+        "@nestjs/mongoose": "^11.0.0",
+        "@nestjs/platform-express": "^11.1.6",
+        "class-transformer": "^0.5.1",
+        "class-validator": "^0.14.2",
+        "dotenv": "^16.6.1",
+        "jsonwebtoken": "^9.0.2",
+        "mongoose": "^8.0.0",
+        "reflect-metadata": "^0.2.2",
+        "rxjs": "^7.8.2"
+    },
+    "devDependencies": {
+        "@types/express": "^5.0.6",
+        "@types/jsonwebtoken": "^9.0.10",
+        "@types/node": "^22.0.0",
+        "nodemon": "^3.1.10",
+        "ts-node": "^10.9.2",
+        "typescript": "^5.0.0",
+        "vitest": "^3.2.7"
+    }
+}

@@ -245,6 +245,44 @@ async def test_live_booking_commits_two_slots_and_pg_checkpoint(live):
     assert replay["booking"]["id"] == result["booking"]["id"]
 
 
+async def test_live_price_proposal_revalidates_before_any_core_write(live):
+    client, center, _, db, *_ = live
+    headers = {"Authorization": "Bearer " + token()}
+    conversation = (await client.post("/api/conversations", headers=headers)).json()[
+        "conversation_id"
+    ]
+
+    async def send(text, **extra):
+        response = await client.post(
+            f"/api/conversations/{conversation}/messages",
+            headers=headers,
+            json={"text": text, "client_message_id": str(uuid4()), **extra},
+        )
+        assert response.status_code == 200, response.text
+        return response.json()
+
+    result = await send("Mai lúc 19:00 chơi 2 tiếng, dưới 150k, gần Cầu Giấy")
+    assert result["action"] == "ALTERNATIVES_PROPOSED"
+    proposal = next(p for p in result["proposals"] if p["center_id"] == center)
+    assert proposal["violations"][0]["field"] == "max_total_price_vnd"
+    result = await send(
+        "Đồng ý đổi ngân sách", action="accept_proposal", proposal_id=proposal["proposal_id"]
+    )
+    assert result["action"] == "SEARCH_RESULTS" and not result["requires_confirmation"]
+    with psycopg.connect(db) as connection:
+        assert (
+            connection.execute(
+                'SELECT count(*) FROM "Reservation" WHERE "centerId"=%s', (center,)
+            ).fetchone()[0]
+            == 0
+        )
+    selected = await send("Chọn sân", action="select", option_id=result["options"][0]["option_id"])
+    booked = await send(
+        "Xác nhận đặt sân", action="confirm", confirmation_id=selected["confirmation_id"]
+    )
+    assert booked["booking"]["status"] == "CONFIRMED"
+
+
 async def test_two_chat_clients_compete_only_one_booking_commits(live):
     client, center, court, db, *_ = live
     a, b = await pick(client, center, "a"), await pick(client, center, "b")
@@ -293,3 +331,56 @@ async def test_postgres_lock_covers_independent_service_connection_pools(live):
                 assert response.status_code == 409
     finally:
         await other_store.engine.dispose()
+
+
+async def test_live_self_service_history_stats_centers_and_confirmed_cancellation(live):
+    client, center, court, db, *_ = live
+    conversation, headers, body = await pick(client, center, sub="assistance-customer")
+    url = f"/api/conversations/{conversation}/messages"
+    booked = (await client.post(url, headers=headers, json=body)).json()["booking"]
+
+    async def message(text, **extra):
+        result = await client.post(
+            url,
+            headers=headers,
+            json={
+                "text": text,
+                "client_message_id": str(uuid4()),
+                **extra,
+            },
+        )
+        assert result.status_code == 200, result.text
+        return result.json()
+
+    history = await message("Xem lịch sắp tới")
+    assert booked["id"] in [b["booking_id"] for b in history["assistance"]["bookings"]]
+    stats = await message("Thống kê ngày " + booked["date"])
+    assert stats["assistance"]["statistics"]["confirmed"] >= 1
+    centers = await message(f'Thông tin trung tâm "AA AI live {center}"')
+    assert centers["assistance"]["centers"][0]["center_id"] == center
+    preview = await message("Hủy booking " + booked["id"])
+    assert preview["action"] == "CONFIRM_CANCELLATION"
+    with psycopg.connect(db) as conn:
+        assert (
+            conn.execute(
+                'SELECT count(*) FROM "SlotAllocation" WHERE "courtId"=%s', (court,)
+            ).fetchone()[0]
+            == 2
+        )
+    result = await message(
+        "Xác nhận hủy booking",
+        action="confirm_cancellation",
+        cancellation_id=preview["assistance"]["cancellation"]["cancellation_id"],
+    )
+    assert result["action"] == "BOOKING_CANCELLED"
+    with psycopg.connect(db) as conn:
+        assert (
+            conn.execute('SELECT status FROM "Booking" WHERE id=%s', (booked["id"],)).fetchone()[0]
+            == "CANCELLED"
+        )
+        assert (
+            conn.execute(
+                'SELECT count(*) FROM "SlotAllocation" WHERE "courtId"=%s', (court,)
+            ).fetchone()[0]
+            == 0
+        )

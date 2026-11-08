@@ -1,0 +1,371 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "PROPOSED /social Socket.IO event payloads",
+  "oneOf": [
+    {
+      "type": "object",
+      "properties": {
+        "direction": {
+          "type": "string",
+          "const": "client_to_server"
+        },
+        "event": {
+          "type": "string",
+          "const": "joinConversation"
+        },
+        "payload": {
+          "type": "object",
+          "properties": {
+            "conversationId": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          "required": [
+            "conversationId"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "direction",
+        "event",
+        "payload"
+      ],
+      "additionalProperties": false
+    },
+    {
+      "type": "object",
+      "properties": {
+        "direction": {
+          "type": "string",
+          "const": "client_to_server"
+        },
+        "event": {
+          "type": "string",
+          "const": "leaveConversation"
+        },
+        "payload": {
+          "type": "object",
+          "properties": {
+            "conversationId": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          "required": [
+            "conversationId"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "direction",
+        "event",
+        "payload"
+      ],
+      "additionalProperties": false
+    },
+    {
+      "type": "object",
+      "properties": {
+        "direction": {
+          "type": "string",
+          "const": "client_to_server"
+        },
+        "event": {
+          "type": "string",
+          "const": "sendMessage"
+        },
+        "payload": {
+          "type": "object",
+          "properties": {
+            "conversationId": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "clientMessageId": {
+              "type": "string",
+              "minLength": 8,
+              "maxLength": 128,
+              "pattern": "^[A-Za-z0-9_-]+$"
+            },
+            "content": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 4000
+            }
+          },
+          "required": [
+            "conversationId",
+            "clientMessageId",
+            "content"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "direction",
+        "event",
+        "payload"
+      ],
+      "additionalProperties": false
+    },
+    {
+      "type": "object",
+      "properties": {
+        "direction": {
+          "type": "string",
+          "const": "client_to_server"
+        },
+        "event": {
+          "type": "string",
+          "const": "markRead"
+        },
+        "payload": {
+          "type": "object",
+          "properties": {
+            "conversationId": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "messageId": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          "required": [
+            "conversationId",
+            "messageId"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "direction",
+        "event",
+        "payload"
+      ],
+      "additionalProperties": false
+    },
+    {
+      "type": "object",
+      "properties": {
+        "direction": {
+          "type": "string",
+          "const": "server_to_client"
+        },
+        "event": {
+          "type": "string",
+          "const": "messageAck"
+        },
+        "payload": {
+          "type": "object",
+          "properties": {
+            "messageId": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "clientMessageId": {
+              "type": "string",
+              "minLength": 8,
+              "maxLength": 128
+            },
+            "conversationId": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          "required": [
+            "messageId",
+            "clientMessageId",
+            "conversationId"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "direction",
+        "event",
+        "payload"
+      ],
+      "additionalProperties": false
+    },
+    {
+      "type": "object",
+      "properties": {
+        "direction": {
+          "type": "string",
+          "const": "server_to_client"
+        },
+        "event": {
+          "type": "string",
+          "const": "newMessage"
+        },
+        "payload": {
+          "type": "object",
+          "properties": {
+            "id": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "conversationId": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "senderUserId": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 128
+            },
+            "clientMessageId": {
+              "type": "string",
+              "minLength": 8,
+              "maxLength": 128
+            },
+            "content": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 4000
+            },
+            "createdAt": {
+              "type": "string",
+              "format": "date-time"
+            }
+          },
+          "required": [
+            "id",
+            "conversationId",
+            "senderUserId",
+            "clientMessageId",
+            "content",
+            "createdAt"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "direction",
+        "event",
+        "payload"
+      ],
+      "additionalProperties": false
+    },
+    {
+      "type": "object",
+      "properties": {
+        "direction": {
+          "type": "string",
+          "const": "server_to_client"
+        },
+        "event": {
+          "type": "string",
+          "const": "readReceipt"
+        },
+        "payload": {
+          "type": "object",
+          "properties": {
+            "conversationId": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "userId": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 128
+            },
+            "messageId": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          "required": [
+            "conversationId",
+            "userId",
+            "messageId"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "direction",
+        "event",
+        "payload"
+      ],
+      "additionalProperties": false
+    },
+    {
+      "type": "object",
+      "properties": {
+        "direction": {
+          "type": "string",
+          "const": "server_to_client"
+        },
+        "event": {
+          "type": "string",
+          "const": "conversationUpdated"
+        },
+        "payload": {
+          "type": "object",
+          "properties": {
+            "conversationId": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "writeAllowed": {
+              "type": "boolean"
+            }
+          },
+          "required": [
+            "conversationId",
+            "writeAllowed"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "direction",
+        "event",
+        "payload"
+      ],
+      "additionalProperties": false
+    },
+    {
+      "type": "object",
+      "properties": {
+        "direction": {
+          "type": "string",
+          "const": "server_to_client"
+        },
+        "event": {
+          "type": "string",
+          "const": "error"
+        },
+        "payload": {
+          "type": "object",
+          "properties": {
+            "code": {
+              "type": "string",
+              "minLength": 1
+            },
+            "requestId": {
+              "type": "string",
+              "minLength": 1
+            }
+          },
+          "required": [
+            "code",
+            "requestId"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "direction",
+        "event",
+        "payload"
+      ],
+      "additionalProperties": false
+    }
+  ]
+}

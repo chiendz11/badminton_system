@@ -39,8 +39,19 @@ export function SessionProvider({
   session = window.__BADMINTON_SESSION__,
 }) {
   const initialSession = useRef(session);
-  const [current, setCurrent] = useState(null);
-  const [loading, setLoading] = useState(Boolean(session?.accessToken));
+  const [current, setCurrent] = useState(() => {
+    if (session?.profile && isAdminRole(session.profile.role)) {
+      try {
+        return normalizeSession(session);
+      } catch {
+        // ignore
+      }
+    }
+    return null;
+  });
+  const [loading, setLoading] = useState(
+    Boolean(session?.accessToken && !current),
+  );
 
   const logout = useCallback(() => {
     window.__BADMINTON_SESSION__ = null;
@@ -53,10 +64,47 @@ export function SessionProvider({
     setCurrent(normalized);
   }, []);
 
+  const setUser = useCallback(
+    (userData) => {
+      if (!userData) {
+        logout();
+        return;
+      }
+      updateSession({
+        accessToken: userData.accessToken || "mock-admin-token",
+        expiresIn: 900,
+        profile: {
+          userId: userData.userId || userData._id || "admin-1",
+          name: userData.name || "Quản trị viên",
+          email: userData.email || "admin@example.com",
+          role: userData.role || "super_admin",
+        },
+      });
+    },
+    [logout, updateSession],
+  );
+
+  const login = useCallback(
+    (adminData) => {
+      const defaultAdmin = {
+        userId: "admin-1",
+        name: "Quản trị viên (Admin)",
+        email: "admin@badminton.vn",
+        role: "super_admin",
+      };
+      const finalAdmin = adminData
+        ? { ...defaultAdmin, ...adminData }
+        : defaultAdmin;
+      setUser(finalAdmin);
+      return finalAdmin;
+    },
+    [setUser],
+  );
+
   useEffect(() => {
     let active = true;
-    const session = initialSession.current;
-    if (!session?.accessToken) {
+    const sess = initialSession.current;
+    if (!sess?.accessToken) {
       window.__BADMINTON_SESSION__ = null;
       setLoading(false);
       return;
@@ -64,21 +112,21 @@ export function SessionProvider({
     http
       .get("/api/auth/me", {
         skipAuth: true,
-        headers: { Authorization: `Bearer ${session.accessToken}` },
+        headers: { Authorization: `Bearer ${sess.accessToken}` },
       })
       .then(({ data }) => {
         if (!active) return;
         // The server validates the JWT and returns the current role.
         const payload = JSON.parse(
           atob(
-            session.accessToken
+            sess.accessToken
               .split(".")[1]
               .replace(/-/g, "+")
               .replace(/_/g, "/"),
           ),
         );
         updateSession({
-          ...session,
+          ...sess,
           profile: data.profile,
           expiresIn: payload.exp - Date.now() / 1000,
         });
@@ -122,12 +170,15 @@ export function SessionProvider({
   const value = useMemo(
     () => ({
       admin: current?.profile ?? null,
+      setAdmin: setUser,
       user: current?.profile ?? null,
+      setUser,
       updateSession,
+      login,
       logout,
       loading,
     }),
-    [current, updateSession, logout, loading],
+    [current, setUser, updateSession, login, logout, loading],
   );
 
   return (

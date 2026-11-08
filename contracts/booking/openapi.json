@@ -1,9 +1,9 @@
 {
-  "openapi": "3.0.3",
+  "openapi": "3.1.0",
   "info": {
     "title": "Badminton Booking Core",
-    "version": "1.0.0",
-    "description": "Booking Core: center/court/pricing/availability/reservation/booking. Pass marketplace and payments are excluded."
+    "version": "1.1.0-proposed",
+    "description": "Current Booking Core API plus explicitly proposed payment/pass operations. Proposed operations are not implemented; x-implementation-status distinguishes them. Current runtime baseline is 1.0.0."
   },
   "servers": [
     {
@@ -31,7 +31,8 @@
           "409": {
             "description": "Xung đột lịch hoặc yêu cầu"
           }
-        }
+        },
+        "x-implementation-status": "implemented"
       },
       "post": {
         "summary": "Tạo trung tâm (admin)",
@@ -57,7 +58,8 @@
           {
             "bearerAuth": []
           }
-        ]
+        ],
+        "x-implementation-status": "implemented"
       }
     },
     "/centers/{id}": {
@@ -91,7 +93,8 @@
               "format": "uuid"
             }
           }
-        ]
+        ],
+        "x-implementation-status": "implemented"
       },
       "patch": {
         "summary": "Cập nhật trung tâm",
@@ -128,7 +131,8 @@
               "format": "uuid"
             }
           }
-        ]
+        ],
+        "x-implementation-status": "implemented"
       }
     },
     "/centers/{id}/courts": {
@@ -167,7 +171,8 @@
               "format": "uuid"
             }
           }
-        ]
+        ],
+        "x-implementation-status": "implemented"
       }
     },
     "/centers/{id}/courts/{courtId}": {
@@ -215,7 +220,8 @@
               "format": "uuid"
             }
           }
-        ]
+        ],
+        "x-implementation-status": "implemented"
       }
     },
     "/centers/{id}/pricing": {
@@ -254,7 +260,8 @@
               "format": "uuid"
             }
           }
-        ]
+        ],
+        "x-implementation-status": "implemented"
       }
     },
     "/centers/{id}/availability": {
@@ -297,7 +304,8 @@
               "format": "date"
             }
           }
-        ]
+        ],
+        "x-implementation-status": "implemented"
       }
     },
     "/reservations": {
@@ -354,7 +362,8 @@
               }
             }
           }
-        }
+        },
+        "x-implementation-status": "implemented"
       },
       "get": {
         "summary": "Read bookings/active reservations with actor scope",
@@ -368,7 +377,8 @@
           "403": {
             "description": "Actor scope denied"
           }
-        }
+        },
+        "x-implementation-status": "implemented"
       }
     },
     "/reservations/{id}/confirm": {
@@ -414,7 +424,8 @@
               "format": "uuid"
             }
           }
-        ]
+        ],
+        "x-implementation-status": "implemented"
       }
     },
     "/reservations/{id}": {
@@ -453,7 +464,8 @@
               "format": "uuid"
             }
           }
-        ]
+        ],
+        "x-implementation-status": "implemented"
       }
     },
     "/bookings/me": {
@@ -481,7 +493,8 @@
           {
             "bearerAuth": []
           }
-        ]
+        ],
+        "x-implementation-status": "implemented"
       }
     },
     "/bookings/me/stats": {
@@ -509,7 +522,8 @@
           {
             "bearerAuth": []
           }
-        ]
+        ],
+        "x-implementation-status": "implemented"
       }
     },
     "/bookings/fixed": {
@@ -549,7 +563,8 @@
               "maxLength": 128
             }
           }
-        ]
+        ],
+        "x-implementation-status": "implemented"
       }
     },
     "/bookings/{id}/cancel": {
@@ -588,7 +603,8 @@
               "format": "uuid"
             }
           }
-        ]
+        ],
+        "x-implementation-status": "implemented"
       }
     },
     "/centers/{id}/bookings": {
@@ -627,7 +643,8 @@
               "format": "uuid"
             }
           }
-        ]
+        ],
+        "x-implementation-status": "implemented"
       }
     },
     "/availability/fixed": {
@@ -649,7 +666,8 @@
           "403": {
             "description": "Không quản lý trung tâm"
           }
-        }
+        },
+        "x-implementation-status": "implemented"
       }
     },
     "/bookings": {
@@ -665,7 +683,8 @@
           "403": {
             "description": "Actor scope denied"
           }
-        }
+        },
+        "x-implementation-status": "implemented"
       }
     },
     "/bookings/{id}": {
@@ -692,7 +711,8 @@
               "format": "uuid"
             }
           }
-        ]
+        ],
+        "x-implementation-status": "implemented"
       },
       "delete": {
         "summary": "Hide completed/cancelled owner history; preserve audit rows",
@@ -717,7 +737,964 @@
               "format": "uuid"
             }
           }
+        ],
+        "x-implementation-status": "implemented"
+      }
+    },
+    "/pass-posts": {
+      "get": {
+        "operationId": "listPassPosts",
+        "tags": [
+          "Pass"
+        ],
+        "summary": "List pass posts",
+        "description": "PROPOSED — not implemented. Public only ACTIVE; historical/private records require actor scope.",
+        "x-delivery-status": "proposed",
+        "x-owner-policy": "Public only ACTIVE; historical/private records require actor scope.",
+        "responses": {
+          "200": {
+            "description": "Proposed success response",
+            "headers": {
+              "X-Request-Id": {
+                "schema": {
+                  "type": "string"
+                },
+                "description": "Correlation ID"
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PassPostPage"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/Error400"
+          },
+          "401": {
+            "$ref": "#/components/responses/Error401"
+          },
+          "403": {
+            "$ref": "#/components/responses/Error403"
+          },
+          "404": {
+            "$ref": "#/components/responses/Error404"
+          },
+          "409": {
+            "$ref": "#/components/responses/Error409"
+          },
+          "429": {
+            "$ref": "#/components/responses/Error429"
+          },
+          "503": {
+            "$ref": "#/components/responses/Error503"
+          }
+        },
+        "security": [],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/XRequestId"
+          },
+          {
+            "name": "centerId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "date",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "date"
+            }
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "ACTIVE",
+                "SOLD",
+                "CANCELLED",
+                "EXPIRED"
+              ]
+            }
+          },
+          {
+            "name": "cursor",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 100,
+              "default": 20
+            }
+          }
+        ],
+        "x-implementation-status": "proposed",
+        "x-owner": "Người 1; pass module Người 2",
+        "x-gateway-path": "/api/booking/pass-posts"
+      },
+      "post": {
+        "operationId": "createPassPost",
+        "tags": [
+          "Pass"
+        ],
+        "summary": "Post a booking",
+        "description": "PROPOSED — not implemented. Current booking owner; CONFIRMED, not started, one post/booking; server determines seller/expiry.",
+        "x-delivery-status": "proposed",
+        "x-owner-policy": "Current booking owner; CONFIRMED, not started, one post/booking; server determines seller/expiry.",
+        "responses": {
+          "201": {
+            "description": "Proposed success response",
+            "headers": {
+              "X-Request-Id": {
+                "schema": {
+                  "type": "string"
+                },
+                "description": "Correlation ID"
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PassPost"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/Error400"
+          },
+          "401": {
+            "$ref": "#/components/responses/Error401"
+          },
+          "403": {
+            "$ref": "#/components/responses/Error403"
+          },
+          "404": {
+            "$ref": "#/components/responses/Error404"
+          },
+          "409": {
+            "$ref": "#/components/responses/Error409"
+          },
+          "429": {
+            "$ref": "#/components/responses/Error429"
+          },
+          "503": {
+            "$ref": "#/components/responses/Error503"
+          }
+        },
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/XRequestId"
+          },
+          {
+            "$ref": "#/components/parameters/IdempotencyKey"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PassCreate"
+              }
+            }
+          }
+        },
+        "x-implementation-status": "proposed",
+        "x-owner": "Người 1; pass module Người 2",
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "x-gateway-path": "/api/booking/pass-posts"
+      }
+    },
+    "/pass-posts/{postId}": {
+      "get": {
+        "operationId": "getPassPost",
+        "tags": [
+          "Pass"
+        ],
+        "summary": "Read pass post",
+        "description": "PROPOSED — not implemented. Public non-PII post fields; no interest roster in public response.",
+        "x-delivery-status": "proposed",
+        "x-owner-policy": "Public non-PII post fields; no interest roster in public response.",
+        "responses": {
+          "200": {
+            "description": "Proposed success response",
+            "headers": {
+              "X-Request-Id": {
+                "schema": {
+                  "type": "string"
+                },
+                "description": "Correlation ID"
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PassPost"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/Error400"
+          },
+          "401": {
+            "$ref": "#/components/responses/Error401"
+          },
+          "403": {
+            "$ref": "#/components/responses/Error403"
+          },
+          "404": {
+            "$ref": "#/components/responses/Error404"
+          },
+          "409": {
+            "$ref": "#/components/responses/Error409"
+          },
+          "429": {
+            "$ref": "#/components/responses/Error429"
+          },
+          "503": {
+            "$ref": "#/components/responses/Error503"
+          }
+        },
+        "security": [],
+        "parameters": [
+          {
+            "name": "postId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "$ref": "#/components/parameters/XRequestId"
+          }
+        ],
+        "x-implementation-status": "proposed",
+        "x-owner": "Người 1; pass module Người 2",
+        "x-gateway-path": "/api/booking/pass-posts/{postId}"
+      },
+      "delete": {
+        "operationId": "cancelPassPost",
+        "tags": [
+          "Pass"
+        ],
+        "summary": "Cancel pass post",
+        "description": "PROPOSED — not implemented. Seller only; ACTIVE to CANCELLED; replay CANCELLED returns 204, SOLD/EXPIRED 409.",
+        "x-delivery-status": "proposed",
+        "x-owner-policy": "Seller only; ACTIVE to CANCELLED; replay CANCELLED returns 204, SOLD/EXPIRED 409.",
+        "responses": {
+          "204": {
+            "description": "No content",
+            "headers": {
+              "X-Request-Id": {
+                "schema": {
+                  "type": "string"
+                },
+                "description": "Correlation ID"
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/Error400"
+          },
+          "401": {
+            "$ref": "#/components/responses/Error401"
+          },
+          "403": {
+            "$ref": "#/components/responses/Error403"
+          },
+          "404": {
+            "$ref": "#/components/responses/Error404"
+          },
+          "409": {
+            "$ref": "#/components/responses/Error409"
+          },
+          "429": {
+            "$ref": "#/components/responses/Error429"
+          },
+          "503": {
+            "$ref": "#/components/responses/Error503"
+          }
+        },
+        "parameters": [
+          {
+            "name": "postId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "$ref": "#/components/parameters/XRequestId"
+          }
+        ],
+        "x-implementation-status": "proposed",
+        "x-owner": "Người 1; pass module Người 2",
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "x-gateway-path": "/api/booking/pass-posts/{postId}"
+      }
+    },
+    "/pass-posts/{postId}/interest": {
+      "put": {
+        "operationId": "addInterest",
+        "tags": [
+          "Pass"
+        ],
+        "summary": "Add own interest",
+        "description": "PROPOSED — not implemented. Actor != seller; ACTIVE post; idempotent, unique post/actor.",
+        "x-delivery-status": "proposed",
+        "x-owner-policy": "Actor != seller; ACTIVE post; idempotent, unique post/actor.",
+        "responses": {
+          "204": {
+            "description": "No content",
+            "headers": {
+              "X-Request-Id": {
+                "schema": {
+                  "type": "string"
+                },
+                "description": "Correlation ID"
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/Error400"
+          },
+          "401": {
+            "$ref": "#/components/responses/Error401"
+          },
+          "403": {
+            "$ref": "#/components/responses/Error403"
+          },
+          "404": {
+            "$ref": "#/components/responses/Error404"
+          },
+          "409": {
+            "$ref": "#/components/responses/Error409"
+          },
+          "429": {
+            "$ref": "#/components/responses/Error429"
+          },
+          "503": {
+            "$ref": "#/components/responses/Error503"
+          }
+        },
+        "parameters": [
+          {
+            "name": "postId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "$ref": "#/components/parameters/XRequestId"
+          }
+        ],
+        "x-implementation-status": "proposed",
+        "x-owner": "Người 1; pass module Người 2",
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "x-gateway-path": "/api/booking/pass-posts/{postId}/interest"
+      },
+      "delete": {
+        "operationId": "removeInterest",
+        "tags": [
+          "Pass"
+        ],
+        "summary": "Remove own interest",
+        "description": "PROPOSED — not implemented. Own interest only; idempotent even if absent.",
+        "x-delivery-status": "proposed",
+        "x-owner-policy": "Own interest only; idempotent even if absent.",
+        "responses": {
+          "204": {
+            "description": "No content",
+            "headers": {
+              "X-Request-Id": {
+                "schema": {
+                  "type": "string"
+                },
+                "description": "Correlation ID"
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/Error400"
+          },
+          "401": {
+            "$ref": "#/components/responses/Error401"
+          },
+          "403": {
+            "$ref": "#/components/responses/Error403"
+          },
+          "404": {
+            "$ref": "#/components/responses/Error404"
+          },
+          "409": {
+            "$ref": "#/components/responses/Error409"
+          },
+          "429": {
+            "$ref": "#/components/responses/Error429"
+          },
+          "503": {
+            "$ref": "#/components/responses/Error503"
+          }
+        },
+        "parameters": [
+          {
+            "name": "postId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "$ref": "#/components/parameters/XRequestId"
+          }
+        ],
+        "x-implementation-status": "proposed",
+        "x-owner": "Người 1; pass module Người 2",
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "x-gateway-path": "/api/booking/pass-posts/{postId}/interest"
+      }
+    },
+    "/pass-posts/{postId}/interests": {
+      "get": {
+        "operationId": "listInterests",
+        "tags": [
+          "Pass"
+        ],
+        "summary": "List interested users",
+        "description": "PROPOSED — not implemented. Seller only, minimal user info.",
+        "x-delivery-status": "proposed",
+        "x-owner-policy": "Seller only, minimal user info.",
+        "responses": {
+          "200": {
+            "description": "Proposed success response",
+            "headers": {
+              "X-Request-Id": {
+                "schema": {
+                  "type": "string"
+                },
+                "description": "Correlation ID"
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/InterestPage"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/Error400"
+          },
+          "401": {
+            "$ref": "#/components/responses/Error401"
+          },
+          "403": {
+            "$ref": "#/components/responses/Error403"
+          },
+          "404": {
+            "$ref": "#/components/responses/Error404"
+          },
+          "409": {
+            "$ref": "#/components/responses/Error409"
+          },
+          "429": {
+            "$ref": "#/components/responses/Error429"
+          },
+          "503": {
+            "$ref": "#/components/responses/Error503"
+          }
+        },
+        "parameters": [
+          {
+            "name": "postId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "$ref": "#/components/parameters/XRequestId"
+          },
+          {
+            "name": "cursor",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 100,
+              "default": 20
+            }
+          }
+        ],
+        "x-implementation-status": "proposed",
+        "x-owner": "Người 1; pass module Người 2",
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "x-gateway-path": "/api/booking/pass-posts/{postId}/interests"
+      }
+    },
+    "/pass-posts/{postId}/transfer": {
+      "post": {
+        "operationId": "transferBooking",
+        "tags": [
+          "Pass"
+        ],
+        "summary": "Transfer booking ownership",
+        "description": "PROPOSED — not implemented. Current seller; active interested receiver != seller; local ACID booking/post/audit/outbox, slots unchanged.",
+        "x-delivery-status": "proposed",
+        "x-owner-policy": "Current seller; active interested receiver != seller; local ACID booking/post/audit/outbox, slots unchanged.",
+        "responses": {
+          "200": {
+            "description": "Proposed success response",
+            "headers": {
+              "X-Request-Id": {
+                "schema": {
+                  "type": "string"
+                },
+                "description": "Correlation ID"
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TransferResult"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/Error400"
+          },
+          "401": {
+            "$ref": "#/components/responses/Error401"
+          },
+          "403": {
+            "$ref": "#/components/responses/Error403"
+          },
+          "404": {
+            "$ref": "#/components/responses/Error404"
+          },
+          "409": {
+            "$ref": "#/components/responses/Error409"
+          },
+          "429": {
+            "$ref": "#/components/responses/Error429"
+          },
+          "503": {
+            "$ref": "#/components/responses/Error503"
+          }
+        },
+        "parameters": [
+          {
+            "name": "postId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "$ref": "#/components/parameters/XRequestId"
+          },
+          {
+            "$ref": "#/components/parameters/IdempotencyKey"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TransferRequest"
+              }
+            }
+          }
+        },
+        "x-implementation-status": "proposed",
+        "x-owner": "Người 1; pass module Người 2",
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "x-gateway-path": "/api/booking/pass-posts/{postId}/transfer"
+      }
+    },
+    "/payments/checkout": {
+      "post": {
+        "operationId": "createCheckout",
+        "tags": [
+          "Payment"
+        ],
+        "summary": "Create checkout attempt",
+        "description": "PROPOSED — not implemented. Booking owner; amount from Core, outbound provider call outside DB transaction.",
+        "x-delivery-status": "proposed",
+        "x-owner-policy": "Booking owner; amount from Core, outbound provider call outside DB transaction.",
+        "responses": {
+          "201": {
+            "description": "Proposed success response",
+            "headers": {
+              "X-Request-Id": {
+                "schema": {
+                  "type": "string"
+                },
+                "description": "Correlation ID"
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Checkout"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/Error400"
+          },
+          "401": {
+            "$ref": "#/components/responses/Error401"
+          },
+          "403": {
+            "$ref": "#/components/responses/Error403"
+          },
+          "404": {
+            "$ref": "#/components/responses/Error404"
+          },
+          "409": {
+            "$ref": "#/components/responses/Error409"
+          },
+          "429": {
+            "$ref": "#/components/responses/Error429"
+          },
+          "503": {
+            "$ref": "#/components/responses/Error503"
+          }
+        },
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/XRequestId"
+          },
+          {
+            "$ref": "#/components/parameters/IdempotencyKey"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CheckoutRequest"
+              }
+            }
+          }
+        },
+        "x-implementation-status": "proposed",
+        "x-owner": "Người 1; pass module Người 2",
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "x-gateway-path": "/api/booking/payments/checkout"
+      }
+    },
+    "/payments/{paymentAttemptId}": {
+      "get": {
+        "operationId": "paymentStatus",
+        "tags": [
+          "Payment"
+        ],
+        "summary": "Read payment status",
+        "description": "PROPOSED — not implemented. Owner or assigned center manager; browser redirect is not payment proof.",
+        "x-delivery-status": "proposed",
+        "x-owner-policy": "Owner or assigned center manager; browser redirect is not payment proof.",
+        "responses": {
+          "200": {
+            "description": "Proposed success response",
+            "headers": {
+              "X-Request-Id": {
+                "schema": {
+                  "type": "string"
+                },
+                "description": "Correlation ID"
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PaymentStatus"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/Error400"
+          },
+          "401": {
+            "$ref": "#/components/responses/Error401"
+          },
+          "403": {
+            "$ref": "#/components/responses/Error403"
+          },
+          "404": {
+            "$ref": "#/components/responses/Error404"
+          },
+          "409": {
+            "$ref": "#/components/responses/Error409"
+          },
+          "429": {
+            "$ref": "#/components/responses/Error429"
+          },
+          "503": {
+            "$ref": "#/components/responses/Error503"
+          }
+        },
+        "parameters": [
+          {
+            "name": "paymentAttemptId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "$ref": "#/components/parameters/XRequestId"
+          }
+        ],
+        "x-implementation-status": "proposed",
+        "x-owner": "Người 1; pass module Người 2",
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "x-gateway-path": "/api/booking/payments/{paymentAttemptId}"
+      }
+    },
+    "/internal/booking/payments/verified-events": {
+      "post": {
+        "operationId": "applyVerifiedPayment",
+        "tags": [
+          "Internal"
+        ],
+        "summary": "Apply normalized verified provider event",
+        "description": "PROPOSED — not implemented. Service-only Core adapter, after raw webhook signature/canonical bytes and amount/order validation. Not raw PayOS webhook.",
+        "x-delivery-status": "proposed",
+        "x-owner-policy": "Service-only Core adapter, after raw webhook signature/canonical bytes and amount/order validation. Not raw PayOS webhook.",
+        "responses": {
+          "200": {
+            "description": "Proposed success response",
+            "headers": {
+              "X-Request-Id": {
+                "schema": {
+                  "type": "string"
+                },
+                "description": "Correlation ID"
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PaymentStatus"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/Error400"
+          },
+          "401": {
+            "$ref": "#/components/responses/Error401"
+          },
+          "403": {
+            "$ref": "#/components/responses/Error403"
+          },
+          "404": {
+            "$ref": "#/components/responses/Error404"
+          },
+          "409": {
+            "$ref": "#/components/responses/Error409"
+          },
+          "429": {
+            "$ref": "#/components/responses/Error429"
+          },
+          "503": {
+            "$ref": "#/components/responses/Error503"
+          }
+        },
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/XRequestId"
+          },
+          {
+            "$ref": "#/components/parameters/IdempotencyKey"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/VerifiedPaymentEvent"
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "ServiceBearer": []
+          }
+        ],
+        "x-implementation-status": "proposed",
+        "x-owner": "Người 1; pass module Người 2",
+        "servers": [
+          {
+            "url": "http://booking-core:3000",
+            "description": "Proposed private service origin; internal endpoint excluded from Gateway."
+          }
         ]
+      }
+    },
+    "/bookings/{bookingId}/pass-eligibility": {
+      "get": {
+        "operationId": "getPassEligibility",
+        "tags": [
+          "Pass"
+        ],
+        "summary": "Check own booking eligibility for pass",
+        "description": "PROPOSED — not implemented. Owner only, derive eligibility from Core state; PAYMENT_NOT_SETTLED only after payment cutover. No claim that CONFIRMED means paid.",
+        "x-delivery-status": "proposed",
+        "x-owner-policy": "Current booking owner; no booking PII to non-owners.",
+        "responses": {
+          "200": {
+            "description": "Proposed success response",
+            "headers": {
+              "X-Request-Id": {
+                "schema": {
+                  "type": "string"
+                },
+                "description": "Correlation ID"
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PassEligibility"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/Error400"
+          },
+          "401": {
+            "$ref": "#/components/responses/Error401"
+          },
+          "403": {
+            "$ref": "#/components/responses/Error403"
+          },
+          "404": {
+            "$ref": "#/components/responses/Error404"
+          },
+          "409": {
+            "$ref": "#/components/responses/Error409"
+          },
+          "429": {
+            "$ref": "#/components/responses/Error429"
+          },
+          "503": {
+            "$ref": "#/components/responses/Error503"
+          }
+        },
+        "parameters": [
+          {
+            "name": "bookingId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "$ref": "#/components/parameters/XRequestId"
+          }
+        ],
+        "x-implementation-status": "proposed",
+        "x-owner": "Người 1; pass module Người 2",
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "x-gateway-path": "/api/booking/bookings/{bookingId}/pass-eligibility"
       }
     }
   },
@@ -727,93 +1704,83 @@
         "type": "http",
         "scheme": "bearer",
         "bearerFormat": "JWT"
+      },
+      "BearerAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "JWT",
+        "description": "Current claim profile sub/role/iss/aud/exp; issuer/algorithm rollout per ADR-006."
+      },
+      "ServiceBearer": {
+        "type": "http",
+        "scheme": "bearer",
+        "description": "Future workload identity with target audience/scope; user JWT alone is insufficient."
       }
     },
     "schemas": {
       "CreateReservation": {
-        "title": "CreateReservation",
-        "type": "object",
-        "required": [
-          "centerId",
-          "date",
-          "selections"
-        ],
-        "additionalProperties": false,
-        "properties": {
-          "centerId": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "date": {
-            "type": "string",
-            "format": "date"
-          },
-          "selections": {
-            "type": "array",
-            "minItems": 1,
-            "maxItems": 8,
-            "items": {
-              "type": "object",
-              "required": [
-                "courtId",
-                "slots"
-              ],
-              "additionalProperties": false,
-              "properties": {
-                "courtId": {
-                  "type": "string",
-                  "format": "uuid"
-                },
-                "slots": {
-                  "type": "array",
-                  "minItems": 1,
-                  "maxItems": 24,
-                  "uniqueItems": true,
-                  "items": {
-                    "type": "integer",
-                    "minimum": 0,
-                    "maximum": 1380,
-                    "multipleOf": 60
-                  }
-                }
-              }
-            }
-          }
-        }
+        "$ref": "./reservation-request.schema.json"
       },
       "Reservation": {
-        "title": "Reservation",
+        "$ref": "./reservation-response.schema.json"
+      },
+      "Booking": {
+        "$ref": "./booking-response.schema.json"
+      },
+      "PassPostPage": {
         "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PassPost"
+            }
+          },
+          "nextCursor": {
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        },
         "required": [
-          "id",
-          "centerId",
-          "userId",
-          "date",
-          "status",
-          "expiresAt",
-          "totalPrice",
-          "selections"
+          "items",
+          "nextCursor"
         ],
+        "additionalProperties": false
+      },
+      "PassPost": {
+        "type": "object",
         "properties": {
           "id": {
             "type": "string",
             "format": "uuid"
           },
-          "centerId": {
+          "bookingId": {
             "type": "string",
             "format": "uuid"
           },
-          "userId": {
-            "type": "string"
-          },
-          "date": {
+          "sellerUserId": {
             "type": "string",
-            "format": "date"
+            "minLength": 1,
+            "maxLength": 128
+          },
+          "resalePrice": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          },
+          "currency": {
+            "type": "string",
+            "enum": [
+              "VND"
+            ]
           },
           "status": {
+            "type": "string",
             "enum": [
-              "HELD",
-              "CONFIRMED",
+              "ACTIVE",
+              "SOLD",
               "EXPIRED",
               "CANCELLED"
             ]
@@ -822,90 +1789,61 @@
             "type": "string",
             "format": "date-time"
           },
-          "totalPrice": {
+          "version": {
             "type": "integer",
-            "minimum": 0
+            "minimum": 1
           },
-          "selections": {
-            "type": "array",
-            "items": {
-              "type": "object",
-              "required": [
-                "courtId",
-                "courtName",
-                "slots",
-                "price"
-              ],
-              "properties": {
-                "courtId": {
-                  "type": "string",
-                  "format": "uuid"
-                },
-                "slots": {
-                  "type": "array",
-                  "minItems": 1,
-                  "maxItems": 24,
-                  "uniqueItems": true,
-                  "items": {
-                    "type": "integer",
-                    "minimum": 0,
-                    "maximum": 1380,
-                    "multipleOf": 60
-                  }
-                },
-                "courtName": {
-                  "type": "string"
-                },
-                "price": {
-                  "type": "integer",
-                  "minimum": 0
-                }
-              }
-            }
+          "description": {
+            "type": "string",
+            "maxLength": 2000
+          },
+          "bookingSnapshot": {
+            "$ref": "#/components/schemas/PassBookingSnapshot"
           }
-        }
-      },
-      "Booking": {
-        "title": "Booking",
-        "type": "object",
+        },
         "required": [
           "id",
-          "reservationId",
+          "bookingId",
+          "sellerUserId",
+          "resalePrice",
+          "currency",
+          "status",
+          "expiresAt",
+          "version",
+          "bookingSnapshot"
+        ],
+        "additionalProperties": false
+      },
+      "PassBookingSnapshot": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
           "centerId",
           "centerName",
-          "userId",
-          "userName",
           "date",
-          "status",
-          "type",
-          "totalPrice",
-          "createdAt",
-          "selections"
+          "selections",
+          "originalPrice",
+          "currency"
         ],
         "properties": {
-          "id": {
-            "type": "string",
-            "format": "uuid"
-          },
           "centerId": {
             "type": "string",
             "format": "uuid"
           },
-          "userId": {
-            "type": "string"
+          "centerName": {
+            "type": "string",
+            "minLength": 1
           },
           "date": {
             "type": "string",
             "format": "date"
           },
-          "totalPrice": {
-            "type": "integer",
-            "minimum": 0
-          },
           "selections": {
             "type": "array",
+            "minItems": 1,
             "items": {
               "type": "object",
+              "additionalProperties": false,
               "required": [
                 "courtId",
                 "courtName",
@@ -916,6 +1854,10 @@
                 "courtId": {
                   "type": "string",
                   "format": "uuid"
+                },
+                "courtName": {
+                  "type": "string",
+                  "minLength": 1
                 },
                 "slots": {
                   "type": "array",
@@ -929,9 +1871,6 @@
                     "multipleOf": 60
                   }
                 },
-                "courtName": {
-                  "type": "string"
-                },
                 "price": {
                   "type": "integer",
                   "minimum": 0
@@ -939,34 +1878,434 @@
               }
             }
           },
-          "reservationId": {
+          "originalPrice": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "currency": {
+            "type": "string",
+            "enum": [
+              "VND"
+            ]
+          }
+        }
+      },
+      "Error": {
+        "$ref": "../shared/error.schema.json"
+      },
+      "PassCreate": {
+        "type": "object",
+        "properties": {
+          "bookingId": {
             "type": "string",
             "format": "uuid"
           },
-          "centerName": {
-            "type": "string"
+          "resalePrice": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
           },
-          "userName": {
-            "type": "string"
+          "description": {
+            "type": "string",
+            "maxLength": 2000
+          }
+        },
+        "required": [
+          "bookingId",
+          "resalePrice"
+        ],
+        "additionalProperties": false
+      },
+      "InterestPage": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Interest"
+            }
           },
-          "status": {
-            "enum": [
-              "CONFIRMED",
-              "CANCELLED"
+          "nextCursor": {
+            "type": [
+              "string",
+              "null"
             ]
+          }
+        },
+        "required": [
+          "items",
+          "nextCursor"
+        ],
+        "additionalProperties": false
+      },
+      "Interest": {
+        "type": "object",
+        "properties": {
+          "userId": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 128
           },
-          "type": {
-            "enum": [
-              "DAILY",
-              "FIXED"
-            ]
+          "displayName": {
+            "type": "string",
+            "maxLength": 150
           },
           "createdAt": {
             "type": "string",
             "format": "date-time"
           }
+        },
+        "required": [
+          "userId",
+          "displayName",
+          "createdAt"
+        ],
+        "additionalProperties": false
+      },
+      "TransferResult": {
+        "type": "object",
+        "properties": {
+          "transferId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "postId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "bookingId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "fromUserId": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 128
+          },
+          "toUserId": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 128
+          },
+          "transferredAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "postStatus": {
+            "type": "string",
+            "enum": [
+              "SOLD"
+            ]
+          }
+        },
+        "required": [
+          "transferId",
+          "postId",
+          "bookingId",
+          "fromUserId",
+          "toUserId",
+          "transferredAt",
+          "postStatus"
+        ],
+        "additionalProperties": false
+      },
+      "TransferRequest": {
+        "type": "object",
+        "properties": {
+          "receiverUserId": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 128
+          }
+        },
+        "required": [
+          "receiverUserId"
+        ],
+        "additionalProperties": false
+      },
+      "Checkout": {
+        "type": "object",
+        "properties": {
+          "paymentAttemptId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "bookingId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "checkoutUrl": {
+            "type": "string",
+            "format": "uri"
+          },
+          "amount": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          },
+          "currency": {
+            "type": "string",
+            "enum": [
+              "VND"
+            ]
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "PENDING"
+            ]
+          },
+          "expiresAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "required": [
+          "paymentAttemptId",
+          "bookingId",
+          "checkoutUrl",
+          "amount",
+          "currency",
+          "status",
+          "expiresAt"
+        ],
+        "additionalProperties": false
+      },
+      "CheckoutRequest": {
+        "type": "object",
+        "properties": {
+          "bookingId": {
+            "type": "string",
+            "format": "uuid"
+          }
+        },
+        "required": [
+          "bookingId"
+        ],
+        "additionalProperties": false
+      },
+      "PaymentStatus": {
+        "type": "object",
+        "properties": {
+          "paymentAttemptId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "bookingId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "amount": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          },
+          "currency": {
+            "type": "string",
+            "enum": [
+              "VND"
+            ]
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "PENDING",
+              "SUCCEEDED",
+              "FAILED",
+              "EXPIRED",
+              "REQUIRES_RECONCILIATION"
+            ]
+          }
+        },
+        "required": [
+          "paymentAttemptId",
+          "bookingId",
+          "amount",
+          "currency",
+          "status"
+        ],
+        "additionalProperties": false
+      },
+      "VerifiedPaymentEvent": {
+        "type": "object",
+        "properties": {
+          "providerEventId": {
+            "type": "string",
+            "minLength": 1
+          },
+          "providerOrderCode": {
+            "type": "string",
+            "minLength": 1
+          },
+          "paymentAttemptId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "amount": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          },
+          "currency": {
+            "type": "string",
+            "enum": [
+              "VND"
+            ]
+          },
+          "result": {
+            "type": "string",
+            "enum": [
+              "SUCCEEDED",
+              "FAILED"
+            ]
+          },
+          "occurredAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "required": [
+          "providerEventId",
+          "providerOrderCode",
+          "paymentAttemptId",
+          "amount",
+          "currency",
+          "result",
+          "occurredAt"
+        ],
+        "additionalProperties": false
+      },
+      "PassEligibility": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "bookingId",
+          "eligible",
+          "reasons"
+        ],
+        "properties": {
+          "bookingId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "eligible": {
+            "type": "boolean"
+          },
+          "reasons": {
+            "type": "array",
+            "uniqueItems": true,
+            "items": {
+              "type": "string",
+              "enum": [
+                "NOT_OWNER",
+                "BOOKING_NOT_CONFIRMED",
+                "BOOKING_STARTED",
+                "POST_EXISTS",
+                "PAYMENT_NOT_SETTLED"
+              ]
+            }
+          }
         }
       }
+    },
+    "responses": {
+      "Error400": {
+        "description": "Validation error",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/Error"
+            }
+          }
+        }
+      },
+      "Error401": {
+        "description": "Authentication required/invalid",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/Error"
+            }
+          }
+        }
+      },
+      "Error403": {
+        "description": "Resource scope denied",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/Error"
+            }
+          }
+        }
+      },
+      "Error404": {
+        "description": "Resource not found",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/Error"
+            }
+          }
+        }
+      },
+      "Error409": {
+        "description": "State, stock or idempotency conflict",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/Error"
+            }
+          }
+        }
+      },
+      "Error429": {
+        "description": "Rate limit exceeded",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/Error"
+            }
+          }
+        }
+      },
+      "Error503": {
+        "description": "Dependency unavailable",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/Error"
+            }
+          }
+        }
+      }
+    },
+    "parameters": {
+      "XRequestId": {
+        "name": "X-Request-Id",
+        "in": "header",
+        "required": false,
+        "schema": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128
+        }
+      },
+      "IdempotencyKey": {
+        "name": "Idempotency-Key",
+        "in": "header",
+        "required": true,
+        "schema": {
+          "type": "string",
+          "minLength": 8,
+          "maxLength": 128,
+          "pattern": "^[A-Za-z0-9_-]+$"
+        },
+        "description": "Stable per user operation; replay same key/body, 409 for different body. Retention requires G02 approval."
+      }
     }
-  }
+  },
+  "x-runtime-contract-version": "1.0.0",
+  "x-implementation-status": "mixed",
+  "x-owner": "Người 1; pass module Người 2"
 }

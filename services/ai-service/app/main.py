@@ -6,7 +6,7 @@ from uuid import UUID, uuid4
 
 import httpx
 from fastapi import Depends, FastAPI, Header, HTTPException, Request
-from fastapi.responses import JSONResponse, Response
+from fastapi.responses import JSONResponse, Response, StreamingResponse
 from langgraph.checkpoint.postgres.aio import AsyncPostgresSaver
 from prometheus_client import generate_latest
 from sqlalchemy import text
@@ -17,6 +17,7 @@ from app.core_client import BookingCoreClient, CoreError
 from app.db.store import Store
 from app.observability import latency, log, registry, requests
 from app.providers import FakeParser, LLMParser
+from app.rate_limiter import UserRateLimiter
 from app.service import ConversationService
 
 
@@ -53,7 +54,7 @@ async def lifespan(app):
 def create_app(service=None, config=None):
     app = FastAPI(
         title="Badminton Conversational Planning",
-        version="0.1.0",
+        version="0.2.0",
         lifespan=lifespan if service is None else None,
     )
     if service is not None:
@@ -62,6 +63,14 @@ def create_app(service=None, config=None):
 
     def cfg():
         return active_config or settings()
+
+    app.state.rate_limiter = UserRateLimiter(
+        max_requests=getattr(active_config, "ai_rate_limit_requests", 20),
+        window_seconds=getattr(active_config, "ai_rate_limit_window_seconds", 60),
+    )
+
+    def get_limiter():
+        return app.state.rate_limiter
 
     async def actor(authorization: str = Header(default="")):
         if not authorization.startswith("Bearer "):
@@ -161,6 +170,20 @@ def create_app(service=None, config=None):
         current=Depends(actor),
         authorization: str = Header(default=""),
     ):
+        get_limiter().check(current.user_id)
+        if request.headers.get("accept") == "text/event-stream":
+            return StreamingResponse(
+                app.state.service.message_stream(
+                    str(conversation_id), body, current, authorization[7:], request.state.request_id
+                ),
+                media_type="text/event-stream",
+                headers={
+                    "Cache-Control": "no-cache, no-transform",
+                    "Connection": "keep-alive",
+                    "X-Accel-Buffering": "no",
+                    "X-Request-Id": request.state.request_id,
+                },
+            )
         return await app.state.service.message(
             str(conversation_id), body, current, authorization[7:], request.state.request_id
         )

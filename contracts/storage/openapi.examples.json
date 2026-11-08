@@ -1,0 +1,28 @@
+{
+  "valid": [
+    {
+      "schema": "FileMetadata",
+      "value": {
+        "id": "a1104000-0000-4000-8000-000000000001",
+        "uploaderUserId": "user-one",
+        "type": "AVATAR",
+        "mimeType": "image/png",
+        "sizeBytes": 128,
+        "status": "READY"
+      }
+    }
+  ],
+  "invalid": [
+    {
+      "schema": "FileMetadata",
+      "value": {
+        "id": "a1104000-0000-4000-8000-000000000001",
+        "uploaderUserId": "user-one",
+        "type": "AVATAR",
+        "mimeType": "image/png",
+        "sizeBytes": 0,
+        "status": "READY"
+      }
+    }
+  ]
+}

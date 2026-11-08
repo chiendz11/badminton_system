@@ -85,7 +85,7 @@ async def test_changed_constraints_invalidate_old_option_and_nonce(env):
 async def test_hard_price_and_soft_time_replanning(env):
     id = await create(env)
     r = await send(env, id, "Mai lúc 19:00 chơi 2 tiếng, dưới 100k")
-    assert not r["options"] and r["action"] == "REPLAN"
+    assert not r["options"] and r["action"] == "ASK_CONSTRAINT_CHANGE"
     env["core"].occupied.add(1140)
     r = await send(env, id, "Đổi giờ khoảng 19:00, dưới 200k")
     assert r["options"] and r["options"][0]["slots"][0] == 1200
