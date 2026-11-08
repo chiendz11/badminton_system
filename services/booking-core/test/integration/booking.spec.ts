@@ -135,9 +135,14 @@ test("holds, confirms without payment, returns history, cancels and releases the
   expect(
     await db.outboxEvent.count({ where: { type: "booking.confirmed.v1" } }),
   ).toBe(1);
+  const userCancel = await request(app.getHttpServer())
+    .post(`/api/v1/bookings/${booking.body.id}/cancel`)
+    .set("Authorization", `Bearer ${token()}`);
+  expect(userCancel.status).toBe(403);
+  expect(userCancel.body.message).toContain("Chợ Pass");
   await request(app.getHttpServer())
     .post(`/api/v1/bookings/${booking.body.id}/cancel`)
-    .set("Authorization", `Bearer ${token()}`)
+    .set("Authorization", `Bearer ${token("manager", "center_manager")}`)
     .expect(200);
   expect(await db.slotAllocation.count()).toBe(0);
   expect(
@@ -298,7 +303,7 @@ test("disabling an occupied court is rejected; cancellation is idempotent", asyn
   for (let i = 0; i < 2; i++)
     await request(app.getHttpServer())
       .post(`/api/v1/bookings/${booking.body.id}/cancel`)
-      .set("Authorization", `Bearer ${token()}`)
+      .set("Authorization", `Bearer ${token("manager", "center_manager")}`)
       .expect(200);
   expect(
     await db.outboxEvent.count({ where: { type: "booking.cancelled.v1" } }),

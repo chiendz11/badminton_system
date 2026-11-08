@@ -121,16 +121,24 @@ export class BookingsCommandService {
       include: { reservation: { include: { center: true } } },
     });
     if (!initial) throw new NotFoundException("Không tìm thấy booking");
-    if (initial.reservation.userId !== actor.userId)
-      assertCenterManager(actor, initial.reservation.center);
+    if (actor.role === "user") {
+      throw new ForbiddenException(
+        "Booking đã xác nhận không thể tự hủy. Bạn vui lòng sử dụng tính năng Chợ Pass sân hoặc liên hệ quản lý trung tâm.",
+      );
+    }
+    assertCenterManager(actor, initial.reservation.center);
     const result = await this.transactions.run("cancel", async (tx) => {
       await this.transactions.lock(tx, initial.reservation.centerId);
       const current = await tx.booking.findUniqueOrThrow({
         where: { id },
         include: { reservation: { include: { center: true } } },
       });
-      if (current.reservation.userId !== actor.userId)
-        assertCenterManager(actor, current.reservation.center);
+      if (actor.role === "user") {
+        throw new ForbiddenException(
+          "Booking đã xác nhận không thể tự hủy. Bạn vui lòng sử dụng tính năng Chợ Pass sân hoặc liên hệ quản lý trung tâm.",
+        );
+      }
+      assertCenterManager(actor, current.reservation.center);
       if (current.status === "CANCELLED")
         return { booking: current, changed: false };
       if (
