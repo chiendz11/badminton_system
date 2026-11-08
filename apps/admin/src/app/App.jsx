@@ -30,8 +30,6 @@ const CenterManagement = lazy(
 
 export default function App() {
   return (
-export default function App() {
-  return (
     <ChatProvider>
       <Router>
         <AssistantDrawer />
@@ -56,7 +54,5 @@ export default function App() {
         </Suspense>
       </Router>
     </ChatProvider>
-  );
-}
   );
 }

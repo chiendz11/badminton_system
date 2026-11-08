@@ -2,8 +2,8 @@ import React, { useState, useEffect, useContext } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Sparkles, LogOut } from "lucide-react";
 import "../styles/header.css";
-import LoginModal from "../../features/identity/ui/LoginModal.jsx";
-import { login } from "../../features/identity/api/auth.js";
+import LoginModal from "./LoginModal.jsx";
+import { login } from "../api/auth.js";
 
 import { SessionContext } from "../session/SessionContext.jsx";
 import { useChat } from "../chat/ChatContext.jsx";
