@@ -70,6 +70,14 @@ async def assistance(env):
             if row is None:
                 return httpx.Response(404)
             if request.method == "POST":
+                if data.get("fail_with_403"):
+                    return httpx.Response(
+                        403,
+                        json={
+                            "statusCode": 403,
+                            "message": "Booking đã xác nhận không thể tự hủy. Bạn vui lòng sử dụng tính năng Chợ Pass sân hoặc liên hệ quản lý trung tâm.",
+                        },
+                    )
                 data["writes"] += 1
                 row["status"] = "CANCELLED"
                 if data["fail_after_commit"]:
@@ -348,3 +356,18 @@ async def test_read_task_invalidates_old_booking_and_cancellation_consent(assist
         cancellation_id=nonce,
     )
     assert data["writes"] == 0
+
+
+async def test_core_403_cancellation_refused_advises_pass_marketplace(assistance):
+    env, data = assistance
+    data["fail_with_403"] = True
+    conversation, nonce = await prepare(env, data["rows"][0])
+    result = await send(
+        env,
+        conversation,
+        "Xác nhận hủy booking",
+        action="confirm_cancellation",
+        cancellation_id=nonce,
+    )
+    assert result["action"] == "CANCELLATION_REFUSED"
+    assert "Chợ Pass" in result["assistant_message"]

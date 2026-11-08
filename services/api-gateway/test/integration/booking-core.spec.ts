@@ -264,6 +264,11 @@ describe("legacy gateway to real Booking Core / Postgres", () => {
       .patch("/api/booking/" + id)
       .set(auth())
       .send({ status: "cancelled" })
+      .expect(403);
+    await request(gateway)
+      .patch("/api/booking/" + id)
+      .set(auth("manager", "center_manager"))
+      .send({ status: "cancelled" })
       .expect(200);
     await request(gateway)
       .delete("/api/booking/" + id)

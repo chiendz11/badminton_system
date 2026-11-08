@@ -1,9 +1,9 @@
 [
   {
-    "id": "cancel-booking", "version": "2026-10-28", "title": "Điều kiện hủy booking",
-    "phrases": ["hủy booking", "hủy lịch", "hủy sân", "hủy đặt sân", "hủy như thế nào", "điều kiện hủy", "cách hủy", "cancel booking"],
-    "answer": "Bạn có thể hủy booking của mình khi chưa có slot nào trong booking bắt đầu. Chatbot sẽ hiển thị đúng booking và yêu cầu xác nhận hủy riêng; chỉ chọn booking chưa thực hiện hủy. Booking đã bắt đầu không hủy được. Không có cơ sở để khẳng định mọi booking được miễn phí hủy hoặc được hoàn tiền.",
-    "source_paths": ["services/booking-core/src/modules/bookings/bookings-command.service.ts", "docs/week-4/BRD.md"]
+    "id": "cancel-booking", "version": "2026-10-28", "title": "Điều kiện hủy booking và giữ chỗ",
+    "phrases": ["hủy booking", "hủy lịch", "hủy sân", "hủy đặt sân", "hủy như thế nào", "điều kiện hủy", "cách hủy", "cancel booking", "hủy giữ chỗ", "hủy slot", "hết hạn giữ chỗ", "hủy khi đã thanh toán", "hủy booking đã thanh toán", "hủy slot đã thanh toán"],
+    "answer": "Quy định hủy đặt sân được phân định theo 2 giai đoạn: 1) Trong thời gian giữ chỗ (Pending / Chờ thanh toán): Bạn có thể chủ động hủy giữ chỗ bất kỳ lúc nào hoặc để hệ thống tự hết hạn pending (mặc định 5-10 phút hoặc tự động hết hạn ngay khi đến giờ bắt đầu của slot). 2) Khi đã xác nhận / thanh toán thành công: Slot đã thanh toán không thể tự ý hủy hoặc hoàn tiền trực tiếp trên hệ thống (để bảo vệ lịch sân chống chiếm giữ ảo); người dùng không thể đến chơi có thể đăng sang nhượng vé trên Chợ Pass sân hoặc liên hệ quản lý trung tâm theo chính sách riêng. Tuyệt đối không thể hủy slot khi đã đến hoặc quá giờ bắt đầu.",
+    "source_paths": ["services/booking-core/src/modules/bookings/bookings-command.service.ts", "services/booking-core/src/modules/reservations/reservations.service.ts", "docs/week-4/BRD.md"]
   },
   {
     "id": "booking-history", "version": "2026-10-28", "title": "Tra cứu lịch sử cá nhân",
@@ -40,5 +40,29 @@
     "phrases": ["thống kê tính", "giờ sân là gì", "giá trị booking", "thống kê ở đâu", "cách xem thống kê"],
     "answer": "Bạn có thể hỏi 'Thống kê của tôi tháng này'. Tháng này tính từ đầu tháng đến hôm nay theo giờ Việt Nam. Giờ-sân là tổng số slot một tiếng của booking còn CONFIRMED, không phải thời gian đã thực sự chơi. Tổng giá trị booking không phải số tiền đã thanh toán. Nếu dữ liệu vượt giới hạn đọc, kết quả được đánh dấu chỉ một phần.",
     "source_paths": ["services/ai-service/app/assistance/queries.py", "docs/week-4/BRD.md"]
+  },
+  {
+    "id": "pass-booking-rules", "version": "2026-11-08", "title": "Quy định pass sân và sang nhượng vé",
+    "phrases": ["pass sân", "nhượng sân", "sang nhượng vé", "bán lại vé", "pass vé", "chợ pass", "điều kiện pass sân", "mua lại vé"],
+    "answer": "Chỉ những booking đã xác nhận và thanh toán thành công (CONFIRMED) mới được phép đăng lên Chợ Pass sân. Bài đăng pass sân phải được tạo trước giờ bắt đầu thi đấu ít nhất 60 phút; sau mốc này bài đăng sẽ tự động đóng để đảm bảo người mua kịp di chuyển tới sân. Khi có người nhận mua, quyền sở hữu booking được chuyển giao hợp lệ.",
+    "source_paths": ["services/booking-core/src/modules/bookings/bookings-command.service.ts", "docs/week-4/BRD.md", "docs/planning/PLAN_WEEK_04_13.md"]
+  },
+  {
+    "id": "hoarding-penalty", "version": "2026-11-08", "title": "Chính sách chống giữ chỗ ảo và tạm khóa tài khoản",
+    "phrases": ["khóa tài khoản", "tại sao bị khóa", "bị chặn đặt sân", "giữ chỗ ảo", "spam đặt sân", "điểm phạt", "bùng kèo", "tạm khóa", "bị tạm khóa", "khóa đặt sân", "tài khoản bị khóa", "bị khóa", "chặn đặt sân"],
+    "answer": "Để chống tình trạng chiếm giữ sân ảo làm ảnh hưởng người chơi khác, mỗi tài khoản chỉ được có tối đa 5 giữ chỗ (HELD) đang chờ thanh toán đồng thời. Nếu người dùng liên tục tạo giữ chỗ mà không thanh toán quá 3 lần trong vòng 1 tiếng, hệ thống sẽ tự động tạm khóa quyền đặt sân của tài khoản trong 30 phút.",
+    "source_paths": ["services/booking-core/src/modules/reservations/reservations.service.ts", "docs/week-4/BRD.md"]
+  },
+  {
+    "id": "court-amenities", "version": "2026-11-08", "title": "Tiện ích sân bãi và dịch vụ tại trung tâm",
+    "phrases": ["thuê vợt", "bán cầu", "gửi xe", "bãi đỗ xe", "phòng thay đồ", "nước uống", "tiện ích sân", "có chỗ gửi xe không", "mua cầu lông"],
+    "answer": "Tất cả các trung tâm trong hệ thống đều trang bị đầy đủ bãi giữ xe (xe máy và ô tô), phòng thay đồ, nhà vệ sinh và tủ khóa đồ cá nhân (lockers). Tại quầy lễ tân (POS), khách có thể thuê vợt thi đấu, mua quả cầu lông, nước giải khát và các phụ kiện thể thao cần thiết.",
+    "source_paths": ["services/booking-core/src/modules/centers/centers.service.ts", "docs/week-4/BRD.md"]
+  },
+  {
+    "id": "late-arrival-policy", "version": "2026-11-08", "title": "Quy định khi đến muộn giờ chơi",
+    "phrases": ["đến muộn", "đi trễ", "trễ giờ", "muộn giờ", "có bị mất sân không", "bù giờ không", "quá giờ"],
+    "answer": "Đối với các booking đã thanh toán (CONFIRMED), sân sẽ được giữ trọn vẹn cho bạn trong suốt khung giờ đã đặt, tuy nhiên hệ thống và trung tâm không hỗ trợ bù giờ cho thời gian bạn đến muộn. Đối với các đơn giữ chỗ chờ thanh toán tại quầy, nếu quá 15 phút tính từ đầu giờ slot mà khách chưa đến làm thủ tục, sân sẽ được tự động giải phóng để nhượng lại cho khách vãng lai.",
+    "source_paths": ["services/booking-core/src/modules/bookings/bookings-command.service.ts", "docs/week-4/BRD.md"]
   }
 ]
