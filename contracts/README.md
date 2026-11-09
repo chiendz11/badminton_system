@@ -26,8 +26,8 @@ Booking Core sở hữu payment/pass; không có Pass service độc lập. Sche
 
 ## Events, Socket và tools
 
-- [events/booking-event.schema.json](events/booking-event.schema.json): hai booking outbox events hiện có, giữ nguyên.
-- [events/domain-event.schema.json](events/domain-event.schema.json): bảy domain event types Proposed, chưa có publisher mới.
+- [events/booking-event.schema.json](events/booking-event.schema.json): hai booking outbox events (booking.confirmed.v1 active; booking.cancelled.v1 deprecated do khóa hủy confirmed booking không hoàn tiền, chuyển nhượng qua Chợ Pass Sân).
+- [events/domain-event.schema.json](events/domain-event.schema.json): 10 domain event types Proposed (gồm 4 pass events, identity user-updated, commerce sale-created, social message-created, notification broadcast/urgent, partner contract status-changed).
 - [sockets/social-event.schema.json](sockets/social-event.schema.json): chín Socket.IO event types Proposed, có direction và strict payload.
 - [ai-tools/](ai-tools/): schema tool/conversation input đang được AI tests dùng; khác HTTP API của AI.
 - [shared/error.schema.json](shared/error.schema.json): error envelope chung cho API tương lai; baseline chưa tự đổi envelope lỗi.

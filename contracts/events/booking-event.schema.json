@@ -9,7 +9,9 @@
       "format": "uuid"
     },
     "type": {
-      "enum": ["booking.confirmed.v1", "booking.cancelled.v1"]
+      "type": "string",
+      "enum": ["booking.confirmed.v1", "booking.cancelled.v1"],
+      "description": "booking.confirmed.v1 is the active lifecycle event. booking.cancelled.v1 is deprecated/locked since confirmed bookings are non-refundable and transferred via Pass Marketplace."
     },
     "aggregateId": {
       "type": "string",

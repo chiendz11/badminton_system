@@ -11,6 +11,28 @@
         "isRead": false,
         "createdAt": "2026-10-19T00:00:00Z"
       }
+    },
+    {
+      "schema": "BroadcastNotificationRequest",
+      "value": {
+        "title": "Bảo trì nâng cấp hệ thống",
+        "message": "Hệ thống sẽ tạm dừng để nâng cấp hạ tầng vào lúc 02:00 - 04:00 ngày 15/11/2026.",
+        "targetAudience": "ALL",
+        "priority": "HIGH"
+      }
+    },
+    {
+      "schema": "UrgentNotificationRequest",
+      "value": {
+        "centerId": "a1104000-0000-4000-8000-000000000001",
+        "date": "2026-11-10",
+        "courtIds": [
+          "b2204000-0000-4000-8000-000000000001"
+        ],
+        "title": "Sự cố kỹ thuật tại Sân 1",
+        "message": "Do hỏng hệ thống chiếu sáng tại Sân 1, ca chơi chiều nay sẽ được chuyển sang Sân 3.",
+        "actionRequired": "RELOCATE"
+      }
     }
   ],
   "invalid": [
@@ -24,6 +46,22 @@
         "message": "Booking confirmed",
         "isRead": "false",
         "createdAt": "2026-10-19T00:00:00Z"
+      }
+    },
+    {
+      "schema": "BroadcastNotificationRequest",
+      "value": {
+        "title": "",
+        "message": "Thiếu title hợp lệ"
+      }
+    },
+    {
+      "schema": "UrgentNotificationRequest",
+      "value": {
+        "centerId": "not-a-uuid",
+        "date": "2026-11-10",
+        "title": "Lỗi sân",
+        "message": "Sai format UUID centerId"
       }
     }
   ]
