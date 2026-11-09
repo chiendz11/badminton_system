@@ -116,11 +116,11 @@ Trong `services/ai-service/app/tools.py`, hệ thống định nghĩa danh sách
 #### 4. `cancel_my_booking` (Cancellation Protection & Refusal Tool)
 - **Hành vi & Phân quyền nghiêm ngặt:**
   - **Quy trình 2 bước**: Tạo `preview` sinh ra `cancellation_id` (hết hạn sau 300 giây) gắn chặt với `state.version` → Thực thi `execute` chỉ chấp nhận action `confirm_cancellation` mang đúng ID hoặc câu nói xác nhận rõ ràng.
-  - **Khóa quyền tự hủy đối với khách hàng thường (`user`)**: Booking Core chặn cứng ở tầng Application Service (`bookings-command.service.ts`) với mã lỗi **HTTP 403 Forbidden**.
+  - **Chặn hoàn toàn việc hủy booking đã CONFIRMED**: Booking Core chặn cứng ở tầng Application Service (`bookings-command.service.ts`) với mã lỗi **HTTP 403 Forbidden** đối với mọi vai trò (kể cả user, center_manager hay super_admin) vì hệ thống không có nghiệp vụ hoàn tiền (refund).
   - **Bắt lỗi & Điều hướng thông minh tại Chatbot**: Trong `cancellation.py`, khi gọi Core API nhận lỗi 403, Chatbot bắt lỗi `CoreError(403)`, xóa preview, ghi nhận metric `metrics.labels("cancel_my_booking", "refused").inc()`, và chuyển sang trạng thái `cancellation_refused` kèm thông điệp:
     > *"Booking đã xác nhận không thể tự hủy. Bạn vui lòng sử dụng tính năng Chợ Pass sân hoặc liên hệ quản lý trung tâm."*
-  - **Hủy giữ chỗ chưa thanh toán**: Khách hàng sử dụng `DELETE /api/v1/reservations/:id` để giải phóng slot giữ chỗ tạm thời (HELD 10 phút).
-  - **Quyền hủy booking đã CONFIRMED**: Chỉ thuộc về Quản lý trung tâm (`center_manager` cơ sở) hoặc `super_admin` khi phát sinh sự cố bất khả kháng (thời tiết, bảo trì đột xuất).
+  - **Hủy giữ chỗ chưa thanh toán**: Khách hàng sử dụng `DELETE /api/v1/reservations/:id` để giải phóng slot giữ chỗ tạm thời (`HELD` 10 phút) ngay lập tức.
+  - **Sang nhượng slot đã xác nhận**: Người dùng có nhu cầu chuyển nhượng booking đã thanh toán bắt buộc sử dụng phân hệ **Chợ Pass Sân (Pass Marketplace)**.
   - **Kiểm chứng tự động**: Đảm bảo an toàn qua ca kiểm thử tích hợp `test_core_403_cancellation_refused_advises_pass_marketplace` trong `tests/integration/test_assistance.py`.
 
 ---

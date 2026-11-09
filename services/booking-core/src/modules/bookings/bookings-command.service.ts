@@ -116,66 +116,8 @@ export class BookingsCommandService {
     });
   }
   async cancel(actor: Actor, id: string) {
-    const initial = await this.prisma.booking.findUnique({
-      where: { id },
-      include: { reservation: { include: { center: true } } },
-    });
-    if (!initial) throw new NotFoundException("Không tìm thấy booking");
-    if (actor.role === "user") {
-      throw new ForbiddenException(
-        "Booking đã xác nhận không thể tự hủy. Bạn vui lòng sử dụng tính năng Chợ Pass sân hoặc liên hệ quản lý trung tâm.",
-      );
-    }
-    assertCenterManager(actor, initial.reservation.center);
-    const result = await this.transactions.run("cancel", async (tx) => {
-      await this.transactions.lock(tx, initial.reservation.centerId);
-      const current = await tx.booking.findUniqueOrThrow({
-        where: { id },
-        include: { reservation: { include: { center: true } } },
-      });
-      if (actor.role === "user") {
-        throw new ForbiddenException(
-          "Booking đã xác nhận không thể tự hủy. Bạn vui lòng sử dụng tính năng Chợ Pass sân hoặc liên hệ quản lý trung tâm.",
-        );
-      }
-      assertCenterManager(actor, current.reservation.center);
-      if (current.status === "CANCELLED")
-        return { booking: current, changed: false };
-      if (
-        (current.reservation.selections as unknown as QuoteSelection[]).some(
-          (s) =>
-            s.slots.some(
-              (minute) =>
-                slotTime(current.reservation.date, minute) <= this.clock.now(),
-            ),
-        )
-      )
-        throw new ConflictException("Không thể hủy booking đã bắt đầu");
-      await tx.slotAllocation.deleteMany({
-        where: { reservationId: current.reservationId },
-      });
-      await tx.reservation.update({
-        where: { id: current.reservationId },
-        data: { status: "CANCELLED" },
-      });
-      const booking = await tx.booking.update({
-        where: { id },
-        data: { status: "CANCELLED", cancelledAt: this.clock.now() },
-        include: { reservation: { include: { center: true } } },
-      });
-      await this.outbox.record(
-        tx,
-        booking,
-        current.reservation,
-        "booking.cancelled.v1",
-      );
-      return { booking, changed: true };
-    });
-    if (result.changed)
-      this.telemetry.event("cancelled", {
-        bookingId: id,
-        actorId: actor.userId,
-      });
-    return bookingView(result.booking);
+    throw new ForbiddenException(
+      "Booking đã xác nhận không thể tự hủy. Bạn vui lòng sử dụng tính năng Chợ Pass sân hoặc liên hệ quản lý trung tâm.",
+    );
   }
 }
