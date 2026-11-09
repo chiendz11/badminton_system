@@ -7,7 +7,6 @@ import {
   Injectable,
   NotFoundException,
 } from "@nestjs/common";
-import { assertCenterManager } from "../../common/auth/center-access";
 import { slotTime } from "../../common/domain/calendar";
 import { Clock, Telemetry } from "../../common/observability/telemetry";
 import { QuoteSelection } from "../../infrastructure/database/booking-records";
@@ -115,7 +114,7 @@ export class BookingsCommandService {
       );
     });
   }
-  async cancel(actor: Actor, id: string) {
+  async cancel(_actor: Actor, _id: string) {
     throw new ForbiddenException(
       "Booking đã xác nhận không thể tự hủy. Bạn vui lòng sử dụng tính năng Chợ Pass sân hoặc liên hệ quản lý trung tâm.",
     );
