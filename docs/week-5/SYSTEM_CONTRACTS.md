@@ -81,15 +81,17 @@ Baseline Core server `/api/v1`, Gateway `/api` + `/graphql`; không đổi route
 
 | Prefix | Provider | Critical operations / schema |
 | --- | --- | --- |
-| /api/identity | Identity | register/login/refresh/logout/me/role/assignments; Actor, TokenResponse |
-| /api/booking/pass-posts | Core pass | list/create/detail/cancel/interest/listInterests/transfer; PassPost/TransferResult |
-| /api/booking/payments | Core payment | checkout/status; Checkout/PaymentStatus |
+| /api/identity | Identity | register/login/refresh/logout/me/role/assignments/status; Actor, TokenResponse |
+| /api/booking/pass-posts | Core pass | list/create/detail/cancel/interest/listInterests/transfer; PassPost/TransferResult (Escrow) |
+| /api/booking/payments | Core payment | checkout/status; Checkout/PaymentStatus (thanh toán trực tiếp tại cơ sở) |
+| /api/booking/centers | Core booking | Onboarding 2 bước: POST /centers (Super Admin tạo DRAFT), PATCH /centers/:id (Center Manager tự setup profile, số sân, bảng giá và mở bán) |
+| /api/partner-contracts | Core / Identity | Hợp đồng B2B SaaS: create/renew/list/status (gói 3/6/12 tháng; Super Admin quản lý hạn dùng & tạm dừng cơ sở nợ phí) |
 | /api/commerce | Commerce | products/inventory/stock-receipts/sales/invoices/reports; Sale/Invoice/Balance |
 | /api/social | Social | friendships/conversations/messages/read; Conversation/Message |
-| /api/content | Content | center reviews/moderation/news/publication |
-| /api/notifications | Notification | list/read/read-all; own recipient |
+| /api/content | Content | center reviews/moderation/news/publication (Center Manager đề xuất sự kiện CLB; Super Admin duyệt xuất bản) |
+| /api/notifications | Notification | list/read/read-all; broadcast (Super Admin phát toàn sàn); urgent (Center Manager cảnh báo khẩn cấp tại sân cho khách có booking) |
 | /api/storage | Storage | file upload/detail/delete/bulk-urls; FileMetadata |
-| /api/ai/v1/chat | AI proposal | read-only chat; AIChatRequest/Response; chưa thay current conversations |
+| /api/ai/v1/chat | AI proposal | read-only chat; AIChatRequest/Response; không có tool hủy booking confirmed |
 | /internal/identity | Identity | trusted service lookup; ServiceBearer |
 | /internal/booking/payments/verified-events | Core adapter | normalized verified event, **không phải raw webhook public** |
 
@@ -145,7 +147,7 @@ Storage upload provider + metadata không có ACID chung; trạng thái pending/
 
 ## Events và Socket contract
 
-Schema baseline booking: id,type,aggregateId,createdAt,payload (bookingId,reservationId,centerId,userId,date,totalPrice,selections). Hai loại booking.confirmed.v1/cancelled.v1 giữ nguyên.
+Schema baseline booking: id,type,aggregateId,createdAt,payload (bookingId,reservationId,centerId,userId,date,totalPrice,selections). Hai loại booking.confirmed.v1/cancelled.v1 giữ trong schema; tuy nhiên event `booking.cancelled.v1` được đánh dấu deprecated vì hệ thống khóa hoàn toàn việc hủy confirmed booking đối với mọi vai trò. Luồng hủy giữ chỗ sớm dùng `DELETE /reservations/:id`.
 
 Schema event bổ sung V2 giữ các tên base đó, thêm schemaVersion=1,producer,correlationId; payload discriminated theo `type`. [W05-N3](week-5/W05-N3_social-events.md) có đủ producer/consumer/payload của bảy loại mới. Không tự đổi tên legacy envelope hoặc sửa consumer đang chạy.
 

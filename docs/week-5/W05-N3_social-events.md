@@ -54,7 +54,7 @@ Message: UUID id, conversationId,senderUserId,clientMessageId,content,createdAt;
 
 | Event | Producer | Consumers | Payload bắt buộc |
 | --- | --- | --- | --- |
-| booking.confirmed.v1, booking.cancelled.v1 | Core outbox | Notification, projection | Giữ nguyên [schema hiện tại](../../contracts/events/booking-event.schema.json) |
+| booking.confirmed.v1 | Core outbox | Notification, projection | Giữ nguyên schema hiện tại; booking.cancelled.v1 deprecated do khóa hủy confirmed |
 | booking.pass-created.v1 | Core pass | Projection, Notification tùy policy | postId,bookingId,sellerUserId,expiresAt |
 | booking.pass-interest-added.v1 | Core pass | Notification | postId,sellerUserId,buyerUserId |
 | booking.pass-transferred.v1 | Core | Social, Notification | transferId,postId,bookingId,fromUserId,toUserId |
@@ -62,6 +62,9 @@ Message: UUID id, conversationId,senderUserId,clientMessageId,content,createdAt;
 | identity.user-updated.v1 | Identity | Domain projections | userId,isActive,role,version |
 | commerce.sale-created.v1 | Commerce | Reporting/Notification nếu bật | saleId,centerId,totalAmount,currency |
 | social.message-created.v1 | Social | Notification | conversationId,messageId,senderUserId,recipientUserIds |
+| notification.broadcast.v1 | Admin / Notification | Toàn bộ User / Center Manager | broadcastId,title,content,targetAudience,createdAt |
+| notification.urgent.v1 | Center Manager / Notification | Khách có booking trong ngày | urgentId,centerId,date,title,content,reason,createdAt |
+| contract.status-changed.v1 | Core / Identity | Core booking, Notification | contractId,centerId,packageType,status=ACTIVE/EXPIRED/SUSPENDED,endDate |
 
 Mỗi event có immutable id; publisher outbox retry cùng id. At-least-once, không tuyên bố exactly-once. Inbox/dedupe theo event và consumer; event version trên identity/projection để chống out-of-order, transfer phải đối soát Core nếu thiếu sự kiện. Event envelope mới giữ tên trường id/type/aggregateId/createdAt/payload quen Core, thêm metadata cho loại mới; không đổi schema hai loại booking đang chạy.
 

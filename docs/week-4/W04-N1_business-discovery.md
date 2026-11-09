@@ -24,9 +24,9 @@ Phạm vi toàn sản phẩm được tổng hợp tại [BRD_SYSTEM_V2](BRD_SYS
 | Actor | Mục tiêu | Boundary chính |
 | --- | --- | --- |
 | Khách chưa đăng nhập | Xem trung tâm, giá, nội dung | Core/Content public read |
-| user | Đặt sân, pass, chat, nhận thông báo, review | Core, Social, Notification, Content |
-| center_manager | Quản trị sân và POS ở trung tâm được giao | Core + Commerce; kiểm tra center scope |
-| super_admin | Quản trị toàn hệ thống, tài khoản, nội dung | Identity/Core/Content; audit thao tác nhạy cảm |
+| user | Đặt sân, giữ chỗ 10p, tự hủy giữ chỗ sớm, pass slot qua Chợ Pass, chat, nhận thông báo, review | Core, Social, Notification, Content; khóa hủy confirmed booking |
+| center_manager | Tự setup cơ sở (địa chỉ, hotline, ảnh, bio, tiện ích, số sân, bảng giá), mở bán, lịch cố định, POS, báo cáo nội bộ và cảnh báo khẩn cấp | Core + Commerce; kiểm tra center scope |
+| super_admin | Platform Operator theo mô hình B2B SaaS Subscription (ký HĐ 3/6/12 tháng); Onboard vỏ cơ sở & gán managerId (DRAFT); gia hạn/dừng cơ sở; duyệt sự kiện CLB; kiểm duyệt đánh giá; Broadcast toàn sàn | Identity/Core/Content/Notification; audit thao tác nhạy cảm |
 | Cổng thanh toán | Gửi kết quả đã ký | Core Payment; không tin redirect trình duyệt |
 | AI | Diễn giải yêu cầu và tra cứu | FAQ, tìm sân và gợi ý bằng các công cụ tra cứu |
 
@@ -38,7 +38,8 @@ Phạm vi toàn sản phẩm được tổng hợp tại [BRD_SYSTEM_V2](BRD_SYS
 | Slot | Đơn vị 60 phút; `[start,end)` theo Asia/Ho_Chi_Minh khi nhập ngày/giờ |
 | Availability | Snapshot lịch; không bảo đảm còn trống khi ghi |
 | Reservation / Hold | Giữ tập slot có TTL; hết TTL không tiếp tục chặn slot |
-| Booking | Quyền sử dụng sân; có owner và lịch cụ thể |
+| Booking | Quyền sử dụng sân; có owner và lịch; khóa hoàn toàn hủy confirmed do không hoàn tiền (hướng dẫn sang Chợ Pass) |
+| SaaS Partner Contract | Hợp đồng B2B thuê bao phần mềm định kỳ (gói 3/6/12 tháng) giữa Platform Operator và chủ trung tâm |
 | PaymentAttempt | Lần tương tác cổng thanh toán; trạng thái độc lập với booking |
 | PassPost | Bài nhượng một booking đủ điều kiện; không tạo slot mới |
 | Interest | Một người quan tâm bài pass; không giữ sân hoặc tự nhận booking |
