@@ -33,7 +33,7 @@ Gateway không đọc DB hoặc gọi service cũ. Giá, quyền owner/centre, l
 | GET /api/booking/bookings                    | Danh sách quản lý, server giới hạn theo centre sở hữu                                                                               |
 | POST /api/booking/check-available-courts     | Preview toàn bộ occurrence trong 31 ngày, nhóm thứ/sân trống                                                                        |
 | POST /api/booking/create-fixed-bookings      | Gom từng ngày/sân thành occurrences; Core tạo toàn chuỗi atomic, có idempotency                                                     |
-| PATCH /api/booking/:bookingId                | Chỉ status cancelled → Core cancel; chưa bắt đầu                                                                                    |
+| PATCH /api/booking/:bookingId                | Forward tới Core cancel booking; chỉ cho phép role center_manager / super_admin; khách hàng thường bị từ chối 403 Forbidden (hướng dẫn sang Chợ Pass sân) |
 | DELETE /api/booking/:bookingId               | Owner ẩn history sau khi hủy/kết thúc; không hard delete                                                                            |
 | GET /api/booking/:id/status                  | Status sau owner/manager check                                                                                                      |
 | GET /api/user/:userId/booking-history        | Chỉ signed sub đúng userId, filter/pagination tại Core                                                                              |

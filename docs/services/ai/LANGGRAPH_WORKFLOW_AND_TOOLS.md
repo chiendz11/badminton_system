@@ -77,7 +77,7 @@ Trong `services/ai-service/app/tools.py`, hệ thống định nghĩa danh sách
 | **6** | `get_my_booking_stats` | `app/assistance/queries.py` | Thống kê số lượng booking, tổng chi tiêu, tỷ lệ hoàn tất theo kỳ | Tính toán tổng hợp từ danh sách booking người dùng |
 | **7** | `compare_centers` | `app/assistance/queries.py` | So sánh tiện ích, số lượng sân, bảng giá giữa các trung tâm cầu lông | REST `/api/v1/centers` qua `BookingCoreClient` |
 | **8** | `search_faq` | `app/assistance/knowledge.py` | Tra cứu quy chế, chính sách hủy, giữ chỗ 10 phút và chợ pass sân | Tìm kiếm từ khóa trên `knowledge.json` tĩnh (có trích dẫn nguồn) |
-| **9** | `cancel_my_booking` | `app/assistance/cancellation.py` | Thực hiện luồng hủy slot (Preview thông tin → Xác nhận 2 bước) | REST `/api/v1/bookings/{id}/cancel` qua `BookingCoreClient` |
+| **9** | `cancel_my_booking` | `app/assistance/cancellation.py` | Hủy đặt sân 2 bước (preview → confirm) & bảo vệ chặn tự hủy (Core 403 → tư vấn Chợ Pass) | REST `/api/v1/bookings/{id}/cancel` qua `BookingCoreClient` |
 
 ### Chi tiết các công cụ tiêu biểu:
 
@@ -112,6 +112,16 @@ Trong `services/ai-service/app/tools.py`, hệ thống định nghĩa danh sách
   - Không gọi ra ngoài internet hay LLM bên ngoài để tránh ảo giác (hallucination).
   - Quét văn bản người dùng đối chiếu với bộ dữ liệu tri thức `knowledge.json` gồm các chính sách: thời gian giữ chỗ 10 phút, quy định slot đã thanh toán không được hoàn hủy trực tiếp (chống spam bot), quy trình pass sân trên sàn giao dịch.
   - Trả về câu trả lời chuẩn hóa kèm mảng trích dẫn `citations`.
+
+#### 4. `cancel_my_booking` (Cancellation Protection & Refusal Tool)
+- **Hành vi & Phân quyền nghiêm ngặt:**
+  - **Quy trình 2 bước**: Tạo `preview` sinh ra `cancellation_id` (hết hạn sau 300 giây) gắn chặt với `state.version` → Thực thi `execute` chỉ chấp nhận action `confirm_cancellation` mang đúng ID hoặc câu nói xác nhận rõ ràng.
+  - **Khóa quyền tự hủy đối với khách hàng thường (`user`)**: Booking Core chặn cứng ở tầng Application Service (`bookings-command.service.ts`) với mã lỗi **HTTP 403 Forbidden**.
+  - **Bắt lỗi & Điều hướng thông minh tại Chatbot**: Trong `cancellation.py`, khi gọi Core API nhận lỗi 403, Chatbot bắt lỗi `CoreError(403)`, xóa preview, ghi nhận metric `metrics.labels("cancel_my_booking", "refused").inc()`, và chuyển sang trạng thái `cancellation_refused` kèm thông điệp:
+    > *"Booking đã xác nhận không thể tự hủy. Bạn vui lòng sử dụng tính năng Chợ Pass sân hoặc liên hệ quản lý trung tâm."*
+  - **Hủy giữ chỗ chưa thanh toán**: Khách hàng sử dụng `DELETE /api/v1/reservations/:id` để giải phóng slot giữ chỗ tạm thời (HELD 10 phút).
+  - **Quyền hủy booking đã CONFIRMED**: Chỉ thuộc về Quản lý trung tâm (`center_manager` cơ sở) hoặc `super_admin` khi phát sinh sự cố bất khả kháng (thời tiết, bảo trì đột xuất).
+  - **Kiểm chứng tự động**: Đảm bảo an toàn qua ca kiểm thử tích hợp `test_core_403_cancellation_refused_advises_pass_marketplace` trong `tests/integration/test_assistance.py`.
 
 ---
 

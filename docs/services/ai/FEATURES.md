@@ -54,7 +54,7 @@ Nếu đang có `pending_booking` hoặc `pending_cancellation`, workflow yêu c
 | --- | --- | --- |
 | `GET /api/v1/bookings/me` | Lịch cá nhân và thống kê | Chỉ bộ lọc cho phép; không nhận userId từ model hoặc client. |
 | `GET /api/v1/bookings/:id` | Preview hủy và kiểm tra kết quả | UUID hợp lệ; kiểm tra lại `userId == actor.user_id` ngay cả khi token có role manager/admin. |
-| `POST /api/v1/bookings/:id/cancel` | Thực thi ý định hủy đã xác nhận | Chỉ booking trong preview server; Core tiếp tục quyết định quyền và thời điểm được hủy. |
+| `POST /api/v1/bookings/:id/cancel` | Thực thi ý định hủy đã xác nhận | Chỉ booking trong preview server; Core kiểm tra role (user nhận 403 Forbidden; chỉ center_manager/super_admin được hủy). |
 | `GET /api/v1/centers?search=...` | Thông tin/so sánh | Tối đa ba từ khóa, mỗi từ khóa đọc một trang mười trung tâm; hiển thị tối đa mười trung tâm khác nhau. |
 
 Mỗi call dùng JWT gốc của actor và `X-Request-Id`. AI không dùng tài khoản quản trị để thay người dùng đọc dữ liệu. Không cần bổ sung route nghiệp vụ hoặc schema database cho Booking Core trong thay đổi này.
@@ -118,7 +118,19 @@ Core hiện xử lý cancel dưới khóa và trả lại booking đã CANCELLED
 
 Turn vẫn được chống trùng bằng `client_message_id`. Nếu chỉ mất response HTTP, client gửi lại chính request và key cũ. Nếu worker dừng sau khi lưu ý định, `GET conversation` trả pending request và trạng thái để Web tiếp tục an toàn.
 
-Điều kiện thời điểm và quyền cuối cùng thuộc Core. Nếu giá/nội dung thay đổi hoặc booking bắt đầu trước lúc thực thi, bot từ chối dùng consent cũ. Hủy ở đây giải phóng lịch; không có logic thu phí, thanh toán hoặc hoàn tiền.
+### 5.4. Quy tắc phân quyền và xử lý từ chối 403 Forbidden
+
+- **Quy tắc phân quyền tại Booking Core (`bookings-command.service.ts`)**:
+  - Khách hàng thường (`user`): Tuyệt đối **không thể tự hủy** booking đã `CONFIRMED`. Lệnh gọi `POST /api/v1/bookings/:id/cancel` bị chặn với HTTP 403 Forbidden:
+    > *"Booking đã xác nhận không thể tự hủy. Bạn vui lòng sử dụng tính năng Chợ Pass sân hoặc liên hệ quản lý trung tâm."*
+  - Khách hàng muốn hủy giữ chỗ tạm thời (chưa thanh toán): Dùng `DELETE /api/v1/reservations/:id` (release hold trong thời hạn 10 phút).
+  - Quản lý trung tâm (`center_manager`) hoặc `super_admin`: Có quyền hủy booking `CONFIRMED` khi trung tâm gặp sự cố kỹ thuật hoặc bất khả kháng.
+
+- **Cơ chế xử lý thông minh tại Chatbot (`cancellation.py`)**:
+  - Khi gọi Core API và nhận lỗi `HTTP 403 Forbidden`, Chatbot bắt lỗi `CoreError`, ghi nhận metric `metrics.labels("cancel_my_booking", "refused").inc()`, xóa preview và trả về trạng thái `cancellation_refused` kèm lời khuyên nghiệp vụ chuẩn xác:
+    > *"Booking đã xác nhận không thể tự hủy. Bạn vui lòng sử dụng tính năng Chợ Pass sân hoặc liên hệ quản lý trung tâm."*
+  - Knowledge Base (`knowledge.json`) đồng thời cung cấp các bài FAQ `cancel-booking` và `pass-booking-rules` hướng dẫn người dùng đăng bán vé trên Chợ Pass Sân thay vì cố hủy slot đã thanh toán.
+  - Được kiểm chứng tự động qua integration test `test_core_403_cancellation_refused_advises_pass_marketplace` trong `tests/integration/test_assistance.py`.
 
 ## 6. So sánh trung tâm
 
