@@ -77,8 +77,9 @@ Hệ thống được thiết kế theo mô hình **SaaS Platform kết nối th
 
 2. **Quản lý trung tâm (`center_manager`):**
    - Đối tác sở hữu/quản lý cụm sân cụ thể, được Super Admin bàn giao quyền vận hành cơ sở thông qua định danh `managerId`.
+   - **Tự tay thiết lập & hoàn thiện hồ sơ cơ sở (Self-serve Facility Setup):** Cập nhật địa chỉ chi tiết, hotline liên hệ lễ tân, giờ mở/đóng cửa, viết bio giới thiệu, chọn tiện ích (wifi, bãi đỗ xe, phòng tắm nóng lạnh...), tải logo và album ảnh thực tế mặt sân; thiết lập số lượng sân và cấu hình bảng giá linh hoạt theo giờ vàng / giờ thấp điểm, ngày thường / cuối tuần.
+   - **Kích hoạt mở bán cơ sở:** Chủ động kích hoạt mở bán (`isActive: true`) sau khi hoàn tất hồ sơ thiết lập ban đầu để hiển thị công khai trên Web khách hàng.
    - Quản lý cấu hình sân nội bộ (đổi tên sân, thông số mặt sân thảm PVC/gỗ) trong cơ sở được phân công.
-   - Tự chủ thiết lập bảng giá linh hoạt theo giờ vàng / giờ thấp điểm, ngày thường / cuối tuần để tối ưu hóa doanh thu cơ sở.
    - Tạm khóa / mở lại từng sân khi cần bảo trì, thay lưới (`isActive: false`), hệ thống tự động bảo vệ các slot tương lai đã có người đặt.
    - Tạo lịch cố định (Recurring Series 1–60 ngày) dạng chuỗi nguyên vẹn (atomic transaction) cho các CLB / khách quen.
    - Bảng điều khiển trạng thái sân thời gian thực (Real-time Court Grid 05:00–24:00) phục vụ đón tiếp và check-in khách tại quầy.
@@ -88,7 +89,7 @@ Hệ thống được thiết kế theo mô hình **SaaS Platform kết nối th
 
 3. **Quản trị viên nền tảng (`super_admin` - Platform Operator):**
    - Đơn vị sở hữu và vận hành sàn công nghệ (Platform Operator), đóng vai trò điều phối hệ sinh thái, không can thiệp vào các hoạt động bán lẻ hay đặt lịch hàng ngày của từng cơ sở.
-   - **Onboarding trung tâm mới:** Tiếp nhận hồ sơ khi đối tác ký hợp đồng B2B; khởi tạo hồ sơ trung tâm (Tên, địa chỉ, hotline, giờ mở/đóng cửa, số sân ban đầu); tải ảnh quảng bá trung tâm/mặt sân; cập nhật lời giới thiệu (bio) và danh mục tiện ích (wifi, tắm nóng lạnh, bãi xe ô tô).
+   - **Onboarding đối tác & Khởi tạo trung tâm (Platform Onboarding):** Tiếp nhận hồ sơ khi đối tác ký kết hợp đồng B2B; khởi tạo vỏ trung tâm ban đầu (Tên trung tâm/pháp nhân, gói thuê bao SaaS) và phân công tài khoản quản trị viên cơ sở (`managerId`); cơ sở khởi tạo ở trạng thái ban đầu `DRAFT` (`isActive: false`) chờ đối tác tự cấu hình; Super Admin không can thiệp gõ thay từng chi tiết địa chỉ, ảnh, bio hay tiện ích của sân.
    - **Quản lý Hợp đồng Đối tác & Thuê bao SaaS (B2B Partner Contracts):** Khởi tạo hợp đồng thuê bao (gói 3 tháng, 6 tháng, 1 năm); gia hạn hợp đồng khi đối tác thanh toán định kỳ; theo dõi thời hạn hiệu lực và công nợ phí phần mềm.
    - **Phân công & Điều chuyển quản lý cơ sở:** Gán và thay đổi `managerId` cho trung tâm khi đối tác thay đổi nhân sự quản lý (Center Manager không có quyền tự đổi người).
    - **Quản lý vòng đời cơ sở (Center Lifecycle):** Kích hoạt hoặc tạm dừng hoạt động trung tâm (`isActive: false`) khi đối tác nợ phí thuê bao hoặc hết hạn hợp đồng chưa gia hạn (Core tự động chặn đặt sân mới).
@@ -113,7 +114,9 @@ Hệ thống được thiết kế theo mô hình **SaaS Platform kết nối th
 | **Tạo lịch cố định nhiều ngày (chuỗi atomic 1–60 ngày)** | Không | Không | Trung tâm được giao | Không can thiệp |
 | **Bảng grid trạng thái sân thời gian thực & Check-in đón khách** | Không | Không | Trung tâm được giao | Mọi trung tâm (chế độ xem) |
 | **Xem báo cáo doanh số, lượt đặt nội bộ sân mình** | Không | Không | Trung tâm được giao | Không can thiệp nội bộ |
-| **Onboarding trung tâm mới (tạo cơ sở, tải ảnh, viết giới thiệu)** | Không | Không | Cung cấp hồ sơ hợp đồng | **Toàn quyền khi ký HĐ B2B** |
+| **Onboarding đối tác & Ký HĐ SaaS (tạo vỏ cơ sở ban đầu)** | Không | Không | Ký HĐ & nhận bàn giao | **Toàn quyền khi ký HĐ B2B** |
+| **Thiết lập hồ sơ cơ sở (hotline, địa chỉ, ảnh, bio, tiện ích, số sân)** | Không | Không | **Toàn quyền (sân được giao)** | Giám sát / hỗ trợ |
+| **Kích hoạt mở bán cơ sở sau setup (isActive: true)** | Không | Không | **Chủ động kích hoạt** | Toàn quyền kiểm soát |
 | **Quản lý Hợp đồng Đối tác & Gia hạn thuê bao SaaS** | Không | Không | Xem hạn HĐ & liên hệ gia hạn | **Toàn quyền (Tạo/Gia hạn/Dừng)** |
 | **Gán và điều chuyển người quản lý (managerId)** | Không | Không | Không | **Toàn quyền** |
 | **Tạm dừng / Đóng trung tâm hết hạn HĐ (isActive: false)** | Không | Không | Không | **Toàn quyền** |
@@ -135,7 +138,7 @@ Hệ thống triển khai theo mô hình **B2B SaaS Subscription (Phần mềm d
 
 | Nhóm | Nội dung |
 | --- | --- |
-| **Danh mục sân & Onboarding** | Super Admin tạo trung tâm khi ký hợp đồng, cấu hình số sân ban đầu, tải ảnh thực tế, giới thiệu và tiện ích; phân công `managerId`. |
+| **Danh mục sân & Onboarding** | Quy trình Onboarding 2 bước: Super Admin khởi tạo vỏ trung tâm & HĐ SaaS (Tên cơ sở + gói thuê bao + gán `managerId`) ở trạng thái DRAFT; Center Manager tự tay hoàn thiện hồ sơ vận hành (hotline, địa chỉ, ảnh, bio, tiện ích, số lượng sân, bảng giá) và kích hoạt mở bán (`isActive: true`). |
 | **Quản lý Hợp đồng SaaS** | Super Admin quản lý hợp đồng thuê bao đối tác (gói 3/6/12 tháng), ngày bắt đầu/kết thúc, trạng thái thanh toán và gia hạn; tự động/thủ công tạm dừng cơ sở khi quá hạn. |
 | **Cấu hình & Vận hành cơ sở** | Center Manager điều chỉnh giá giờ vàng/thấp điểm, ngày thường/cuối tuần; bật/tắt bảo trì từng sân; quản lý grid sân check-in khách. |
 | **Đặt sân & Concurrency** | Lịch trống 05:00–24:00, GiST Exclusion Constraint chống race condition; giữ chỗ 10 phút; tự hủy giữ chỗ sớm; khóa hủy booking confirmed. |
@@ -180,21 +183,22 @@ Booking Core là nguồn sự thật duy nhất (Single Source of Truth) quyết
 
 | Mã | Yêu cầu | Ưu tiên | Trạng thái đối chiếu |
 | --- | --- | --- | --- |
-| FR-M01 | Quản lý cấu hình sân nội bộ (đổi tên sân, thông số mặt sân thảm/gỗ) trong cơ sở được Super Admin phân công | P1 | Có |
-| FR-M02 | Thiết lập bảng giá linh hoạt theo giờ vàng / giờ thấp điểm, ngày thường / cuối tuần của trung tâm mình | P0 | Có |
-| FR-M03 | Tạm khóa / bảo trì từng sân (`isActive: false`) khi có sự cố kỹ thuật; Core chặn đóng sân nếu còn allocation tương lai | P0 | Có |
-| FR-M04 | Tạo lịch cố định (Recurring Series 1–60 ngày) cho CLB / khách quen; kiểm tra khả dụng toàn chuỗi và ghi nhận nguyên vẹn (atomic) | P1 | Có |
-| FR-M05 | Bảng điều khiển trạng thái sân thời gian thực (Real-time Court Grid 05:00–24:00) phục vụ đón tiếp và check-in khách tại quầy | P1 | Có |
-| FR-M06 | Báo cáo doanh số & thống kê lượt đặt nội bộ của riêng trung tâm mình; không xem hoặc can thiệp dữ liệu trung tâm khác | P1 | Có |
-| FR-M07 | Soạn thảo & gửi hồ sơ đề xuất Sự kiện, Giải đấu CLB, Khuyến mại cơ sở lên Super Admin để thẩm định và duyệt đăng toàn sàn | P2 | Có baseline từ `new_service` & `Competition.jsx` |
-| FR-M08 | Báo cáo đánh giá tiêu cực / chơi xấu từ đối thủ lên Super Admin; gửi thông báo sự cố cục bộ đến khách có booking trong ngày | P2 | Có baseline từ `rating_service` & `notification_service` |
+| FR-M01 | Tự hoàn thiện hồ sơ cơ sở (Self-serve Setup): Cập nhật hotline, địa chỉ chi tiết, link Google Maps, giờ mở/đóng cửa, bio, tiện ích, tải ảnh/logo, thiết lập số lượng sân (`totalCourts`) và kích hoạt mở bán (`isActive: true`) | P0 | Có (`PATCH /centers/:id` hỗ trợ đủ fields) |
+| FR-M02 | Quản lý cấu hình sân nội bộ (đổi tên sân, thông số mặt sân thảm/gỗ) trong cơ sở được phân công | P1 | Có |
+| FR-M03 | Thiết lập bảng giá linh hoạt theo giờ vàng / giờ thấp điểm, ngày thường / cuối tuần của trung tâm mình | P0 | Có |
+| FR-M04 | Tạm khóa / bảo trì từng sân (`isActive: false`) khi có sự cố kỹ thuật; Core chặn đóng sân nếu còn allocation tương lai | P0 | Có |
+| FR-M05 | Tạo lịch cố định (Recurring Series 1–60 ngày) cho CLB / khách quen; kiểm tra khả dụng toàn chuỗi và ghi nhận nguyên vẹn (atomic) | P1 | Có |
+| FR-M06 | Bảng điều khiển trạng thái sân thời gian thực (Real-time Court Grid 05:00–24:00) phục vụ đón tiếp và check-in khách tại quầy | P1 | Có |
+| FR-M07 | Báo cáo doanh số & thống kê lượt đặt nội bộ của riêng trung tâm mình; không xem hoặc can thiệp dữ liệu trung tâm khác | P1 | Có |
+| FR-M08 | Soạn thảo & gửi hồ sơ đề xuất Sự kiện, Giải đấu CLB, Khuyến mại cơ sở lên Super Admin để thẩm định và duyệt đăng toàn sàn | P2 | Có baseline từ `new_service` & `Competition.jsx` |
+| FR-M09 | Báo cáo đánh giá tiêu cực / chơi xấu từ đối thủ lên Super Admin; gửi thông báo sự cố cục bộ đến khách có booking trong ngày | P2 | Có baseline từ `rating_service` & `notification_service` |
 
 ### 6.3. Nghiệp vụ Quản trị viên nền tảng (`super_admin` - Platform Operator)
 
 | Mã | Yêu cầu | Ưu tiên | Trạng thái đối chiếu |
 | --- | --- | --- | --- |
-| FR-A01 | Onboarding trung tâm mới khi ký hợp đồng B2B: Khởi tạo trung tâm, cấu hình số sân ban đầu, hotline, giờ mở/đóng cửa | P0 | Có (`createCenter` chỉ cho phép `super_admin`) |
-| FR-A02 | Quản lý tư liệu truyền thông cơ sở: Tải ảnh đại diện, album ảnh mặt sân, cập nhật giới thiệu (bio) và danh mục tiện ích | P1 | Có |
+| FR-A01 | Onboarding đối tác & Ký hợp đồng B2B: Khởi tạo vỏ trung tâm, thiết lập gói thuê bao SaaS ban đầu và phân công `managerId` ở trạng thái DRAFT (`isActive: false`) | P0 | Có (`createCenter` chỉ cho phép `super_admin`) |
+| FR-A02 | Giám sát truyền thông & Hỗ trợ cơ sở: Thẩm định hình ảnh/nội dung cơ sở, hỗ trợ kỹ thuật; Center Manager là đầu mối tự tải ảnh và cập nhật thông tin sân mình | P1 | Có |
 | FR-A03 | Quản lý Hợp đồng Đối tác B2B (SaaS Contracts): Tạo hợp đồng thuê bao (3/6/12 tháng), gia hạn hợp đồng, quản lý ngày bắt đầu/kết thúc và công nợ phí phần mềm | P1 | Kiến trúc SaaS & Tab Contracts trên Admin |
 | FR-A04 | Phân công & điều chuyển người quản lý cơ sở (`managerId`) cho trung tâm; Center Manager không có quyền tự đổi người | P0 | Có (`assertCenterManager` và `updateCenter` chặn cứng) |
 | FR-A05 | Quản lý vòng đời cơ sở: Kích hoạt hoặc tạm dừng hoạt động trung tâm (`isActive: false`) khi đối tác nợ phí hoặc hết hạn HĐ | P0 | Có |
@@ -308,24 +312,27 @@ Ví dụ nhu cầu: “Mai khoảng 19 giờ, chơi 2 tiếng, gần Cầu Giấ
 
 **Ngoại lệ:** đổi điều kiện thì chọn/xác nhận cũ mất hiệu lực; giá thay đổi thì xin xác nhận lại; slot bị lấy thì tìm lại; timeout thì phục hồi yêu cầu cũ để xác định kết quả. Tin nhắn “hủy” trong hội thoại có thể hủy kế hoạch/lựa chọn, không mặc nhiên thực hiện hủy một booking đã confirmed; khách dùng luồng hủy booking hiện có.
 
-### UC-05 — Quản lý cơ sở cấu hình sân, bảng giá và bảo trì
+### UC-05 — Center Manager tự thiết lập cơ sở (Self-serve Setup), cấu hình sân và bảng giá
 
-**Tác nhân:** người quản lý trung tâm (`center_manager`). **Liên quan:** FR-M01, FR-M02, FR-M03.
+**Tác nhân:** người quản lý trung tâm (`center_manager`). **Liên quan:** FR-M01, FR-M02, FR-M03, FR-M04.
 
-1. Center Manager đăng nhập cổng Admin, mở màn hình Quản lý trung tâm được phân công.
-2. Điều chỉnh thông số mặt sân (thảm/gỗ), đổi tên sân hiển thị; cập nhật khung giá ngày thường và cuối tuần theo giờ mở cửa.
-3. Khi cần bảo trì sân hoặc thay lưới: Chuyển trạng thái sân sang `isActive: false`. Backend Booking Core kiểm tra: nếu sân đang có allocation tương lai còn hiệu lực thì từ chối (HTTP 409 Conflict) để bảo vệ quyền lợi của khách hàng đã đặt; nếu không có tranh chấp thì cho phép tạm khóa.
-4. Báo giá của các booking/giữ chỗ đã chốt trước thời điểm cập nhật bảng giá được giữ nguyên vẹn (Price Snapshot).
+1. **Tiếp nhận cơ sở:** Center Manager đăng nhập cổng Admin, mở cơ sở vừa được Super Admin bàn giao (đang ở trạng thái ban đầu `DRAFT` / `isActive: false`).
+2. **Tự hoàn thiện thông tin & tư liệu:** Nhập số hotline lễ tân đón khách, địa chỉ chi tiết, link Google Maps chỉ đường, giờ mở cửa và giờ đóng cửa (`openMinute`, `closeMinute`); soạn thảo bio giới thiệu cơ sở; tích chọn danh mục tiện ích sẵn có (wifi, phòng tắm nước nóng, bãi gửi ô tô, cho thuê vợt). Tải logo đại diện và album ảnh chụp thực tế mặt sân.
+3. **Khai báo số sân & cấu hình sân:** Nhập số lượng sân ban đầu (`totalCourts`), tùy chỉnh tên hiển thị từng sân (Sân 1, Sân 2, Sân VIP) và thông số mặt sân (thảm PVC tiêu chuẩn BWF / sàn gỗ).
+4. **Thiết lập bảng giá linh hoạt:** Cài đặt giá giờ chuẩn, giá giờ vàng (cao điểm chiều tối) và giờ thấp điểm, phân tách rõ khung giá ngày thường và cuối tuần.
+5. **Kích hoạt mở bán (Go-Live):** Sau khi hoàn tất danh mục kiểm tra tối thiểu (có địa chỉ, số hotline, ít nhất 1 sân và bảng giá), Center Manager gạt nút **[Kích hoạt mở bán]** (`isActive: true`). Cơ sở lập tức xuất hiện công khai trên Web khách hàng để nhận đặt lịch.
+6. **Vận hành & bảo trì thường nhật:** Khi cần thay lưới hoặc bảo dưỡng định kỳ, Center Manager chuyển trạng thái sân sang `isActive: false`. Backend Booking Core kiểm tra: nếu sân đang có allocation tương lai còn hiệu lực thì từ chối (HTTP 409 Conflict) để bảo vệ quyền lợi của khách hàng đã đặt; nếu không có tranh chấp thì cho phép tạm khóa.
+7. Báo giá của các booking/giữ chỗ đã chốt trước thời điểm cập nhật bảng giá được giữ nguyên vẹn (Price Snapshot).
 
-### UC-06 — Super Admin Onboarding trung tâm mới & Quản lý Hợp đồng Đối tác B2B
+### UC-06 — Super Admin Onboarding trung tâm & Quản lý Hợp đồng Đối tác B2B (SaaS Contracts)
 
 **Tác nhân:** quản trị viên nền tảng (`super_admin` - Platform Operator). **Liên quan:** FR-A01, FR-A02, FR-A03, FR-A04, FR-A05.
 
-1. **Onboarding cơ sở mới:** Sau khi đối tác ký kết hợp đồng hợp tác, Super Admin vào tab "Quản lý Hợp đồng Đối tác", bấm **[+ Ký mới / Tạo Hợp đồng]**.
-2. Nhập thông tin cơ sở: Tên trung tâm, địa chỉ chi tiết, hotline, giờ mở/đóng cửa, số lượng sân ban đầu; tải ảnh đại diện và album ảnh mặt sân; soạn thảo giới thiệu (bio) và danh mục tiện ích.
-3. Thiết lập thông số hợp đồng B2B: Chọn gói thuê bao (3 tháng, 6 tháng, 1 năm), hệ thống tự động xác định ngày bắt đầu và kết thúc; gán tài khoản `center_manager` phụ trách (`managerId`).
-4. Lưu và kích hoạt: Trung tâm hiển thị công khai trên Web (`isActive: true`), tài khoản Center Manager được bàn giao quyền truy cập cơ sở.
-5. **Gia hạn hợp đồng & Xử lý nợ phí:** Khi đối tác thanh toán phí duy trì định kỳ, Super Admin bấm **[Gia hạn hợp đồng]** để cộng thêm thời gian hiệu lực. Nếu đối tác quá hạn nợ phí hoặc hết hạn hợp đồng chưa tái ký, Super Admin gạt nút **Tạm dừng hoạt động** (`isActive: false`), Booking Core lập tức khóa chức năng đặt sân mới của cơ sở này.
+1. **Khởi tạo đối tác & Hợp đồng B2B (Bước 1 Onboarding):** Sau khi đối tác ký kết hợp đồng hợp tác dịch vụ, Super Admin vào tab "Quản lý Hợp đồng Đối tác", bấm **[+ Ký mới / Tạo Hợp đồng]**.
+2. **Thiết lập thông số hợp đồng SaaS:** Super Admin nhập thông tin định danh cốt lõi: Tên pháp nhân / tên thương hiệu cơ sở, chọn gói thuê bao (3 tháng, 6 tháng, 1 năm), hệ thống tự động xác định ngày bắt đầu và ngày kết thúc hợp đồng; chọn tài khoản đối tác (`center_manager`) để gán quyền quản lý qua `managerId`.
+3. **Bàn giao quyền cho cơ sở (DRAFT):** Trung tâm được khởi tạo với trạng thái ban đầu là `DRAFT` (`isActive: false`). Hệ thống phân công cơ sở cho Center Manager để đối tác tự tay cấu hình chi tiết (theo UC-05). Super Admin không phải làm thay các công việc nhập ảnh, bio, tiện ích hay bảng giá.
+4. **Gia hạn hợp đồng & Xử lý nợ phí:** Khi đối tác thanh toán phí duy trì định kỳ, Super Admin bấm **[Gia hạn hợp đồng]** để cộng thêm thời gian hiệu lực. Nếu đối tác quá hạn nợ phí hoặc hết hạn hợp đồng chưa tái ký, Super Admin gạt nút **Tạm dừng hoạt động** (`isActive: false`), Booking Core lập tức khóa chức năng đặt sân mới của cơ sở này; Center Manager không thể tự gạt mở lại nếu chưa gia hạn hợp đồng.
+5. **Điều chuyển nhân sự:** Khi chủ sân thay đổi người quản lý, chỉ Super Admin mới có quyền gán lại `managerId` mới cho trung tâm (Center Manager bị từ chối đổi quyền).
 
 ### UC-07 — Đề xuất, Duyệt và Đăng tải Sự kiện / Giải đấu CLB toàn sàn
 
@@ -415,7 +422,7 @@ Các tình huống dưới đây là bộ UAT tối thiểu. Một ca có test t
 | AC-16 | FR-18, FR-19 | Actor khác, kể cả admin, thử đọc/ghi hội thoại không thuộc mình | Bị từ chối; owner vẫn khôi phục được hội thoại/checkpoint |
 | AC-17 | FR-20, FR-SYS02 | Gây lỗi kết nối/timeout trong môi trường kiểm thử | Có mã đối chiếu, log/metric phù hợp; không lộ secret/transcript trong log; không thông báo đặt thành công |
 | AC-18 | FR-U01, FR-M04 | Chọn ngày/giờ sát biên UI và giới hạn Core, xem preview rồi tạo lịch | UI/API/preview cùng tuân theo phạm vi đã chốt; đây là ca cần hoàn thiện GAP-03 |
-| AC-19 | FR-A01, FR-A04 | Onboarding trung tâm mới và phân công quản lý | Chỉ super_admin được phép tạo cơ sở và gán managerId; center_manager hoặc user gửi yêu cầu đều bị từ chối HTTP 403 Forbidden |
+| AC-19 | FR-A01, FR-M01, FR-A04 | Onboarding 2 bước và phân công quản lý cơ sở | Super Admin khởi tạo trung tâm & HĐ SaaS và gán managerId; Center Manager tự cập nhật chi tiết profile, ảnh, bio, tiện ích, số sân, bảng giá và kích hoạt mở bán; Center Manager thử đổi managerId bị từ chối HTTP 403 Forbidden |
 | AC-20 | FR-A03, FR-A05 | Quản lý hợp đồng SaaS và tạm dừng trung tâm hết hạn / nợ phí | Super Admin gia hạn hợp đồng thành công; khi cơ sở chuyển isActive: false do nợ phí, Core chặn đứng mọi luồng đặt sân mới |
 | AC-21 | FR-M07, FR-A06 | Đề xuất và phê duyệt sự kiện / giải đấu CLB toàn sàn | Center Manager gửi đề xuất sự kiện; bài viết ở trạng thái chờ duyệt và chỉ xuất hiện công khai trên trang chủ sau khi Super Admin bấm duyệt |
 
