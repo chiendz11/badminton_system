@@ -99,6 +99,7 @@ Toàn bộ hướng dẫn phát triển và tài liệu từng dịch vụ trong
 - [**Chỉ mục Hợp đồng API (services/api/README.md)**](services/api/README.md): Danh mục OpenAPI contracts của 9 microservices.
 - [**Phân hệ Trợ lý Thông minh (services/ai/)**](services/ai/README.md):
   - [Tổng quan AI Service (ai/README.md)](services/ai/README.md): FastAPI, LangGraph workflow và bộ nhớ đàm thoại.
+  - [Kiến trúc LangChain Tools & LangGraph (ai/LANGGRAPH_WORKFLOW_AND_TOOLS.md)](services/ai/LANGGRAPH_WORKFLOW_AND_TOOLS.md): Danh mục 9 Tools, sơ đồ StateGraph 11 Node và kiểm chứng Provider K8s.
   - [Nâng cấp Khuyến nghị & Đàm phán (ai/UPGRADE.md)](services/ai/UPGRADE.md): Đề xuất nới lỏng điều kiện tìm sân khi hết giờ.
   - [Tính năng Trợ lý AI (ai/FEATURES.md)](services/ai/FEATURES.md): Tra cứu lịch sử, hủy vé 2 bước và giải đáp FAQ.
   - [Code Walkthrough Chi tiết (ai/CODE_WALKTHROUGH.md)](services/ai/CODE_WALKTHROUGH.md): Phân tích chi tiết từng tầng code.
