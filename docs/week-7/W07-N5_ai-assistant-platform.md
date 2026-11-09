@@ -33,12 +33,12 @@
 ### 2.2. Chuẩn hóa Bộ tri thức (Knowledge Base) & Bảo vệ Phân quyền Hủy sân
 - **Bảo vệ và định tuyến từ chối thông minh trong Chatbot (`cancellation.py`)**:
   - Khi người dùng yêu cầu hủy qua chatbot, hệ thống thực hiện quy trình 2 bước với consent riêng.
-  - Khi Booking Core trả về lỗi **HTTP 403 Forbidden** (do khách hàng role `user` không có quyền hủy đơn `CONFIRMED`), Chatbot bắt lỗi và phản hồi hành động `cancellation_refused` kèm lời khuyên nghiệp vụ:
+  - Khi Booking Core trả về lỗi **HTTP 403 Forbidden** (do hệ thống khóa hoàn toàn việc hủy booking `CONFIRMED` cho mọi vai trò nhằm tránh phát sinh hoàn tiền phức tạp), Chatbot bắt lỗi và phản hồi hành động `cancellation_refused` kèm lời khuyên nghiệp vụ:
     > *"Booking đã xác nhận không thể tự hủy. Bạn vui lòng sử dụng tính năng Chợ Pass sân hoặc liên hệ quản lý trung tâm."*
   - Bổ sung ca kiểm thử tích hợp `test_core_403_cancellation_refused_advises_pass_marketplace` trong `tests/integration/test_assistance.py`.
 - **Tệp tri thức `knowledge.json` (`cancel-booking` và `pass-booking-rules`)**:
   - Quy định giữ chỗ: 10 phút tự động hủy nếu chưa hoàn tất thanh toán (khách hàng có thể hủy sớm qua `DELETE /api/v1/reservations/:id`).
-  - Quy định hủy sân: Slot đã thanh toán (`CONFIRMED`) không được hủy trực tiếp để tránh tình trạng bot spam chiếm sân.
+  - Quy định hủy sân: Slot đã thanh toán (`CONFIRMED`) không được hủy trực tiếp bởi bất kỳ vai trò nào để tránh bot spam và do hệ thống không hỗ trợ hoàn tiền.
   - Hướng dẫn chuyển nhượng: Đăng bán qua Chợ Pass Sân, tiền được giữ trong Escrow cho đến khi người mua nhận sân thành công.
 
 ### 2.3. Vận hành Cụm Kubernetes K3d GitOps Local

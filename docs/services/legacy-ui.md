@@ -15,7 +15,7 @@ Xóa UI/API client Identity/profile CRUD, Commerce/kho/bán hàng/báo cáo, Con
 
 `MyBookings.jsx`, `HistoryTab.jsx`, `StatusTab.jsx`, `PopularTimeChart.jsx` được tách từ UI profile gốc sang `features/booking`, chỉ giữ history/statistics. URL mới `/my-bookings`; `/profile` là alias redirect để link cũ không mở lại Identity UI. Card thống kê điểm thành viên, cột phương thức thanh toán và filter chờ thanh toán đã bỏ; history filter dùng confirmed/cancelled. Quote/discount của Booking Core vẫn giữ.
 
-Booking giữ bảng giờ 05:00–24:00, chọn sân/giờ và modal gốc. Modal xác nhận gọi `POST /api/booking/pending/pendingBookingToDB`; gateway giữ chỗ rồi xác nhận trực tiếp tại Core và trả booking confirmed thật, refresh lịch và ở lại bảng. Không gọi payment. Client giữ Idempotency-Key khi retry chưa biết kết quả; giá cuối lấy từ Core. History giữ nút hủy cho booking confirmed chưa bắt đầu, nút xóa cho booking đã hủy/đã kết thúc; xóa chỉ ẩn khỏi lịch sử cá nhân. Các nút hủy/xóa lịch sử vẫn dùng PATCH/DELETE gốc. Booking fixed dùng API admin gốc.
+Booking giữ bảng giờ 05:00–24:00, chọn sân/giờ và modal gốc. Modal xác nhận gọi `POST /api/booking/pending/pendingBookingToDB`; gateway giữ chỗ rồi xác nhận trực tiếp tại Core và trả booking confirmed thật, refresh lịch và ở lại bảng. Không gọi payment. Client giữ Idempotency-Key khi retry chưa biết kết quả; giá cuối lấy từ Core. Khi người dùng bấm nút hủy trên History, Gateway gọi Core và nhận về 403 Forbidden do hệ thống không hỗ trợ hủy booking đã xác nhận (hướng dẫn sang Chợ Pass Sân); nút xóa cho booking đã kết thúc/hủy chỉ ẩn khỏi lịch sử cá nhân. Các nút hủy/xóa lịch sử vẫn dùng PATCH/DELETE gốc. Booking fixed dùng API admin gốc.
 
 ## Gateway và session
 

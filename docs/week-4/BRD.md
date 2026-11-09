@@ -5,7 +5,7 @@
 | Thuộc tính | Nội dung |
 | --- | --- |
 | Loại tài liệu | Business Requirements Document — Tài liệu yêu cầu nghiệp vụ |
-| Phiên bản | 1.1 (Cập nhật chính sách hủy sân & phân quyền RBAC ngày 09/11/2026) |
+| Phiên bản | 1.2 (Khóa toàn bộ hủy booking CONFIRMED mọi vai trò, chỉ cho phép hủy giữ chỗ HELD) |
 | Ngày lập | 18/10/2026, múi giờ Việt Nam |
 | Trạng thái | Dự thảo để chủ hệ thống và nhóm phát triển xem xét; chưa phải biên bản nghiệm thu |
 | Hệ thống | badminton_system |
@@ -47,7 +47,7 @@ Việc giữ các màn hình booking gốc giúp tiếp tục sử dụng bố c
 | Mã mục tiêu | Kết quả nghiệp vụ mong muốn | Cách kiểm chứng |
 | --- | --- | --- |
 | OBJ-01 | Ghi nhận booking đúng sân/ngày/giờ, không chiếm trùng slot | Nghiệm thu tranh chấp đồng thời; đối chiếu booking và phân bổ slot |
-| OBJ-02 | Khách tự tìm, đặt, xem lịch và hủy giữ chỗ tạm thời; kiểm soát hủy booking confirmed | Hoàn thành các kịch bản Web, kiểm tra quyền sở hữu và phân quyền RBAC |
+| OBJ-02 | Khách tự tìm, đặt, xem lịch và hủy giữ chỗ tạm thời; khóa hủy booking confirmed cho mọi vai trò (không hỗ trợ hoàn tiền) | Hoàn thành các kịch bản Web, kiểm tra quyền sở hữu và phân quyền RBAC |
 | OBJ-03 | Quản lý lập và vận hành lịch sân, gồm lịch cố định | Kiểm tra chuỗi nhiều ngày và phạm vi trung tâm được giao |
 | OBJ-04 | Trợ lý AI giữ ngữ cảnh và chỉ đặt khi được xác nhận cuối | Nghiệm thu hội thoại nhiều lượt, thay đổi điều kiện và xác nhận |
 | OBJ-05 | Có thể điều tra lỗi và phục hồi yêu cầu chưa rõ kết quả | Theo dõi mã yêu cầu, kiểm tra retry, trạng thái booking và dữ liệu lưu |
@@ -90,7 +90,7 @@ Tên vai trò hiện tại: khách đã có phiên là **user**, quản lý là 
 | Sửa thông tin trung tâm, sân, bảng giá | Không | Không | Trung tâm được giao, trừ đổi người quản lý | Mọi trung tâm |
 | Tạo trung tâm/phân công quản lý | Không | Không | Không | Có |
 | Tạo lịch cố định cho khách | Không | Không | Trung tâm được giao | Mọi trung tâm |
-| Hủy booking CONFIRMED trước giờ bắt đầu (sự cố kỹ thuật) | Không | Không (chặn 403, sang Chợ Pass) | Trung tâm được giao | Mọi trung tâm |
+| Hủy booking CONFIRMED | Không | Không (chặn 403, sang Chợ Pass) | Không (hệ thống không hỗ trợ hoàn tiền) | Không (hệ thống không hỗ trợ hoàn tiền) |
 | Dùng AI để tìm/đặt cho chính mình | Không | Có | Có | Có |
 | Đọc/ghi hội thoại AI của người khác | Không | Không | Không | Không |
 
@@ -148,7 +148,7 @@ Màn hình Admin có tên kế thừa “Đơn hàng/Hóa đơn” chỉ quản 
 | FR-06 | Giữ chỗ có hạn, ngăn chiếm trùng và giải phóng giữ chỗ hết hạn/hủy | P0 | Có ở Core; Web trực tiếp reserve rồi confirm trong một lần xác nhận, không có màn hình hold riêng |
 | FR-07 | Một ý định đặt được gửi lại với cùng mã yêu cầu phải trả cùng kết quả, không tạo đơn mới | P0 | Một phần; Core/Gateway và AI hỗ trợ, client đặt ngày còn GAP-02 |
 | FR-08 | Chủ booking xem lịch sử, lọc, xem chi tiết và thống kê booking của mình | P1 | Có |
-| FR-09 | Phân quyền hủy booking CONFIRMED: Quản lý hủy khi có sự cố; chặn khách tự hủy (HTTP 403, hướng dẫn Chợ Pass Sân); giải phóng lịch và cho phép ẩn lịch cá nhân | P0 | Có |
+| FR-09 | Quy định hủy booking: Khóa hủy booking CONFIRMED đối với mọi vai trò (Core trả HTTP 403, hướng dẫn Chợ Pass Sân do không hỗ trợ hoàn tiền); chỉ cho phép hủy giữ chỗ tạm thời HELD của user; cho phép ẩn lịch cá nhân | P0 | Có |
 | FR-10 | Quản lý xem booking và trạng thái sân thuộc trung tâm được giao; quản trị xem toàn bộ | P1 | Có |
 | FR-11 | Quản lý tạo lịch cố định cho khách từ directory host, xem lịch khả dụng và tạo chuỗi nguyên vẹn | P1 | Có; giới hạn preview/UI cần thống nhất theo GAP-03 |
 
@@ -188,7 +188,7 @@ Màn hình Admin có tên kế thừa “Đơn hàng/Hóa đơn” chỉ quản 
 | BR-10 | Giữ chỗ còn hạn và booking confirmed đều chiếm slot. Tại một thời điểm, không được có hai phân bổ còn hiệu lực chồng lên cùng sân/giờ. |
 | BR-11 | Xác nhận lần đầu chỉ áp dụng cho giữ chỗ HELD còn hạn; gửi lại xác nhận đã thành công trả booking cũ theo BR-12. Giữ chỗ hết hạn bị từ chối, giải phóng slot và yêu cầu chọn lại. |
 | BR-12 | Cùng actor, cùng mã yêu cầu và cùng nội dung phải cho cùng kết quả; dùng mã cũ cho nội dung khác phải bị từ chối. Đổi ý định đặt thì dùng mã mới. |
-| BR-13 | Quy tắc hủy nghiêm ngặt (Strict Cancellation Policy) chống bot spam: Khách hàng thường (`user`) tuyệt đối không được tự hủy booking đã `CONFIRMED` (hệ thống chặn với mã HTTP 403 Forbidden). Khách hàng muốn chuyển nhượng slot phải đăng bán qua Chợ Pass Sân hoặc liên hệ quản lý trung tâm. Khách chỉ có thể hủy giữ chỗ tạm thời (`HELD` 10 phút) qua `DELETE /api/v1/reservations/:id`. Quyền hủy booking đã `CONFIRMED` trước giờ bắt đầu chỉ dành riêng cho Quản lý trung tâm (`center_manager` phụ trách cơ sở) hoặc `super_admin` khi phát sinh sự cố bất khả kháng (dột mưa, bảo trì sân). |
+| BR-13 | Quy tắc hủy nghiêm ngặt (Strict Cancellation Policy): Hệ thống KHÔNG hỗ trợ nghiệp vụ hủy booking đã `CONFIRMED` cho bất kỳ vai trò nào (`user`, `center_manager`, `super_admin`) do hệ thống không hỗ trợ nghiệp vụ hoàn tiền (refund) phức tạp. Mọi yêu cầu gọi `POST /api/v1/bookings/:id/cancel` đều bị từ chối với mã lỗi HTTP 403 Forbidden. Khách hàng muốn chuyển nhượng slot phải đăng bán qua Chợ Pass Sân (Pass Marketplace). Khách hàng chỉ có thể tự hủy giữ chỗ tạm thời (`HELD` 10 phút khi chưa thanh toán) qua `DELETE /api/v1/reservations/:id` để giải phóng slot ngay lập tức. |
 | BR-14 | “Xóa” lịch cá nhân là ẩn đối với chủ booking sau khi booking đã hủy hoặc toàn bộ giờ chơi đã kết thúc. Không xóa cứng booking và dấu nghiệp vụ cần lưu; phân bổ slot có thể được giải phóng khi hủy hoặc hết hạn. |
 | BR-15 | Lịch cố định gồm 1–60 ngày có lịch, trong giới hạn đặt trước; tối đa 8 sân mỗi ngày theo hợp đồng Core. Có thể chọn sân/giờ khác nhau theo ngày. Bất kỳ ngày nào xung đột thì toàn bộ lần tạo chuỗi bị hoàn tác. |
 | BR-16 | Tạm đóng trung tâm/sân hoặc giảm số sân không được làm mất phân bổ tương lai còn hiệu lực. “Xóa trung tâm” của UI gốc thực hiện ngừng hoạt động, không xóa hồ sơ cũ. |
@@ -213,7 +213,7 @@ Ví dụ giá theo baseline: đặt 2 sân, mỗi sân 2 slot, mỗi slot 80.000
 | Booking | CANCELLED | Đơn đã hủy; slot được giải phóng; giữ hồ sơ |
 | Hiển thị lịch cá nhân | Hiện/ẩn | Thuộc tính hiển thị riêng, không phải trạng thái thanh toán hoặc xóa booking |
 
-Sau khi đã confirm, việc hủy booking thuộc thẩm quyền của Quản lý trung tâm/Quản trị viên khi có sự cố kỹ thuật; khách hàng không thể tự hủy để tránh bot spam mà phải chuyển nhượng qua Chợ Pass Sân. Thao tác bỏ giữ chỗ (`DELETE /api/v1/reservations/:id`) chỉ áp dụng khi giữ chỗ đang ở trạng thái `HELD` (trong vòng 10 phút chưa thanh toán). Hội thoại AI lưu trạng thái kế hoạch/lựa chọn/xác nhận/biên nhận riêng, không phải nguồn thay thế trạng thái booking tại Core.
+Sau khi đã confirm, booking không thể hủy bởi bất kỳ ai (kể cả quản lý hay quản trị viên) do hệ thống không hỗ trợ nghiệp vụ hoàn tiền; khách hàng có nhu cầu sang nhượng slot phải đăng bài qua Chợ Pass Sân. Thao tác bỏ giữ chỗ (`DELETE /api/v1/reservations/:id`) chỉ áp dụng khi giữ chỗ đang ở trạng thái `HELD` (trong vòng 10 phút chưa thanh toán). Hội thoại AI lưu trạng thái kế hoạch/lựa chọn/xác nhận/biên nhận riêng, không phải nguồn thay thế trạng thái booking tại Core.
 
 ## 8. Luồng nghiệp vụ chính
 
@@ -229,18 +229,17 @@ Sau khi đã confirm, việc hủy booking thuộc thẩm quyền của Quản l
 
 **Ngoại lệ:** slot vừa bị người khác lấy thì báo xung đột và tải lại lịch; giữ chỗ hết hạn thì chọn lại; mất kết quả thì phải tra cứu/gửi lại đúng ý định với cùng mã yêu cầu. Lịch trống lúc xem không phải cam kết giữ sân. Điểm gửi lại từ Web còn thiếu ở GAP-02.
 
-### UC-02 — Xem, quản lý lịch cá nhân và quy trình hủy booking
+### UC-02 — Xem, quản lý lịch cá nhân và quy trình hủy giữ chỗ / booking
 
 **Tác nhân:** chủ booking (khách hàng); người quản lý trung tâm (`center_manager`); quản trị viên (`super_admin`). **Liên quan:** FR-08, FR-09, FR-19.
 
 1. Khách mở lịch sử, lọc theo điều kiện được hỗ trợ và chọn booking của mình.
-2. Với giữ chỗ tạm thời (`HELD` trong 10 phút chưa thanh toán), khách có thể hủy giữ chỗ để giải phóng slot (`DELETE /api/v1/reservations/:id`).
+2. Với giữ chỗ tạm thời (`HELD` trong 10 phút chưa thanh toán), khách có thể tự hủy giữ chỗ để giải phóng slot (`DELETE /api/v1/reservations/:id`).
 3. Với booking đã `CONFIRMED`:
-   - Nếu khách hàng thường (`user`) gửi yêu cầu hủy (trực tiếp qua API hoặc qua Chatbot AI): Hệ thống **từ chối với mã lỗi HTTP 403 Forbidden**, thông báo rõ: *"Booking đã xác nhận không thể tự hủy. Bạn vui lòng sử dụng tính năng Chợ Pass sân hoặc liên hệ quản lý trung tâm."* Chatbot tự động chuyển hướng người dùng sang quy trình đăng bài Chợ Pass Sân (`pass-booking-rules`).
-   - Nếu Quản lý trung tâm (`center_manager` phụ trách cơ sở) hoặc `super_admin` thực hiện hủy booking do sự cố bất khả kháng (thời tiết, bảo trì sân) trước giờ bắt đầu: Core chuyển trạng thái booking sang `CANCELLED`, giải phóng `slotAllocation`, ghi nhật ký sự kiện `booking.cancelled.v1`.
-4. Với booking đã ở trạng thái `CANCELLED` hoặc đã kết thúc toàn bộ giờ chơi, khách có thể xác nhận ẩn khỏi lịch cá nhân (giữ nguyên hồ sơ lưu trữ và kiểm toán).
+   - Bất kỳ ai gửi yêu cầu hủy booking đã xác nhận (kể cả `user`, `center_manager`, `super_admin`, trực tiếp qua API hoặc qua Chatbot AI): Hệ thống **từ chối với mã lỗi HTTP 403 Forbidden**, thông báo rõ: *"Booking đã xác nhận không thể tự hủy. Bạn vui lòng sử dụng tính năng Chợ Pass sân hoặc liên hệ quản lý trung tâm."* Chatbot tự động hướng dẫn người dùng sang quy trình đăng bài Chợ Pass Sân (`pass-booking-rules`). Không hỗ trợ hủy và hoàn tiền.
+4. Với booking đã ở trạng thái `CANCELLED` (do timeout giữ chỗ) hoặc đã kết thúc toàn bộ giờ chơi, khách có thể xác nhận ẩn khỏi lịch cá nhân (giữ nguyên hồ sơ lưu trữ và kiểm toán).
 
-**Ngoại lệ:** Sai chủ/quyền hoặc khách thường cố tình tự hủy booking đã CONFIRMED thì nhận lỗi HTTP 403 Forbidden; booking đã bắt đầu thì không cho phép hủy; không phát sinh hoàn tiền trực tiếp tự động.
+**Ngoại lệ:** Mọi yêu cầu hủy booking đã CONFIRMED đều nhận lỗi HTTP 403 Forbidden; hệ thống không hỗ trợ hoàn tiền trực tiếp tự động.
 
 ### UC-03 — Tạo lịch cố định
 
@@ -350,8 +349,8 @@ Các tình huống dưới đây là bộ UAT tối thiểu. Một ca có test t
 | AC-03 | FR-06 | Hai khách cùng gửi yêu cầu chiếm cùng một slot | Chỉ một phân bổ còn hiệu lực thành công; yêu cầu còn lại bị từ chối xung đột |
 | AC-04 | FR-06 | Xác nhận một giữ chỗ đã hết hạn, hoặc để worker dọn hết hạn | Không tạo booking confirmed; slot được giải phóng và có thể được đặt lại |
 | AC-05 | FR-07 | Gửi lại cùng mã/nội dung; sau đó dùng mã đó cho nội dung khác | Cùng ý định trả cùng booking; nội dung khác bị từ chối; phải kiểm tra xuyên Web, không chỉ API |
-| AC-06 | FR-08, FR-09 | Chủ booking xem lịch/thống kê; hủy giữ chỗ HELD; khách thường hủy booking CONFIRMED bị chặn 403 | Trạng thái/lịch cập nhật đúng; khách tự hủy booking confirmed nhận 403 kèm hướng dẫn Chợ Pass; ẩn không xóa hồ sơ nghiệp vụ |
-| AC-07 | FR-09, FR-19 | Quản lý trung tâm hủy booking CONFIRMED thuộc cơ sở mình; khách đổi ID hoặc cố tự hủy booking đã CONFIRMED | Quản lý hủy thành công giải phóng slot; khách thường tự hủy hoặc truy cập trái quyền đều bị từ chối HTTP 403 |
+| AC-06 | FR-08, FR-09 | Chủ booking xem lịch/thống kê; hủy giữ chỗ HELD; mọi vai trò hủy booking CONFIRMED bị chặn 403 | Trạng thái/lịch cập nhật đúng; gọi hủy booking confirmed nhận 403 kèm hướng dẫn Chợ Pass; ẩn không xóa hồ sơ nghiệp vụ |
+| AC-07 | FR-09, FR-19 | Quản lý hoặc admin cố gắng hủy booking CONFIRMED | Bị từ chối HTTP 403 Forbidden; hệ thống không hỗ trợ hủy và hoàn tiền đối với confirmed booking |
 | AC-08 | FR-03, FR-04, FR-10, FR-19 | Quản lý trung tâm A sửa/xem dữ liệu A rồi thử dữ liệu B | Chỉ A được phép; việc tạo trung tâm/đổi quản lý dành cho super_admin |
 | AC-09 | FR-11 | Tạo chuỗi nhiều ngày, một ngày giữa chuỗi đã bị chiếm | Không có booking mới nào của lần tạo chuỗi bị ghi dở; trường hợp không trùng tạo đủ các ngày |
 | AC-10 | FR-02, FR-04 | Đổi giá sau khi một hold đã được chốt; thử đóng sân đang có phân bổ tương lai | Giá chốt cũ giữ nguyên; thay đổi trạng thái gây mất phân bổ bị từ chối |
@@ -384,7 +383,7 @@ GAP-02 được đối chiếu trực tiếp trong [client đặt ngày Web](../
 | Mã | Quyết định cần xác nhận | Baseline/đề xuất để xem xét | Người quyết định |
 | --- | --- | --- | --- |
 | D-01 | AI chỉ tư vấn hay được thực thi đặt sân? | Code hiện tại và kế hoạch hội thoại cho phép gọi Core sau xác nhận cuối. Tài liệu kiến trúc v2 trước đó đề xuất read-only. BRD mô tả baseline đang có, không coi khác biệt này đã được phê duyệt | Chủ hệ thống |
-| D-02 | Chính sách hủy booking và Chợ Pass sân | ĐÃ CHỐT: Khóa quyền tự hủy đối với khách hàng thường (chống bot spam, Core chặn 403 Forbidden); chuyển sang mô hình Chợ Pass Sân (Pass Marketplace) có Escrow; quyền hủy booking CONFIRMED chỉ thuộc về Quản lý trung tâm/Super Admin khi có sự cố bất khả kháng. | Chủ hệ thống / Đã phê duyệt |
+| D-02 | Chính sách hủy booking và Chợ Pass sân | ĐÃ CHỐT: Không cho phép bất kỳ vai trò nào (`user`, `center_manager`, `super_admin`) hủy booking đã CONFIRMED do hệ thống không hỗ trợ hoàn tiền (Core chặn 403 Forbidden); chuyển sang mô hình Chợ Pass Sân (Pass Marketplace) có Escrow; chỉ người dùng được hủy giữ chỗ tạm thời HELD trong 10 phút (`DELETE /reservations/:id`). | Chủ hệ thống / Đã phê duyệt |
 | D-03 | Phạm vi ngày/giờ chính thức mà Web/Admin phải hỗ trợ | Khả năng Core tới 90 ngày; giao diện/preview đang hẹp hơn, cần quyết định thống nhất trước nghiệm thu | Chủ hệ thống và nhóm sản phẩm |
 | D-04 | Nguồn danh tính, directory khách/quản lý và quy trình cấp/thu hồi quyền | Host/Identity bên ngoài; không sử dụng demo session làm tài khoản khách thật | Chủ hệ thống và phụ trách tích hợp |
 | D-05 | Chỉ tiêu vận hành, chi phí LLM và chính sách dữ liệu | Chốt tải, SLO, RPO/RTO, thời gian lưu hội thoại, người được truy cập dữ liệu và hạn mức sử dụng model | Chủ hệ thống/người vận hành |

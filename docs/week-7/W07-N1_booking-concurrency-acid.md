@@ -39,23 +39,21 @@ Hiện thực hóa lát cắt nghiệp vụ quan trọng nhất của phân hệ
 - Một tiến trình nền tự động dọn dẹp các slot giữ chỗ quá hạn chưa thanh toán, đưa sân về trạng thái khả dụng cho người chơi khác.
 
 ### 2.3. Quy tắc hủy sân nghiêm ngặt (Strict Cancellation Policy)
-- Nhằm ngăn chặn hành vi sử dụng bot tự động giữ slot hàng loạt rồi chờ sát giờ mới hủy khiến sân bị bỏ trống, hệ thống áp dụng quy tắc: **Slot đã thanh toán thành công không được phép hủy trực tiếp để hoàn tiền**.
-- **Khóa quyền tự hủy đối với người dùng thông thường (`user`)**:
+- Nhằm ngăn chặn hành vi sử dụng bot tự động giữ slot hàng loạt rồi chờ sát giờ mới hủy khiến sân bị bỏ trống, đồng thời do hệ thống **không hỗ trợ nghiệp vụ hoàn tiền (refund)** phức tạp (nhất quán với thiết kế legacy repo), hệ thống áp dụng quy tắc: **Booking đã thanh toán thành công (`CONFIRMED`) không được phép hủy bởi bất kỳ ai**.
+- **Khóa hoàn toàn quyền hủy booking CONFIRMED đối với mọi vai trò (`user`, `center_manager`, `super_admin`)**:
   - Tại `services/booking-core/src/modules/bookings/bookings-command.service.ts`:
     ```typescript
-    if (actor.role === "user") {
-      throw new ForbiddenException(
-        "Booking đã xác nhận không thể tự hủy. Bạn vui lòng sử dụng tính năng Chợ Pass sân hoặc liên hệ quản lý trung tâm.",
-      );
-    }
-    assertCenterManager(actor, initial.reservation.center);
+    // Khóa hoàn toàn nghiệp vụ hủy booking đã CONFIRMED cho mọi vai trò vì hệ thống không có nghiệp vụ hoàn tiền (refund).
+    // Người dùng muốn chuyển nhượng slot phải đăng bán qua Chợ Pass Sân (Pass Marketplace).
+    throw new ForbiddenException(
+      "Booking đã xác nhận không thể tự hủy. Bạn vui lòng sử dụng tính năng Chợ Pass sân hoặc liên hệ quản lý trung tâm.",
+    );
     ```
-  - Khách hàng thường (`user`): Tuyệt đối không thể hủy booking đã `CONFIRMED`. Nếu cố tình gọi API `POST /api/v1/bookings/:id/cancel`, hệ thống chặn với mã lỗi **HTTP 403 Forbidden**.
-  - Khách hàng muốn hủy giữ chỗ khi chưa thanh toán: Sử dụng `DELETE /api/v1/reservations/:id` (release reservation).
-  - Quyền hủy booking đã `CONFIRMED`: Chỉ dành riêng cho Quản lý trung tâm (`center_manager` phụ trách cơ sở) hoặc `super_admin` khi gặp sự cố bất khả kháng (sân hỏng đèn, dột nước, sự kiện trung tâm).
+  - Mọi đối tượng (`user`, `center_manager`, `super_admin`): Tuyệt đối không thể hủy booking đã `CONFIRMED`. Nếu gọi API `POST /api/v1/bookings/:id/cancel`, hệ thống lập tức chặn với mã lỗi **HTTP 403 Forbidden**.
+  - Khách hàng muốn hủy giữ chỗ khi chưa thanh toán: Sử dụng `DELETE /api/v1/reservations/:id` (release reservation) trong thời hạn giữ chỗ 10 phút để giải phóng slot ngay lập tức.
 - **Kiểm thử tích hợp (`test/integration/booking.spec.ts`)**:
-  - Người dùng thường gửi lệnh hủy bị từ chối với HTTP 403 và thông báo hướng dẫn ra Chợ Pass.
-  - Quản lý trung tâm gửi lệnh hủy thành công (200 OK) và giải phóng `slotAllocation`.
+  - Cả khách hàng thường (`user`) và quản lý trung tâm (`center_manager`) gửi lệnh hủy booking `CONFIRMED` đều bị từ chối với HTTP 403 Forbidden và thông báo hướng dẫn sang Chợ Pass.
+  - Khách hàng gửi lệnh hủy giữ chỗ tạm thời (`DELETE /reservations/:id`) thành công và giải phóng slot ngay lập tức.
 - Người dùng không có nhu cầu thi đấu bắt buộc phải đăng bán lại thông qua phân hệ **Chợ Pass Sân (Pass Marketplace)** với cơ chế ký quỹ (Escrow) minh bạch.
 
 ---
