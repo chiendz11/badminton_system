@@ -1051,12 +1051,12 @@ def create_presentation():
     p_desc.space_before = Pt(10)
 
     # Save presentation
-    out_dir = "docs/reports"
-    os.makedirs(out_dir, exist_ok=True)
-    out_path = os.path.join(out_dir, "Bao_Cao_Tuan_7_Badminton_Manager.pptx")
-    prs.save(out_path)
-    print(f"Successfully generated PowerPoint presentation at: {out_path}")
-    return out_path
+    for target_dir in ["docs/week-7", "docs/reports"]:
+        os.makedirs(target_dir, exist_ok=True)
+        target_path = os.path.join(target_dir, "Bao_Cao_Tuan_7_Badminton_Manager.pptx")
+        prs.save(target_path)
+        print(f"Successfully generated PowerPoint presentation at: {target_path}")
+    return os.path.join("docs/week-7", "Bao_Cao_Tuan_7_Badminton_Manager.pptx")
 
 if __name__ == "__main__":
     create_presentation()
