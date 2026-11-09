@@ -22,6 +22,9 @@ export class CenterDto {
   @IsString() @Matches(/^[+0-9 ()-]{8,20}$/) phone!: string;
   @IsString() @MinLength(1) @MaxLength(128) managerId!: string;
   @ValidateIf((_object, value) => value !== undefined)
+  @IsBoolean()
+  isActive = false;
+  @ValidateIf((_object, value) => value !== undefined)
   @IsString()
   @MaxLength(2000)
   description = "";

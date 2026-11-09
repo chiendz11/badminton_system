@@ -129,7 +129,7 @@ const CenterModal = ({
           description: "",
           totalCourts: 0,
           googleMapUrl: "",
-          isActive: true,
+          isActive: false, // Onboarding Bước 1: Khởi tạo cơ sở ở trạng thái DRAFT
           centerManagerId: "",
           facilitiesString: "",
           pricing: defaultPricing,
@@ -670,16 +670,22 @@ const CenterModal = ({
               </div>
             </div>
 
-            {!isCreating && (
+            {isCreating ? (
+              <div style={{ marginTop: "10px", padding: "10px 14px", backgroundColor: "#fef3c7", borderRadius: "6px", border: "1px solid #f59e0b" }}>
+                <p style={{ margin: 0, fontSize: "0.85rem", color: "#92400e" }}>
+                  ℹ️ <strong>Quy trình Onboarding:</strong> Cơ sở mới được Super Admin khởi tạo ở trạng thái <strong>DRAFT (Chưa mở bán)</strong>. Sau khi hoàn tất tạo, Center Manager được chỉ định sẽ vào cấu hình chi tiết (số sân, bảng giá, tiện ích) và kích hoạt mở bán.
+                </p>
+              </div>
+            ) : (
               <div style={{ marginTop: "10px" }}>
-                <label style={{ cursor: "pointer" }}>
+                <label style={{ cursor: "pointer", fontWeight: "600" }}>
                   <input
                     type="checkbox"
                     name="isActive"
                     checked={formData.isActive || false}
                     onChange={handleChange}
                   />{" "}
-                  Đang hoạt động
+                  Kích hoạt mở bán (Đang hoạt động)
                 </label>
               </div>
             )}
