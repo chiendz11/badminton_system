@@ -524,6 +524,263 @@
         "payload"
       ],
       "additionalProperties": false
+    },
+    {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "type": {
+          "type": "string",
+          "const": "notification.broadcast.v1"
+        },
+        "aggregateId": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "schemaVersion": {
+          "type": "integer",
+          "const": 1
+        },
+        "producer": {
+          "type": "string",
+          "const": "notification-service"
+        },
+        "correlationId": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128
+        },
+        "payload": {
+          "type": "object",
+          "properties": {
+            "broadcastId": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "title": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 200
+            },
+            "message": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 2000
+            },
+            "targetAudience": {
+              "type": "string",
+              "enum": [
+                "ALL",
+                "MANAGERS",
+                "PLAYERS"
+              ]
+            },
+            "priority": {
+              "type": "string",
+              "enum": [
+                "NORMAL",
+                "HIGH",
+                "URGENT"
+              ]
+            }
+          },
+          "required": [
+            "broadcastId",
+            "title",
+            "message",
+            "targetAudience",
+            "priority"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "id",
+        "type",
+        "aggregateId",
+        "createdAt",
+        "schemaVersion",
+        "producer",
+        "correlationId",
+        "payload"
+      ],
+      "additionalProperties": false
+    },
+    {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "type": {
+          "type": "string",
+          "const": "notification.urgent.v1"
+        },
+        "aggregateId": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "schemaVersion": {
+          "type": "integer",
+          "const": 1
+        },
+        "producer": {
+          "type": "string",
+          "const": "notification-service"
+        },
+        "correlationId": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128
+        },
+        "payload": {
+          "type": "object",
+          "properties": {
+            "urgentId": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "centerId": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "date": {
+              "type": "string",
+              "format": "date"
+            },
+            "title": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 200
+            },
+            "message": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 2000
+            },
+            "impactedBookingsCount": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "urgentId",
+            "centerId",
+            "date",
+            "title",
+            "message",
+            "impactedBookingsCount"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "id",
+        "type",
+        "aggregateId",
+        "createdAt",
+        "schemaVersion",
+        "producer",
+        "correlationId",
+        "payload"
+      ],
+      "additionalProperties": false
+    },
+    {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "type": {
+          "type": "string",
+          "const": "contract.status-changed.v1"
+        },
+        "aggregateId": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "schemaVersion": {
+          "type": "integer",
+          "const": 1
+        },
+        "producer": {
+          "type": "string",
+          "const": "commerce-service"
+        },
+        "correlationId": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128
+        },
+        "payload": {
+          "type": "object",
+          "properties": {
+            "contractId": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "centerId": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "managerId": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 128
+            },
+            "status": {
+              "type": "string",
+              "enum": [
+                "ACTIVE",
+                "EXPIRED",
+                "SUSPENDED"
+              ]
+            },
+            "reason": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 1000
+            }
+          },
+          "required": [
+            "contractId",
+            "centerId",
+            "managerId",
+            "status",
+            "reason"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "id",
+        "type",
+        "aggregateId",
+        "createdAt",
+        "schemaVersion",
+        "producer",
+        "correlationId",
+        "payload"
+      ],
+      "additionalProperties": false
     }
   ]
 }

@@ -7,6 +7,13 @@
         "stars": 5,
         "comment": "Good court"
       }
+    },
+    {
+      "schema": "ReviewReportRequest",
+      "value": {
+        "reason": "SPAM",
+        "details": "Quảng cáo cờ bạc trái phép trong bình luận"
+      }
     }
   ],
   "invalid": [
@@ -16,6 +23,13 @@
         "bookingId": "a1104000-0000-4000-8000-000000000001",
         "stars": 6,
         "comment": "Invalid score"
+      }
+    },
+    {
+      "schema": "ReviewReportRequest",
+      "value": {
+        "reason": "INVALID_REASON",
+        "details": "Sai enum lý do"
       }
     }
   ]

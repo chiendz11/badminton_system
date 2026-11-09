@@ -802,6 +802,353 @@
           }
         ]
       }
+    },
+    "/partner-contracts": {
+      "get": {
+        "operationId": "listPartnerContracts",
+        "tags": [
+          "PartnerContract"
+        ],
+        "summary": "Danh sách hợp đồng thuê bao đối tác B2B SaaS",
+        "description": "Super Admin xem toàn bộ hợp đồng trên sàn; Center Manager chỉ xem hợp đồng của cơ sở mình phụ trách.",
+        "x-delivery-status": "proposed",
+        "x-owner-policy": "super_admin or center_manager.",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/XRequestId"
+          },
+          {
+            "name": "centerId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "ACTIVE",
+                "EXPIRED",
+                "SUSPENDED"
+              ]
+            }
+          },
+          {
+            "name": "cursor",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 100,
+              "default": 20
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Proposed success response",
+            "headers": {
+              "X-Request-Id": {
+                "schema": {
+                  "type": "string"
+                },
+                "description": "Correlation ID"
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PartnerContractPage"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/Error400"
+          },
+          "401": {
+            "$ref": "#/components/responses/Error401"
+          },
+          "403": {
+            "$ref": "#/components/responses/Error403"
+          },
+          "404": {
+            "$ref": "#/components/responses/Error404"
+          },
+          "409": {
+            "$ref": "#/components/responses/Error409"
+          },
+          "429": {
+            "$ref": "#/components/responses/Error429"
+          },
+          "503": {
+            "$ref": "#/components/responses/Error503"
+          }
+        },
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "x-implementation-status": "proposed",
+        "x-owner": "Người 4",
+        "x-gateway-path": "/api/commerce/partner-contracts"
+      },
+      "post": {
+        "operationId": "createPartnerContract",
+        "tags": [
+          "PartnerContract"
+        ],
+        "summary": "Tạo hợp đồng thuê bao đối tác B2B SaaS (Super Admin)",
+        "description": "Super Admin khởi tạo hợp đồng dịch vụ thuê bao khi onboard trung tâm thể thao mới với kỳ hạn 3/6/12 tháng.",
+        "x-delivery-status": "proposed",
+        "x-owner-policy": "super_admin only.",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/XRequestId"
+          },
+          {
+            "$ref": "#/components/parameters/IdempotencyKey"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PartnerContractCreate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Proposed success response",
+            "headers": {
+              "X-Request-Id": {
+                "schema": {
+                  "type": "string"
+                },
+                "description": "Correlation ID"
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PartnerContract"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/Error400"
+          },
+          "401": {
+            "$ref": "#/components/responses/Error401"
+          },
+          "403": {
+            "$ref": "#/components/responses/Error403"
+          },
+          "404": {
+            "$ref": "#/components/responses/Error404"
+          },
+          "409": {
+            "$ref": "#/components/responses/Error409"
+          },
+          "429": {
+            "$ref": "#/components/responses/Error429"
+          },
+          "503": {
+            "$ref": "#/components/responses/Error503"
+          }
+        },
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "x-implementation-status": "proposed",
+        "x-owner": "Người 4",
+        "x-gateway-path": "/api/commerce/partner-contracts"
+      }
+    },
+    "/partner-contracts/{contractId}": {
+      "get": {
+        "operationId": "getPartnerContract",
+        "tags": [
+          "PartnerContract"
+        ],
+        "summary": "Chi tiết hợp đồng thuê bao đối tác",
+        "description": "Super Admin hoặc Center Manager liên kết xem thông tin chi tiết hợp đồng.",
+        "x-delivery-status": "proposed",
+        "x-owner-policy": "super_admin or center_manager of contract centerId.",
+        "parameters": [
+          {
+            "name": "contractId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "$ref": "#/components/parameters/XRequestId"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Proposed success response",
+            "headers": {
+              "X-Request-Id": {
+                "schema": {
+                  "type": "string"
+                },
+                "description": "Correlation ID"
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PartnerContract"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/Error400"
+          },
+          "401": {
+            "$ref": "#/components/responses/Error401"
+          },
+          "403": {
+            "$ref": "#/components/responses/Error403"
+          },
+          "404": {
+            "$ref": "#/components/responses/Error404"
+          },
+          "409": {
+            "$ref": "#/components/responses/Error409"
+          },
+          "429": {
+            "$ref": "#/components/responses/Error429"
+          },
+          "503": {
+            "$ref": "#/components/responses/Error503"
+          }
+        },
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "x-implementation-status": "proposed",
+        "x-owner": "Người 4",
+        "x-gateway-path": "/api/commerce/partner-contracts/{contractId}"
+      }
+    },
+    "/partner-contracts/{contractId}/status": {
+      "patch": {
+        "operationId": "updatePartnerContractStatus",
+        "tags": [
+          "PartnerContract"
+        ],
+        "summary": "Cập nhật trạng thái hợp đồng (Gia hạn / Kích hoạt / Tạm ngưng)",
+        "description": "Super Admin cập nhật trạng thái hợp đồng thuê bao đối tác (kích hoạt, gia hạn, tạm dừng khi quá hạn thanh toán phí sàn).",
+        "x-delivery-status": "proposed",
+        "x-owner-policy": "super_admin only.",
+        "parameters": [
+          {
+            "name": "contractId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "$ref": "#/components/parameters/XRequestId"
+          },
+          {
+            "$ref": "#/components/parameters/IdempotencyKey"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PartnerContractStatusUpdate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Proposed success response",
+            "headers": {
+              "X-Request-Id": {
+                "schema": {
+                  "type": "string"
+                },
+                "description": "Correlation ID"
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PartnerContract"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/Error400"
+          },
+          "401": {
+            "$ref": "#/components/responses/Error401"
+          },
+          "403": {
+            "$ref": "#/components/responses/Error403"
+          },
+          "404": {
+            "$ref": "#/components/responses/Error404"
+          },
+          "409": {
+            "$ref": "#/components/responses/Error409"
+          },
+          "429": {
+            "$ref": "#/components/responses/Error429"
+          },
+          "503": {
+            "$ref": "#/components/responses/Error503"
+          }
+        },
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "x-implementation-status": "proposed",
+        "x-owner": "Người 4",
+        "x-gateway-path": "/api/commerce/partner-contracts/{contractId}/status"
+      }
     }
   },
   "components": {
@@ -1289,6 +1636,156 @@
         },
         "required": [
           "status"
+        ],
+        "additionalProperties": false
+      },
+      "PartnerContract": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "centerId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "managerId": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 128
+          },
+          "packageType": {
+            "type": "string",
+            "enum": [
+              "MONTHLY_3",
+              "MONTHLY_6",
+              "YEARLY_1"
+            ]
+          },
+          "startDate": {
+            "type": "string",
+            "format": "date"
+          },
+          "endDate": {
+            "type": "string",
+            "format": "date"
+          },
+          "monthlyFee": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "ACTIVE",
+              "EXPIRED",
+              "SUSPENDED"
+            ]
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "required": [
+          "id",
+          "centerId",
+          "managerId",
+          "packageType",
+          "startDate",
+          "endDate",
+          "monthlyFee",
+          "status",
+          "createdAt"
+        ],
+        "additionalProperties": false
+      },
+      "PartnerContractCreate": {
+        "type": "object",
+        "properties": {
+          "centerId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "managerId": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 128
+          },
+          "packageType": {
+            "type": "string",
+            "enum": [
+              "MONTHLY_3",
+              "MONTHLY_6",
+              "YEARLY_1"
+            ]
+          },
+          "startDate": {
+            "type": "string",
+            "format": "date"
+          },
+          "endDate": {
+            "type": "string",
+            "format": "date"
+          },
+          "monthlyFee": {
+            "type": "integer",
+            "minimum": 0
+          }
+        },
+        "required": [
+          "centerId",
+          "managerId",
+          "packageType",
+          "startDate",
+          "endDate",
+          "monthlyFee"
+        ],
+        "additionalProperties": false
+      },
+      "PartnerContractStatusUpdate": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string",
+            "enum": [
+              "ACTIVE",
+              "EXPIRED",
+              "SUSPENDED"
+            ]
+          },
+          "reason": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 1000
+          }
+        },
+        "required": [
+          "status",
+          "reason"
+        ],
+        "additionalProperties": false
+      },
+      "PartnerContractPage": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PartnerContract"
+            }
+          },
+          "nextCursor": {
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        },
+        "required": [
+          "items",
+          "nextCursor"
         ],
         "additionalProperties": false
       }

@@ -36,6 +36,7 @@
       },
       "post": {
         "summary": "Tạo trung tâm (admin)",
+        "description": "Super Admin tạo mới trung tâm thể thao khi đối tác ký hợp đồng dịch vụ B2B SaaS. Cơ sở được khởi tạo ở trạng thái DRAFT (isActive: false) và gán managerId cho Center Manager vận hành.",
         "operationId": "post__centers",
         "responses": {
           "201": {
@@ -98,6 +99,7 @@
       },
       "patch": {
         "summary": "Cập nhật trung tâm",
+        "description": "Center Manager tự chủ cấu hình thông tin cơ sở (tên, hotline, địa chỉ, giờ mở/đóng cửa, tiện ích, ảnh quảng bá, bio, bảng giá) và kích hoạt mở bán (isActive: true). Chỉ Super Admin mới có quyền cập nhật hoặc thay đổi managerId.",
         "operationId": "patch__centers_id",
         "responses": {
           "200": {
@@ -569,11 +571,13 @@
     },
     "/bookings/{id}/cancel": {
       "post": {
-        "summary": "Hủy booking",
+        "summary": "Khóa hủy booking đã xác nhận (Locked / Disabled - Chuyển sang Chợ Pass Sân)",
+        "description": "Hệ thống KHÔNG hỗ trợ hoàn tiền hoặc hủy trực tiếp cho booking đã xác nhận (CONFIRMED). Mọi yêu cầu gọi vào endpoint này đều bị từ chối với mã lỗi HTTP 403 Forbidden (BOOKING_CANCELLATION_DISABLED). Khách hàng có nhu cầu nhượng lại lịch đặt cần đăng tin lên Chợ Pass Sân qua POST /pass-posts. Đối với giữ chỗ tạm thời (HELD 10 phút), khách hàng hủy qua DELETE /reservations/{id}.",
+        "deprecated": true,
         "operationId": "post__bookings_id_cancel",
         "responses": {
-          "200": {
-            "description": "Thành công"
+          "403": {
+            "description": "Chức năng hủy bị vô hiệu hóa; không hỗ trợ hoàn tiền confirmed booking. Vui lòng sử dụng Chợ Pass Sân (POST /pass-posts)."
           },
           "400": {
             "description": "Dữ liệu không hợp lệ"
@@ -581,8 +585,8 @@
           "401": {
             "description": "Chưa đăng nhập"
           },
-          "403": {
-            "description": "Không có quyền"
+          "404": {
+            "description": "Không tìm thấy booking"
           },
           "409": {
             "description": "Xung đột lịch hoặc yêu cầu"
