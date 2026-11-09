@@ -1,5 +1,8 @@
 # Trợ lý hội thoại đặt sân
 
+> [!NOTE]
+> Đặc tả chi tiết về **Danh mục 9 Tools của LangChain** và **Sơ đồ đồ thị trạng thái 11 Node của LangGraph** (StateGraph), cùng kết quả kiểm chứng kết nối Provider thực tế trên cụm Kubernetes xem tại: **[LANGGRAPH_WORKFLOW_AND_TOOLS.md](LANGGRAPH_WORKFLOW_AND_TOOLS.md)**.
+
 Bản nâng cấp 27/10/2026 có diagnostics, near-miss một vi phạm, locked constraints, thương lượng và revalidation. Đọc [thiết kế và implementation V1](AI_SERVICE_UPGRADE.md) cho luồng hiện hành, cấu hình, contract và kiểm chứng; [walkthrough baseline](AI_SERVICE_CODE_WALKTHROUGH.md) giải thích nền tảng booking/persistence trước nâng cấp.
 
 Bổ sung 28/10/2026: chatbot xem lịch/lịch sử cá nhân, thống kê theo khoảng ngày, hủy booking với xác nhận riêng, so sánh trung tâm và trả lời FAQ có nguồn. [AI_ASSISTANCE_FEATURES.md](AI_ASSISTANCE_FEATURES.md) giải thích ví dụ hội thoại, guard/recovery, cách tính số liệu và toàn bộ file thay đổi. FAQ hiện dùng truy hồi từ khóa trên bảy bài quản lý phiên bản, chưa có embeddings/vector database.
