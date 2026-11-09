@@ -21,12 +21,17 @@ Tên role chuẩn của hệ thống: `user`, `center_manager`, `super_admin`. I
 | --- | --- | --- | --- | --- |
 | Đọc center/news/rating công khai | Có | Có | Có | Có |
 | Profile/phiên/booking của mình | Không | Own | Own | Theo policy; admin không mặc định đọc chat riêng |
+| Onboarding đối tác & Ký HĐ B2B SaaS | Không | Không | Nhận bàn giao cơ sở | **Toàn quyền khi ký HĐ** |
+| Thiết lập hồ sơ cơ sở (hotline, địa chỉ, ảnh, bio, tiện ích, số sân, bảng giá) | Không | Không | **Toàn quyền (sân được giao)** | Giám sát / hỗ trợ |
+| Kích hoạt mở bán cơ sở sau setup (isActive: true) | Không | Không | **Chủ động kích hoạt** | Toàn quyền kiểm soát |
+| Quản lý Hợp đồng Đối tác & Gia hạn SaaS | Không | Không | Xem hạn HĐ & liên hệ gia hạn | **Toàn quyền (Tạo/Gia hạn/Dừng)** |
 | Giá/sân/booking trung tâm | Đọc công khai | Không ghi | Assigned center | Toàn hệ thống + audit |
 | Nhập kho / POS / báo cáo | Không | Không | Assigned center | Toàn hệ thống + audit |
-| Gán manager/role/khóa user | Không | Không | Không | Có, audit và kiểm soát self-escalation |
+| Gán manager/role/khóa user (Ban user) | Không | Không | Không | Có, audit và kiểm soát self-escalation |
 | Viết review | Không | Own + booking hợp lệ (đề xuất) | Own nếu đúng điều kiện | Moderate theo policy |
+| Đề xuất Sự kiện, Giải đấu CLB cơ sở | Đọc published | Không | **Soạn thảo đề xuất (DRAFT)** | **Thẩm định & Duyệt xuất bản** |
 | News draft/publish | Đọc published | Không | Theo quyền editor được cấp | Quản trị theo policy |
-| Notification | Không | Own | Own | Own; không đọc mặc định của mọi user |
+| Notification | Không | Own | Gửi cảnh báo khẩn cấp tại sân | Phát thông báo toàn sàn (Broadcast) |
 
 ## Identity business rules
 
@@ -61,6 +66,11 @@ Commerce quản lý sale, inventory và stock movement trong cùng transaction b
 | AD-04 | Báo cáo tồn/sale | Bộ lọc trung tâm/thời gian; không lộ center khác |
 | AD-05 | Duyệt/ẩn review và publish news | Audit lý do/người thực hiện; giữ lịch sử moderation |
 | AD-06 | Tải ảnh center/product/profile | Storage kiểm MIME/size/owner; domain chỉ giữ fileId |
+| AD-07 | Onboarding đối tác & Ký HĐ SaaS | Super Admin tạo vỏ trung tâm, gán `managerId`, chọn gói SaaS (3/6/12 tháng) ở trạng thái DRAFT (`isActive: false`) |
+| AD-08 | Center Manager tự thiết lập cơ sở (Self-serve) | Manager tự hoàn thiện hotline, địa chỉ, ảnh, bio, tiện ích, số sân, bảng giá và kích hoạt mở bán (`isActive: true`) |
+| AD-09 | Quản lý HĐ Đối tác & Thuê bao SaaS | Super Admin gia hạn hợp đồng; tạm dừng hoạt động trung tâm (`isActive: false`) khi đối tác nợ phí hoặc hết hạn |
+| AD-10 | Đề xuất & Duyệt Sự kiện / Giải đấu CLB | Center Manager gửi hồ sơ đề xuất (DRAFT); Super Admin thẩm định và bấm duyệt đăng toàn sàn |
+| AD-11 | Khóa tài khoản vi phạm (Ban user/bot) | Super Admin khóa/mở khóa tài khoản người dùng vi phạm chính sách hoặc bot spam |
 
 Bộ use case xác định các màn hình quản trị, dữ liệu đầu vào và ngoại lệ cần hỗ trợ; đây là đầu vào cho wireframe, API contract và tổ chức feature ở tuần 5.
 

@@ -48,10 +48,13 @@ Notification là hậu quả của sự kiện, không phải điều kiện đ�
 
 | Nguồn sự kiện | Người nhận | Nội dung tối thiểu |
 | --- | --- | --- |
-| booking.confirmed.v1 / cancelled.v1 | Booking owner | bookingId + loại kết quả, không token |
+| booking.confirmed.v1 | Booking owner | bookingId + loại kết quả (booking.cancelled.v1 deprecated do khóa hủy confirmed) |
 | booking.pass-interest-added.v1 | Seller | postId + buyerId tham chiếu |
 | booking.pass-transferred.v1 | Seller cũ, receiver | bookingId/postId, không gửi toàn bộ hồ sơ |
 | social.message-created.v1 | Thành viên còn lại, tùy mute/online | conversationId/messageId; hạn chế log/nội dung nhạy cảm |
+| notification.broadcast (POST /notifications/broadcast) | Toàn sàn (user, center_manager) | Thông báo bảo trì máy chủ, lịch nghỉ lễ Tết, chính sách sàn từ Super Admin |
+| notification.urgent (POST /notifications/urgent) | Khách có booking trong ngày tại sân | Cảnh báo khẩn cấp (mất điện, dột mưa, sự cố kỹ thuật) từ Center Manager |
+| contract.expiry-reminder (Event-driven cron) | Center Manager | Nhắc hạn hợp đồng thuê bao SaaS trước 7 ngày, 3 ngày, 1 ngày khi hết hạn |
 
 Dedupe unique `(eventId, recipientId, channel)`; retry không nhân thông báo. ACK RabbitMQ sau persist, bounded retry có backoff, DLQ sau ngưỡng cấu hình. Lỗi consumer phải đi vào cơ chế retry hoặc DLQ thay vì bị bỏ qua.
 

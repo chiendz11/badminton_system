@@ -22,6 +22,7 @@ erDiagram
   User ||--o{ ExternalIdentity : links
   User ||--o{ CenterAssignment : manages
   AuthClient ||--o{ RefreshToken : scopes
+  CenterAssignment ||--o{ PartnerContract : binds
 ```
 
 | Entity | Fields chính | Constraints / bảo mật |
@@ -32,6 +33,7 @@ erDiagram
 | ExternalIdentity | userId,provider,providerSubject | Unique provider/subject; link cần re-auth |
 | AuthClient | id,clientSecretHash,allowedRedirectUris | Không wildcard redirect; không commit secret |
 | CenterAssignment | userId,centerId,status | Unique user/center; centerId external reference không FK xuyên Core DB |
+| PartnerContract | id,centerId,packageType,startDate,endDate,status,monthlyFee | Hợp đồng B2B SaaS gói 3/6/12 tháng; Super Admin quản lý gia hạn & dừng cơ sở |
 | OutboxEvent | id,type,aggregateId,payload,createdAt,publishedAt | User update + version + event trong cùng local transaction; publisher retry cùng eventId |
 
 Identity là nguồn sự thật cho userId, role và session. ID nội bộ có thể dùng UUID; contract actor ID giữa các service chấp nhận string 1–128, vì vậy consumer không tự ép mọi `sub` thành UUID. Public ID và JWT subject cần giữ nhất quán qua các API.
