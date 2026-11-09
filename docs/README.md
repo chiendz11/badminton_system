@@ -8,7 +8,8 @@ docs/
 ├── week-4/                # Khảo sát nghiệp vụ: Master BRD, BRD V2, 5 Artifacts W04
 ├── week-5/                # Thiết kế kỹ thuật: Master Architecture, Contracts, ADRs, 5 Artifacts W05
 ├── week-6/                # Khung hệ thống (Skeleton): 5 Artifacts W06, nghiệm thu Gate G03
-├── reports/               # Báo cáo thảo luận hàng tuần (WEEK_04 -> WEEK_06, Biên bản bàn giao)
+├── week-7/                # Lát cắt Đặt sân & Xác thực (Booking Slice): 5 Artifacts W07, nghiệm thu Gate G04, PPTX
+├── reports/               # Báo cáo thảo luận hàng tuần (WEEK_04 -> WEEK_07, Biên bản bàn giao)
 ├── services/              # Tài liệu kỹ thuật chi tiết các dịch vụ (Core, Gateway, UI, AI Subsystem)
 └── devops/                # Tự động hóa CI/CD, Giám sát Prometheus/Grafana, Kiểm chứng & Runbooks
 ```
@@ -62,6 +63,17 @@ Hiện thực hóa thành công 100% khung ứng dụng trên môi trường loc
   - `W06-N4`: [Content service, Admin shell & Docker hardening](week-6/W06-N4_content-admin.md) (Người 4)
   - `W06-N5`: [AI service FastAPI, Dual Runtime & CI/CD](week-6/W06-N5_ai-platform.md) (Người 5)
 
+### [Tuần 7 — Lát cắt Đặt sân & Xác thực người dùng (week-7/)](week-7/README.md)
+Hiện thực hóa thành công lát cắt dọc Đặt sân và Định danh (Đạt chuẩn Quality Gate G04 100%):
+- [**Slide Báo cáo PowerPoint Tuần 7 (Bao_Cao_Tuan_7_Badminton_Manager.pptx)**](week-7/Bao_Cao_Tuan_7_Badminton_Manager.pptx)
+- [**Thư viện Ảnh chụp Màn hình Kiểm chứng (screenshots/)**](week-7/screenshots/)
+- **5 Artifact Thực thi Cá nhân**:
+  - `W07-N1`: [Booking Core Concurrency ACID & Slot Hold Rules](week-7/W07-N1_booking-concurrency-acid.md) (Người 1)
+  - `W07-N2`: [Web Booking Integration & Auth Shell](week-7/W07-N2_web-booking-integration.md) (Người 2)
+  - `W07-N3`: [Social 1-1 Chat Progress & Recovery Plan](week-7/W07-N3_social-chat-progress.md) (Người 3)
+  - `W07-N4`: [Identity MVP, Multi-role Seed & Auth RBAC](week-7/W07-N4_identity-auth-rbac.md) (Người 4)
+  - `W07-N5`: [AI Assistant Q-Style & K8s Cluster Operations](week-7/W07-N5_ai-assistant-platform.md) (Người 5)
+
 ---
 
 ## 3. Báo cáo Tiến độ Thảo luận (Reports)
@@ -72,6 +84,7 @@ Tập trung các bản báo cáo hàng tuần phục vụ đăng bài trên chuy
 - [**Báo cáo Tuần 4 (reports/WEEK_04.md)**](reports/WEEK_04.md): Kết quả khảo sát nghiệp vụ và hoàn thành Master BRD.
 - [**Báo cáo Tuần 5 (reports/WEEK_05.md)**](reports/WEEK_05.md): Kết quả thiết kế kỹ thuật, hợp đồng dịch vụ và bộ 9 ADR.
 - [**Báo cáo Tuần 6 (reports/WEEK_06.md)**](reports/WEEK_06.md): Kết quả chạy thử nghiệm hệ thống kép (Compose + k3d) và vượt qua Gate G03.
+- [**Báo cáo Tuần 7 (reports/WEEK_07.md)**](reports/WEEK_07.md): Kết quả lát cắt Đặt sân, Concurrency ACID GiST và nghiệm thu Gate G04.
 - [**Biên bản Bàn giao Tuần 4–5 (reports/DELIVERY_W04_W05.md)**](reports/DELIVERY_W04_W05.md): Biên bản đối chiếu bàn giao giữa hai giai đoạn.
 
 ---

@@ -63,7 +63,8 @@ Báo cáo dùng số tuần 7 thống nhất với kế hoạch 10 tuần tại 
 
 ---
 
-## 4. Tài liệu trình chiếu đính kèm
+## 4. Tài liệu chi tiết & Trình chiếu đính kèm
 
-- File trình chiếu chính thức: [Bao_Cao_Tuan_7_Badminton_Manager.pptx](./Bao_Cao_Tuan_7_Badminton_Manager.pptx)
-- Thư mục ảnh chụp màn hình chứng minh: [screenshots/](./screenshots/)
+- **Thư mục tổng hợp Tuần 7:** [docs/week-7/](../week-7/README.md)
+- **File trình chiếu chính thức:** [Bao_Cao_Tuan_7_Badminton_Manager.pptx](../week-7/Bao_Cao_Tuan_7_Badminton_Manager.pptx) (bản sao lưu tại [reports/Bao_Cao_Tuan_7_Badminton_Manager.pptx](./Bao_Cao_Tuan_7_Badminton_Manager.pptx))
+- **Thư mục ảnh chụp màn hình chứng minh:** [docs/week-7/screenshots/](../week-7/screenshots/) (bản sao lưu tại [screenshots/](./screenshots/))
