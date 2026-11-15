@@ -67,6 +67,7 @@ describe("gateway boundaries", () => {
         "Content-Type": "application/json",
         Cookie: "refresh_token=current",
         "X-Request-Id": "refresh-request",
+        "X-Forwarded-For": "203.0.113.10",
       });
       const headers = new Headers();
       headers.append("Set-Cookie", replacement);
@@ -79,6 +80,7 @@ describe("gateway boundaries", () => {
       .set("Cookie", "other=value; refresh_token=current; tracking=value")
       .set("Authorization", "Bearer expired-access")
       .set("X-Request-Id", "refresh-request")
+      .set("X-Forwarded-For", "203.0.113.10")
       .expect(200)
       .expect("Cache-Control", "no-store");
     expect(result.headers["set-cookie"]).toEqual([replacement]);

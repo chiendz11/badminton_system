@@ -82,9 +82,114 @@
             }
           }
         },
-        "x-implementation-status": "proposed",
+        "x-implementation-status": "implemented",
         "x-owner": "Người 4",
-        "x-gateway-path": "/api/identity/register"
+        "x-gateway-path": "/api/auth/register"
+      }
+    },
+    "/verify-email": {
+      "post": {
+        "operationId": "verifyEmail",
+        "tags": [
+          "Identity"
+        ],
+        "summary": "Verify an account email with a one-time token",
+        "description": "Implemented via /api/auth/verify-email. Public; single-use SHA-256 verification token.",
+        "x-delivery-status": "implemented",
+        "x-owner-policy": "Public; rate limits required.",
+        "responses": {
+          "204": {
+            "description": "Email verified"
+          },
+          "400": {
+            "$ref": "#/components/responses/Error400"
+          },
+          "429": {
+            "$ref": "#/components/responses/Error429"
+          },
+          "503": {
+            "$ref": "#/components/responses/Error503"
+          }
+        },
+        "security": [],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/XRequestId"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/VerifyEmailRequest"
+              }
+            }
+          }
+        },
+        "x-implementation-status": "implemented",
+        "x-owner": "Người 4",
+        "x-gateway-path": "/api/auth/verify-email"
+      }
+    },
+    "/resend-verification": {
+      "post": {
+        "operationId": "resendVerification",
+        "tags": [
+          "Identity"
+        ],
+        "summary": "Request a new email verification link",
+        "description": "Implemented via /api/auth/resend-verification. Public; enforces 60s resend cooldown and generic 202 response.",
+        "x-delivery-status": "implemented",
+        "x-owner-policy": "Public; cooldown and rate limits required.",
+        "responses": {
+          "202": {
+            "description": "Generic acceptance response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "message"
+                  ],
+                  "properties": {
+                    "message": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/Error400"
+          },
+          "429": {
+            "$ref": "#/components/responses/Error429"
+          },
+          "503": {
+            "$ref": "#/components/responses/Error503"
+          }
+        },
+        "security": [],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/XRequestId"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ResendVerificationRequest"
+              }
+            }
+          }
+        },
+        "x-implementation-status": "implemented",
+        "x-owner": "Người 4",
+        "x-gateway-path": "/api/auth/resend-verification"
       }
     },
     "/login": {
@@ -160,9 +265,9 @@
             }
           }
         },
-        "x-implementation-status": "proposed",
+        "x-implementation-status": "implemented",
         "x-owner": "Người 4",
-        "x-gateway-path": "/api/identity/login"
+        "x-gateway-path": "/api/auth/login"
       }
     },
     "/refresh": {
@@ -226,9 +331,9 @@
             "$ref": "#/components/parameters/XRequestId"
           }
         ],
-        "x-implementation-status": "proposed",
+        "x-implementation-status": "implemented",
         "x-owner": "Người 4",
-        "x-gateway-path": "/api/identity/refresh"
+        "x-gateway-path": "/api/auth/refresh"
       }
     },
     "/logout": {
@@ -285,9 +390,9 @@
             "RefreshCookie": []
           }
         ],
-        "x-implementation-status": "proposed",
+        "x-implementation-status": "implemented",
         "x-owner": "Người 4",
-        "x-gateway-path": "/api/identity/logout"
+        "x-gateway-path": "/api/auth/logout"
       }
     },
     "/me": {
@@ -346,14 +451,14 @@
             "$ref": "#/components/parameters/XRequestId"
           }
         ],
-        "x-implementation-status": "proposed",
+        "x-implementation-status": "implemented",
         "x-owner": "Người 4",
         "security": [
           {
             "BearerAuth": []
           }
         ],
-        "x-gateway-path": "/api/identity/me"
+        "x-gateway-path": "/api/auth/me"
       },
       "patch": {
         "operationId": "updateMe",
@@ -1117,6 +1222,35 @@
           "reason"
         ],
         "additionalProperties": false
+      },
+      "VerifyEmailRequest": {
+        "type": "object",
+        "properties": {
+          "token": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9_-]{43}$",
+            "minLength": 43,
+            "maxLength": 43
+          }
+        },
+        "required": [
+          "token"
+        ],
+        "additionalProperties": false
+      },
+      "ResendVerificationRequest": {
+        "type": "object",
+        "properties": {
+          "email": {
+            "type": "string",
+            "format": "email",
+            "maxLength": 254
+          }
+        },
+        "required": [
+          "email"
+        ],
+        "additionalProperties": false
       }
     },
     "responses": {
@@ -1220,7 +1354,7 @@
         "type": "apiKey",
         "in": "cookie",
         "name": "refresh_token",
-        "description": "Proposed HttpOnly Secure cookie, SameSite/CSRF/rotation policy must be reviewed."
+        "description": "HttpOnly refresh cookie scoped to /api/auth, SameSite=Lax and Secure in production."
       },
       "BearerAuth": {
         "type": "http",

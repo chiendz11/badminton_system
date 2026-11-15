@@ -7,12 +7,32 @@ export interface IdentityConfig {
   issuer: string;
   audience: string;
   secureRefreshCookie: boolean;
+  trustProxy: number | false;
   mailpit?: MailpitConfig;
+}
+
+function parseCookieSecure(env: NodeJS.ProcessEnv): boolean {
+  const raw = env.COOKIE_SECURE?.trim().toLowerCase();
+  if (!raw) return env.NODE_ENV === "production";
+  if (raw === "true") return true;
+  if (raw === "false") return false;
+  throw Error("COOKIE_SECURE must be true or false");
+}
+
+function parseTrustProxy(rawValue: string | undefined): number | false {
+  const raw = rawValue?.trim().toLowerCase();
+  if (!raw) return 1;
+  if (raw === "false" || raw === "0") return false;
+  const hops = Number(raw);
+  if (!Number.isInteger(hops) || hops < 1 || hops > 10) {
+    throw Error("TRUST_PROXY must be false or an integer between 1 and 10");
+  }
+  return hops;
 }
 
 function mailpitConfiguration(env: NodeJS.ProcessEnv): MailpitConfig | undefined {
   const origin = env.MAILPIT_URL?.trim();
-  if (env.NODE_ENV !== "development" || !origin) return undefined;
+  if (!origin) return undefined;
 
   const mailpitOrigin = new URL(origin);
   const verificationPage = new URL(
@@ -55,7 +75,8 @@ export function configuration(
     jwtSecret,
     issuer: env.JWT_ISSUER || "badminton-identity",
     audience: env.JWT_AUDIENCE || "badminton-system",
-    secureRefreshCookie: env.NODE_ENV === "production",
+    secureRefreshCookie: parseCookieSecure(env),
+    trustProxy: parseTrustProxy(env.TRUST_PROXY),
     mailpit: mailpitConfiguration(env),
   };
 }

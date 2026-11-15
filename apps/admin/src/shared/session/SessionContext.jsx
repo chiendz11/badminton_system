@@ -7,6 +7,10 @@ import {
   useState,
 } from "react";
 import http from "../api/http.js";
+import {
+  logoutSession,
+  refreshSession,
+} from "../api/auth.js";
 import { ROLES } from "../constants/roles.js";
 
 export const SessionContext = createContext(null);
@@ -34,15 +38,18 @@ function normalizeSession(session) {
   };
 }
 
-export function SessionProvider({
-  children,
-  session = window.__BADMINTON_SESSION__,
-}) {
-  const initialSession = useRef(session);
+export function SessionProvider({ children, session }) {
+  const hostProvided = useRef(
+    session !== undefined || window.__BADMINTON_SESSION__ !== undefined,
+  );
+  const initialSession = useRef(
+    session !== undefined ? session : window.__BADMINTON_SESSION__,
+  );
   const [current, setCurrent] = useState(() => {
-    if (session?.profile && isAdminRole(session.profile.role)) {
+    const sess = initialSession.current;
+    if (sess?.profile && isAdminRole(sess.profile.role)) {
       try {
-        return normalizeSession(session);
+        return normalizeSession(sess);
       } catch {
         // ignore
       }
@@ -50,13 +57,19 @@ export function SessionProvider({
     return null;
   });
   const [loading, setLoading] = useState(
-    Boolean(session?.accessToken && !current),
+    !hostProvided.current ||
+      Boolean(initialSession.current?.accessToken && !current),
   );
 
-  const logout = useCallback(() => {
+  const clearSession = useCallback(() => {
     window.__BADMINTON_SESSION__ = null;
     setCurrent(null);
   }, []);
+
+  const logout = useCallback(() => {
+    clearSession();
+    void logoutSession().catch(() => {});
+  }, [clearSession]);
 
   const updateSession = useCallback((nextSession) => {
     const normalized = normalizeSession(nextSession);
@@ -67,7 +80,7 @@ export function SessionProvider({
   const setUser = useCallback(
     (userData) => {
       if (!userData) {
-        logout();
+        clearSession();
         return;
       }
       updateSession({
@@ -81,7 +94,7 @@ export function SessionProvider({
         },
       });
     },
-    [logout, updateSession],
+    [clearSession, updateSession],
   );
 
   const login = useCallback(
@@ -105,13 +118,29 @@ export function SessionProvider({
     let active = true;
     const sess = initialSession.current;
     if (!sess?.accessToken) {
-      window.__BADMINTON_SESSION__ = null;
-      setLoading(false);
-      return;
+      if (hostProvided.current) {
+        window.__BADMINTON_SESSION__ = null;
+        setLoading(false);
+        return;
+      }
+      refreshSession()
+        .then((refreshed) => {
+          if (active) updateSession(refreshed);
+        })
+        .catch(() => {
+          if (active) clearSession();
+        })
+        .finally(() => {
+          if (active) setLoading(false);
+        });
+      return () => {
+        active = false;
+      };
     }
     http
       .get("/api/auth/me", {
         skipAuth: true,
+        skipRefresh: true,
         headers: { Authorization: `Bearer ${sess.accessToken}` },
       })
       .then(({ data }) => {
@@ -132,7 +161,7 @@ export function SessionProvider({
         });
       })
       .catch(() => {
-        if (active) logout();
+        if (active) clearSession();
       })
       .finally(() => {
         if (active) setLoading(false);
@@ -140,32 +169,60 @@ export function SessionProvider({
     return () => {
       active = false;
     };
-  }, [logout, updateSession]);
+  }, [clearSession, updateSession]);
 
   useEffect(() => {
     if (!current) return;
-    const timer = setTimeout(
-      logout,
-      Math.max(0, current.expiresAt - Date.now()),
-    );
-    return () => clearTimeout(timer);
-  }, [current, logout]);
+    const remaining = Math.max(0, current.expiresAt - Date.now());
+    const expiryTimer = setTimeout(clearSession, remaining);
+    const timers = [expiryTimer];
+    if (remaining > 30_000) {
+      timers.push(
+        setTimeout(() => {
+          void refreshSession()
+            .then(updateSession)
+            .catch(() => {});
+        }, remaining - 30_000),
+      );
+    }
+    return () => {
+      for (const timer of timers) clearTimeout(timer);
+    };
+  }, [clearSession, current, updateSession]);
 
   useEffect(() => {
-    const interceptor = http.interceptors.response.use(undefined, (error) => {
-      if (
-        error.response?.status === 401 &&
-        current &&
-        error.config?.headers?.Authorization ===
-          `Bearer ${current.accessToken}` &&
-        window.__BADMINTON_SESSION__?.accessToken === current.accessToken
-      ) {
-        logout();
-      }
-      return Promise.reject(error);
-    });
+    const interceptor = http.interceptors.response.use(
+      undefined,
+      async (error) => {
+        const originalConfig = error?.config;
+        if (
+          error.response?.status === 401 &&
+          originalConfig &&
+          !originalConfig._retried &&
+          !originalConfig.skipAuth &&
+          !originalConfig.skipRefresh &&
+          current &&
+          originalConfig.headers?.Authorization ===
+            `Bearer ${current.accessToken}` &&
+          window.__BADMINTON_SESSION__?.accessToken === current.accessToken
+        ) {
+          try {
+            const refreshed = await refreshSession();
+            updateSession(refreshed);
+            const headers = {
+              ...originalConfig.headers,
+              Authorization: `Bearer ${refreshed.accessToken}`,
+            };
+            return http({ ...originalConfig, headers, _retried: true });
+          } catch {
+            clearSession();
+          }
+        }
+        return Promise.reject(error);
+      },
+    );
     return () => http.interceptors.response.eject(interceptor);
-  }, [current, logout]);
+  }, [clearSession, current, updateSession]);
 
   const value = useMemo(
     () => ({
