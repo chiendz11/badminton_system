@@ -4,7 +4,6 @@ import {
   Controller,
   Get,
   Headers,
-  HttpCode,
   Inject,
   Param,
   ParseUUIDPipe,
@@ -54,7 +53,7 @@ export class BookingsController {
   @Delete(":id") hide(@Req() req: AuthRequest, @Param("id", uuid) id: string) {
     return this.commands.hide(req.actor, id);
   }
-  @Post(":id/cancel") @HttpCode(200) cancel(
+  @Post(":id/cancel") cancel(
     @Req() req: AuthRequest,
     @Param("id", uuid) id: string,
   ) {

@@ -149,12 +149,16 @@ const MyBookings = () => {
     let title, message;
     switch (actionType) {
       case "cancel":
-        title = "Hủy đặt sân";
-        message = "Bạn chắc chắn muốn hủy?";
+        title = "Hủy giữ chỗ";
+        message = "Bạn có chắc chắn muốn hủy lượt giữ chỗ này không?";
         break;
       case "delete":
         title = "Xóa booking";
         message = "Xóa khỏi lịch sử?";
+        break;
+      case "pass":
+        title = "Chuyển nhượng lịch đặt (Chợ Pass Sân)";
+        message = `Hệ thống không hỗ trợ hoàn tiền cho booking đã thanh toán. Bạn có muốn đăng tin nhượng lại suất chơi tại ${params.centerName || "sân"} ngày ${params.date || ""} lên Chợ Pass Sân?`;
         break;
       default:
         return;
@@ -173,12 +177,14 @@ const MyBookings = () => {
     try {
       if (actionConfig.type === "cancel") {
         await cancelBooking(actionConfig.bookingId || actionConfig.orderId);
-        alert("Đã hủy thành công!");
+        alert("Đã hủy giữ chỗ thành công!");
         setRefreshHistoryTrigger((prev) => prev + 1); // Trigger reload tab History
       } else if (actionConfig.type === "delete") {
         await deleteBooking(actionConfig.bookingId);
         alert("Đã xóa!");
         setRefreshHistoryTrigger((prev) => prev + 1);
+      } else if (actionConfig.type === "pass") {
+        alert("Đã tiếp nhận yêu cầu nhượng sân! Hệ thống sẽ điều hướng bạn đến Chợ Pass Sân (POST /pass-posts) để hoàn tất đăng tin.");
       }
     } catch (error) {
       alert("Lỗi: " + (error.response?.data?.message || error.message));

@@ -361,10 +361,10 @@
         "tags": [
           "Content"
         ],
-        "summary": "Create draft news",
-        "description": "PROPOSED — not implemented. super_admin or explicit editor permission; policy pending.",
+        "summary": "Tạo tin bài hoặc đề xuất sự kiện CLB (draft)",
+        "description": "Center Manager đề xuất sự kiện thi đấu, giao lưu CLB tại cơ sở ở trạng thái DRAFT hoặc Super Admin tạo trực tiếp tin tức hệ thống. Tin bài DRAFT cần được Super Admin phê duyệt qua POST /news/{newsId}/publication trước khi hiển thị công khai toàn sàn.",
         "x-delivery-status": "proposed",
-        "x-owner-policy": "super_admin or explicit editor permission; policy pending.",
+        "x-owner-policy": "super_admin or center_manager for centerId drafts.",
         "responses": {
           "201": {
             "description": "Proposed success response",
@@ -655,6 +655,94 @@
           }
         ]
       }
+    },
+    "/reviews/{reviewId}/report": {
+      "post": {
+        "operationId": "reportReview",
+        "tags": [
+          "Content"
+        ],
+        "summary": "Báo cáo đánh giá vi phạm",
+        "description": "Người dùng hoặc Center Manager gửi báo cáo về đánh giá có nội dung spam, xúc phạm hoặc sai sự thật để Super Admin kiểm duyệt gỡ bỏ.",
+        "x-delivery-status": "proposed",
+        "x-owner-policy": "Authenticated user or center manager.",
+        "responses": {
+          "201": {
+            "description": "Đã gửi báo cáo vi phạm thành công",
+            "headers": {
+              "X-Request-Id": {
+                "schema": {
+                  "type": "string"
+                },
+                "description": "Correlation ID"
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReviewReportResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/Error400"
+          },
+          "401": {
+            "$ref": "#/components/responses/Error401"
+          },
+          "403": {
+            "$ref": "#/components/responses/Error403"
+          },
+          "404": {
+            "$ref": "#/components/responses/Error404"
+          },
+          "409": {
+            "$ref": "#/components/responses/Error409"
+          },
+          "429": {
+            "$ref": "#/components/responses/Error429"
+          },
+          "503": {
+            "$ref": "#/components/responses/Error503"
+          }
+        },
+        "parameters": [
+          {
+            "name": "reviewId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "$ref": "#/components/parameters/XRequestId"
+          },
+          {
+            "$ref": "#/components/parameters/IdempotencyKey"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ReviewReportRequest"
+              }
+            }
+          }
+        },
+        "x-implementation-status": "proposed",
+        "x-owner": "Người 4",
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "x-gateway-path": "/api/content/reviews/{reviewId}/report"
+      }
     }
   },
   "components": {
@@ -852,6 +940,10 @@
           "publishedAt": {
             "type": "string",
             "format": "date-time"
+          },
+          "centerId": {
+            "type": "string",
+            "format": "uuid"
           }
         },
         "required": [
@@ -891,6 +983,10 @@
           "category": {
             "type": "string",
             "maxLength": 100
+          },
+          "centerId": {
+            "type": "string",
+            "format": "uuid"
           }
         },
         "required": [
@@ -935,6 +1031,68 @@
         },
         "required": [
           "status"
+        ],
+        "additionalProperties": false
+      },
+      "ReviewReportRequest": {
+        "type": "object",
+        "properties": {
+          "reason": {
+            "type": "string",
+            "enum": [
+              "SPAM",
+              "OFFENSIVE",
+              "FALSE_INFORMATION",
+              "OTHER"
+            ]
+          },
+          "details": {
+            "type": "string",
+            "maxLength": 1000
+          }
+        },
+        "required": [
+          "reason"
+        ],
+        "additionalProperties": false
+      },
+      "ReviewReportResponse": {
+        "type": "object",
+        "properties": {
+          "reportId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "reviewId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "reporterUserId": {
+            "type": "string"
+          },
+          "reason": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "PENDING",
+              "RESOLVED",
+              "REJECTED"
+            ]
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "required": [
+          "reportId",
+          "reviewId",
+          "reporterUserId",
+          "reason",
+          "status",
+          "createdAt"
         ],
         "additionalProperties": false
       }

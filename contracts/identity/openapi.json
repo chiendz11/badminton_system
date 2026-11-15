@@ -812,6 +812,95 @@
           }
         ]
       }
+    },
+    "/users/{userId}/status": {
+      "patch": {
+        "operationId": "updateUserStatus",
+        "tags": [
+          "Identity"
+        ],
+        "summary": "Khóa hoặc mở khóa tài khoản (Super Admin ban/unban)",
+        "description": "Super Admin quản lý trạng thái tài khoản người dùng hoặc chủ sân. Khóa tài khoản (isActive: false) khi vi phạm quy định sàn hoặc mở lại tài khoản.",
+        "x-delivery-status": "proposed",
+        "x-owner-policy": "super_admin only.",
+        "responses": {
+          "200": {
+            "description": "Proposed success response",
+            "headers": {
+              "X-Request-Id": {
+                "schema": {
+                  "type": "string"
+                },
+                "description": "Correlation ID"
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Actor"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/Error400"
+          },
+          "401": {
+            "$ref": "#/components/responses/Error401"
+          },
+          "403": {
+            "$ref": "#/components/responses/Error403"
+          },
+          "404": {
+            "$ref": "#/components/responses/Error404"
+          },
+          "409": {
+            "$ref": "#/components/responses/Error409"
+          },
+          "429": {
+            "$ref": "#/components/responses/Error429"
+          },
+          "503": {
+            "$ref": "#/components/responses/Error503"
+          }
+        },
+        "parameters": [
+          {
+            "name": "userId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 128
+            }
+          },
+          {
+            "$ref": "#/components/parameters/XRequestId"
+          },
+          {
+            "$ref": "#/components/parameters/IdempotencyKey"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UserStatusUpdate"
+              }
+            }
+          }
+        },
+        "x-implementation-status": "proposed",
+        "x-owner": "Người 4",
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "x-gateway-path": "/api/identity/users/{userId}/status"
+      }
     }
   },
   "components": {
@@ -1008,6 +1097,24 @@
         },
         "required": [
           "status"
+        ],
+        "additionalProperties": false
+      },
+      "UserStatusUpdate": {
+        "type": "object",
+        "properties": {
+          "isActive": {
+            "type": "boolean"
+          },
+          "reason": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 1000
+          }
+        },
+        "required": [
+          "isActive",
+          "reason"
         ],
         "additionalProperties": false
       }

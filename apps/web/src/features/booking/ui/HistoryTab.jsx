@@ -388,23 +388,51 @@ const HistoryTab = ({
                       </td>
                       <td>
                         <div className="action-buttons">
-                          {(booking.status === "pending" ||
-                            (booking.status === "confirmed" &&
-                              Date.parse(booking.startsAt) > Date.now())) && (
-                            <>
-                              <button
-                                className="cancel-btn"
-                                title="Hủy"
-                                onClick={() =>
-                                  promptAction("cancel", {
-                                    bookingId: booking.bookingId,
-                                    orderId: booking.orderId,
-                                  })
-                                }
-                              >
-                                <i className="fas fa-times"></i>
-                              </button>
-                            </>
+                          {booking.status === "pending" && (
+                            <button
+                              className="cancel-btn"
+                              title="Hủy giữ chỗ"
+                              onClick={() =>
+                                promptAction("cancel", {
+                                  bookingId: booking.bookingId,
+                                  orderId: booking.orderId,
+                                })
+                              }
+                            >
+                              <i className="fas fa-times"></i>
+                            </button>
+                          )}
+
+                          {booking.status === "confirmed" &&
+                            Date.parse(booking.startsAt) > Date.now() && (
+                            <button
+                              className="pass-btn"
+                              title="Pass sân (Chuyển nhượng)"
+                              style={{
+                                backgroundColor: "#f59e0b",
+                                color: "#ffffff",
+                                border: "none",
+                                borderRadius: "4px",
+                                padding: "4px 8px",
+                                cursor: "pointer",
+                                fontSize: "0.8rem",
+                                fontWeight: "600",
+                                display: "inline-flex",
+                                alignItems: "center",
+                                gap: "4px",
+                              }}
+                              onClick={() =>
+                                promptAction("pass", {
+                                  bookingId: booking.bookingId,
+                                  orderId: booking.orderId,
+                                  centerName: booking.centerName,
+                                  date: booking.date,
+                                  price: booking.price,
+                                })
+                              }
+                            >
+                              <i className="fas fa-ticket-alt"></i> Pass sân
+                            </button>
                           )}
 
                           {(booking.status === "confirmed" &&

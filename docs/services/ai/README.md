@@ -1,5 +1,8 @@
 # Trợ lý hội thoại đặt sân
 
+> [!NOTE]
+> Đặc tả chi tiết về **Danh mục 9 Tools của LangChain** và **Sơ đồ đồ thị trạng thái 11 Node của LangGraph** (StateGraph), cùng kết quả kiểm chứng kết nối Provider thực tế trên cụm Kubernetes xem tại: **[LANGGRAPH_WORKFLOW_AND_TOOLS.md](LANGGRAPH_WORKFLOW_AND_TOOLS.md)**.
+
 Bản nâng cấp 27/10/2026 có diagnostics, near-miss một vi phạm, locked constraints, thương lượng và revalidation. Đọc [thiết kế và implementation V1](AI_SERVICE_UPGRADE.md) cho luồng hiện hành, cấu hình, contract và kiểm chứng; [walkthrough baseline](AI_SERVICE_CODE_WALKTHROUGH.md) giải thích nền tảng booking/persistence trước nâng cấp.
 
 Bổ sung 28/10/2026: chatbot xem lịch/lịch sử cá nhân, thống kê theo khoảng ngày, hủy booking với xác nhận riêng, so sánh trung tâm và trả lời FAQ có nguồn. [AI_ASSISTANCE_FEATURES.md](AI_ASSISTANCE_FEATURES.md) giải thích ví dụ hội thoại, guard/recovery, cách tính số liệu và toàn bộ file thay đổi. FAQ hiện dùng truy hồi từ khóa trên bảy bài quản lý phiên bản, chưa có embeddings/vector database.
@@ -73,7 +76,7 @@ Mọi endpoint sau cần business bearer JWT. Gateway chuyển các route conver
 
 `search_availability` vẫn giữ adapter LangChain StructuredTool cho tương thích. Workflow cố định gọi trực tiếp `BookingTools.search_result` có kiểu để nhận diagnostics/coverage; không để LLM chọn đường mutation. `get_option_details` chỉ đọc option server đã lưu. `create_booking` là orchestration reserve/confirm/recovery có policy trong BOOK. `get_booking` chỉ gọi Core; không có SQL tool, payment/pass hoặc admin mutation trong allowlist.
 
-Nhánh `ASSIST` bổ sung `list_my_bookings`, `get_my_booking_stats`, `compare_centers`, `search_faq`, `cancel_my_booking`. Các thao tác gọi API Core hiện có; FAQ đọc knowledge JSON local. Riêng cancel cần preview, `cancellation_id`, owner check và durable intent trước mutation. Khi chưa rõ kết quả, trả `RETRY_CANCELLATION`; `confirmation_id` đặt sân không có quyền hủy booking.
+Nhánh `ASSIST` bổ sung `list_my_bookings`, `get_my_booking_stats`, `compare_centers`, `search_faq`, `cancel_my_booking`. Các thao tác gọi API Core hiện có; FAQ đọc knowledge JSON local. Hệ thống áp dụng quy tắc: **booking đã CONFIRMED tuyệt đối không thể hủy bởi bất kỳ vai trò nào** do không hỗ trợ hoàn tiền; khi người dùng yêu cầu hủy qua chatbot, Core trả về HTTP 403 Forbidden và Chatbot tự động bắt lỗi, phản hồi hành động `cancellation_refused` kèm lời khuyên nghiệp vụ: *"Booking đã xác nhận không thể tự hủy. Bạn vui lòng sử dụng tính năng Chợ Pass sân hoặc liên hệ quản lý trung tâm."* Khách hàng chỉ có quyền hủy giữ chỗ tạm thời (`HELD` 10 phút) chưa thanh toán qua `DELETE /api/v1/reservations/:id`. Khi chưa rõ kết quả, trả `RETRY_CANCELLATION`; `confirmation_id` đặt sân không có quyền hủy booking.
 
 AI không được cấp database URL Booking Core trong runtime. Các biến `AI_LIVE_*` chỉ phục vụ integration test với DB tên kết thúc `_test`; fixture tạo/xóa dữ liệu của chính nó. Database AI lưu transcript và checkpoint, không lưu JWT/API key. Trace gồm node/outcome/version, không phải chain-of-thought riêng của model.
 

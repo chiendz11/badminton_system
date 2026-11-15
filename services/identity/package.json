@@ -13,7 +13,8 @@
     "test:integration": "vitest run test/auth.spec.ts",
     "prisma:validate": "prisma validate",
     "prisma:generate": "prisma generate",
-    "prisma:migrate:deploy": "prisma migrate deploy"
+    "prisma:migrate:deploy": "prisma migrate deploy",
+    "seed": "tsx src/seed-dev.ts"
   },
   "dependencies": {
     "@badminton/auth-contracts": "workspace:*",

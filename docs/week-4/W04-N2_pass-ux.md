@@ -15,7 +15,7 @@ Tài liệu trình bày kết quả phân tích trong tuần 4: phạm vi, quy t
 
 ## Nguyên tắc thiết kế giao diện
 
-Luồng giao diện gồm lịch sử đặt sân, modal đăng nhượng, danh sách bài nhượng và thẻ trạng thái. UI nhận bookingId/postId từ API và hiển thị đúng trạng thái server; không tự suy quyền sở hữu hoặc điều kiện nhượng từ dữ liệu đã lưu trong trình duyệt.
+Luồng giao diện gồm lịch sử đặt sân, modal đăng nhượng, danh sách bài nhượng và thẻ trạng thái. Do hệ thống khóa hoàn toàn quyền hủy booking đã CONFIRMED (HTTP 403 Forbidden do không hỗ trợ hoàn tiền), Chợ Pass Sân (Pass Marketplace) có cơ chế ký quỹ (Escrow) là giải pháp hợp pháp và duy nhất để người chơi sang nhượng lại quyền chơi cho người khác. UI nhận bookingId/postId từ API và hiển thị đúng trạng thái server; không tự suy quyền sở hữu hoặc điều kiện nhượng từ dữ liệu đã lưu trong trình duyệt.
 
 ## User stories và ưu tiên
 

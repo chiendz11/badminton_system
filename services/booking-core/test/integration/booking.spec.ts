@@ -121,7 +121,7 @@ beforeEach(async () => {
     },
   });
 });
-test("holds, confirms without payment, returns history, cancels and releases the slot", async () => {
+test("holds, confirms without payment, returns history, and confirmed bookings cannot be cancelled by anyone", async () => {
   const held = await hold().expect(201);
   expect(held.body.totalPrice).toBe(80000);
   const booking = await confirm(held.body.id);
@@ -140,15 +140,27 @@ test("holds, confirms without payment, returns history, cancels and releases the
     .set("Authorization", `Bearer ${token()}`);
   expect(userCancel.status).toBe(403);
   expect(userCancel.body.message).toContain("Chợ Pass");
-  await request(app.getHttpServer())
+  const managerCancel = await request(app.getHttpServer())
     .post(`/api/v1/bookings/${booking.body.id}/cancel`)
-    .set("Authorization", `Bearer ${token("manager", "center_manager")}`)
+    .set("Authorization", `Bearer ${token("manager", "center_manager")}`);
+  expect(managerCancel.status).toBe(403);
+  expect(managerCancel.body.message).toContain("Chợ Pass");
+  expect(await db.slotAllocation.count()).toBe(1);
+});
+test("user can cancel an active hold reservation to release the slot immediately", async () => {
+  const held = await hold("hold-cancel-key-1", "customer").expect(201);
+  expect(await db.slotAllocation.count()).toBe(1);
+  await request(app.getHttpServer())
+    .delete(`/api/v1/reservations/${held.body.id}`)
+    .set("Authorization", `Bearer ${token()}`)
     .expect(200);
   expect(await db.slotAllocation.count()).toBe(0);
-  expect(
-    await db.outboxEvent.count({ where: { type: "booking.cancelled.v1" } }),
-  ).toBe(1);
-  await hold("request-key-new1", "other").expect(201);
+  const res = await db.reservation.findUniqueOrThrow({
+    where: { id: held.body.id },
+  });
+  expect(res.status).toBe("CANCELLED");
+  await hold("hold-after-cancel-key-2", "other").expect(201);
+  expect(await db.slotAllocation.count()).toBe(1);
 });
 test("concurrent requests cannot double-book a court", async () => {
   const outcomes = await Promise.all([
@@ -292,7 +304,7 @@ test("fixed booking creation is idempotent and authorization stays scoped to the
   );
   expect(await db.outboxEvent.count()).toBe(2);
 });
-test("disabling an occupied court is rejected; cancellation is idempotent", async () => {
+test("disabling an occupied court is rejected while court has active allocations", async () => {
   const held = await hold().expect(201),
     booking = await confirm(held.body.id);
   await request(app.getHttpServer())
@@ -300,14 +312,10 @@ test("disabling an occupied court is rejected; cancellation is idempotent", asyn
     .set("Authorization", `Bearer ${token("manager", "center_manager")}`)
     .send({ isActive: false })
     .expect(409);
-  for (let i = 0; i < 2; i++)
-    await request(app.getHttpServer())
-      .post(`/api/v1/bookings/${booking.body.id}/cancel`)
-      .set("Authorization", `Bearer ${token("manager", "center_manager")}`)
-      .expect(200);
-  expect(
-    await db.outboxEvent.count({ where: { type: "booking.cancelled.v1" } }),
-  ).toBe(1);
+  await request(app.getHttpServer())
+    .post(`/api/v1/bookings/${booking.body.id}/cancel`)
+    .set("Authorization", `Bearer ${token("manager", "center_manager")}`)
+    .expect(403);
 });
 test("PostgreSQL constraint rejects overlapping allocations independently of application checks", async () => {
   const held = await hold().expect(201);

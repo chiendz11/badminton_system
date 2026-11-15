@@ -522,7 +522,7 @@
           }
         },
         "x-implementation-status": "implemented",
-        "description": "Personal history/statistics, center comparison and sourced FAQ. select_booking prepares cancellation; confirm_cancellation uses a separate server-issued cancellation_id. retry_cancellation reconciles the original pending cancellation. User IDs and tool names cannot be supplied by clients."
+        "description": "Personal history/statistics, center comparison and sourced FAQ. Confirmed booking cancellation is locked (HTTP 403 / non-refundable); AI guides users to Pass Marketplace (Chợ Pass Sân) for transfers. For held reservations (10-min TTL), users can cancel prior to payment. User IDs and tool names cannot be supplied by clients."
       }
     },
     "/api/conversations/{conversation_id}/trace": {

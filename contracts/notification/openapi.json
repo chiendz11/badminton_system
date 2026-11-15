@@ -365,6 +365,161 @@
           }
         ]
       }
+    },
+    "/notifications/broadcast": {
+      "post": {
+        "operationId": "broadcastNotification",
+        "tags": [
+          "Notification"
+        ],
+        "summary": "Super Admin phát thông báo toàn hệ thống",
+        "description": "Super Admin phát thông báo hệ thống (bảo trì sàn, chính sách mới, thông báo nghỉ lễ) tới toàn bộ người dùng, chủ sân hoặc phân nhóm chỉ định.",
+        "x-delivery-status": "proposed",
+        "x-owner-policy": "super_admin only.",
+        "responses": {
+          "202": {
+            "description": "Đã tiếp nhận và đưa vào hàng đợi phát thông báo",
+            "headers": {
+              "X-Request-Id": {
+                "schema": {
+                  "type": "string"
+                },
+                "description": "Correlation ID"
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BroadcastNotificationResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/Error400"
+          },
+          "401": {
+            "$ref": "#/components/responses/Error401"
+          },
+          "403": {
+            "$ref": "#/components/responses/Error403"
+          },
+          "409": {
+            "$ref": "#/components/responses/Error409"
+          },
+          "429": {
+            "$ref": "#/components/responses/Error429"
+          },
+          "503": {
+            "$ref": "#/components/responses/Error503"
+          }
+        },
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/XRequestId"
+          },
+          {
+            "$ref": "#/components/parameters/IdempotencyKey"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BroadcastNotificationRequest"
+              }
+            }
+          }
+        },
+        "x-implementation-status": "proposed",
+        "x-owner": "Người 3",
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "x-gateway-path": "/api/notifications/broadcast"
+      }
+    },
+    "/notifications/urgent": {
+      "post": {
+        "operationId": "sendUrgentNotification",
+        "tags": [
+          "Notification"
+        ],
+        "summary": "Center Manager phát thông báo khẩn cấp tại cơ sở",
+        "description": "Center Manager gửi thông báo khẩn cấp (thời tiết mưa bão, sự cố kỹ thuật hỏng đèn, bảo trì khẩn) tới tất cả người chơi có lịch đặt sân bị ảnh hưởng trong ngày tại cơ sở.",
+        "x-delivery-status": "proposed",
+        "x-owner-policy": "center_manager of centerId or super_admin.",
+        "responses": {
+          "200": {
+            "description": "Đã gửi thông báo khẩn cấp thành công",
+            "headers": {
+              "X-Request-Id": {
+                "schema": {
+                  "type": "string"
+                },
+                "description": "Correlation ID"
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UrgentNotificationResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/Error400"
+          },
+          "401": {
+            "$ref": "#/components/responses/Error401"
+          },
+          "403": {
+            "$ref": "#/components/responses/Error403"
+          },
+          "404": {
+            "$ref": "#/components/responses/Error404"
+          },
+          "409": {
+            "$ref": "#/components/responses/Error409"
+          },
+          "429": {
+            "$ref": "#/components/responses/Error429"
+          },
+          "503": {
+            "$ref": "#/components/responses/Error503"
+          }
+        },
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/XRequestId"
+          },
+          {
+            "$ref": "#/components/parameters/IdempotencyKey"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UrgentNotificationRequest"
+              }
+            }
+          }
+        },
+        "x-implementation-status": "proposed",
+        "x-owner": "Người 3",
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "x-gateway-path": "/api/notifications/urgent"
+      }
     }
   },
   "components": {
@@ -452,6 +607,156 @@
           "status"
         ],
         "additionalProperties": false
+      },
+      "BroadcastNotificationRequest": {
+        "type": "object",
+        "properties": {
+          "title": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 200
+          },
+          "message": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 2000
+          },
+          "targetAudience": {
+            "type": "string",
+            "enum": [
+              "ALL",
+              "MANAGERS",
+              "PLAYERS"
+            ],
+            "default": "ALL"
+          },
+          "priority": {
+            "type": "string",
+            "enum": [
+              "NORMAL",
+              "HIGH",
+              "URGENT"
+            ],
+            "default": "NORMAL"
+          }
+        },
+        "required": [
+          "title",
+          "message"
+        ],
+        "additionalProperties": false
+      },
+      "BroadcastNotificationResponse": {
+        "type": "object",
+        "properties": {
+          "broadcastId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "recipientCount": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "sentAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "SENT",
+              "QUEUED"
+            ]
+          }
+        },
+        "required": [
+          "broadcastId",
+          "recipientCount",
+          "sentAt",
+          "status"
+        ],
+        "additionalProperties": false
+      },
+      "UrgentNotificationRequest": {
+        "type": "object",
+        "properties": {
+          "centerId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "date": {
+            "type": "string",
+            "format": "date"
+          },
+          "courtIds": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          "title": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 200
+          },
+          "message": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 2000
+          },
+          "actionRequired": {
+            "type": "string",
+            "enum": [
+              "NOTICE_ONLY",
+              "REFUND_PENDING",
+              "RELOCATE"
+            ],
+            "default": "NOTICE_ONLY"
+          }
+        },
+        "required": [
+          "centerId",
+          "date",
+          "title",
+          "message"
+        ],
+        "additionalProperties": false
+      },
+      "UrgentNotificationResponse": {
+        "type": "object",
+        "properties": {
+          "urgentId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "centerId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "impactedBookingsCount": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "sentAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "DELIVERED"
+            ]
+          }
+        },
+        "required": [
+          "urgentId",
+          "centerId",
+          "impactedBookingsCount",
+          "sentAt",
+          "status"
+        ],
+        "additionalProperties": false
       }
     },
     "responses": {
@@ -536,6 +841,18 @@
           "minLength": 1,
           "maxLength": 128
         }
+      },
+      "IdempotencyKey": {
+        "name": "Idempotency-Key",
+        "in": "header",
+        "required": true,
+        "schema": {
+          "type": "string",
+          "minLength": 8,
+          "maxLength": 128,
+          "pattern": "^[A-Za-z0-9_-]+$"
+        },
+        "description": "Khóa chống trùng lặp yêu cầu gửi thông báo"
       }
     },
     "securitySchemes": {

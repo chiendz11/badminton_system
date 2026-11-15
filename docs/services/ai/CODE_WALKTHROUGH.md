@@ -959,7 +959,7 @@ Các giới hạn cần hiểu để không giải thích quá mức code:
 - Evidence chỉ được kiểm là substring sau normalize, chưa chứng minh mọi suy diễn value đều đúng. soft_fields nhận từ parser chưa có evidence validator riêng; chuyển mềm→cứng cần parser trả danh sách phù hợp.
 - Area là text match; cap catalogue/centers/options nghĩa không đảm bảo sân gần nhất theo km hoặc tìm hết toàn hệ thống.
 - Availability/giá search là snapshot/ước tính. Core reserve/confirm mới quyết định trạng thái và giá thật.
-- Intent cancel chỉ bỏ lựa chọn trong chat, chưa có workflow hủy booking đã chốt.
+- Nghiệp vụ hủy booking: Hệ thống không cho phép bất kỳ vai trò nào hủy booking đã CONFIRMED do không hỗ trợ hoàn tiền; khách hàng chỉ có thể hủy giữ chỗ tạm thời (HELD 10 phút) qua `DELETE /reservations/:id`. Khi yêu cầu hủy booking đã xác nhận qua Chatbot, Core trả 403 Forbidden và Chatbot tự động bắt lỗi, từ chối yêu cầu và hướng dẫn người dùng đăng bài sang Chợ Pass Sân.
 - Chưa có response_model đầy đủ cho các response dict, chưa có cursor paging, retention/TTL transcript hoặc quota/rate limit riêng trong service này.
 - Không tự có distributed transaction/exactly-once, production SLO hay chất lượng LLM thật chỉ vì đã dùng LangGraph và có tests.
 

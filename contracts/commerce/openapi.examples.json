@@ -12,6 +12,17 @@
         ],
         "paymentMethod": "CASH"
       }
+    },
+    {
+      "schema": "PartnerContractCreate",
+      "value": {
+        "centerId": "a1104000-0000-4000-8000-000000000006",
+        "managerId": "manager-user-01",
+        "packageType": "MONTHLY_6",
+        "startDate": "2026-11-01",
+        "endDate": "2027-05-01",
+        "monthlyFee": 1500000
+      }
     }
   ],
   "invalid": [
@@ -26,6 +37,17 @@
           }
         ],
         "paymentMethod": "CASH"
+      }
+    },
+    {
+      "schema": "PartnerContractCreate",
+      "value": {
+        "centerId": "not-a-uuid",
+        "managerId": "manager-user-01",
+        "packageType": "MONTHLY_99",
+        "startDate": "2026-11-01",
+        "endDate": "2027-05-01",
+        "monthlyFee": -100
       }
     }
   ]

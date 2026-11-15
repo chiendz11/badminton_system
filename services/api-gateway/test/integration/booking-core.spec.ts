@@ -269,7 +269,12 @@ describe("legacy gateway to real Booking Core / Postgres", () => {
       .patch("/api/booking/" + id)
       .set(auth("manager", "center_manager"))
       .send({ status: "cancelled" })
-      .expect(200);
+      .expect(403);
+    const b = await db.booking.findUniqueOrThrow({ where: { id } });
+    await db.reservation.update({
+      where: { id: b.reservationId },
+      data: { date: "2020-01-01" },
+    });
     await request(gateway)
       .delete("/api/booking/" + id)
       .set(auth())
@@ -285,7 +290,7 @@ describe("legacy gateway to real Booking Core / Postgres", () => {
     const rows = await request(gateway)
       .get("/api/booking/bookings")
       .set(auth("manager", "center_manager"));
-    expect(rows.body.data[0].bookingStatus).toBe("cancelled");
+    expect(rows.body.data[0].bookingStatus).toBe("confirmed");
   });
   it("applies centre, court count and pricing updates atomically with manager boundaries", async () => {
     const query =

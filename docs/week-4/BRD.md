@@ -5,11 +5,11 @@
 | Thuộc tính | Nội dung |
 | --- | --- |
 | Loại tài liệu | Business Requirements Document — Tài liệu yêu cầu nghiệp vụ |
-| Phiên bản | 1.0 |
-| Ngày lập | 18/10/2026, múi giờ Việt Nam |
-| Trạng thái | Dự thảo để chủ hệ thống và nhóm phát triển xem xét; chưa phải biên bản nghiệm thu |
+| Phiên bản | 2.0 (Chuẩn hóa mô hình Platform 3 Actor, SaaS Subscription & Vận hành hợp đồng B2B) |
+| Ngày lập | 18/10/2026 (Cập nhật lớn: 09/11/2026), múi giờ Việt Nam |
+| Trạng thái | Dự thảo chuẩn hóa kiến trúc 3 Actor và vận hành nền tảng B2B SaaS |
 | Hệ thống | badminton_system |
-| Phạm vi phiên bản | Booking Core và AI service; Web/Admin kế thừa giao diện booking từ repo gốc; API Gateway phục vụ tích hợp |
+| Phạm vi phiên bản | Booking Core, AI service, Content/Rating/News, Identity/RBAC; Web khách hàng và Cổng quản trị Admin dùng chung (Single Admin Portal) |
 | Mốc code đối chiếu | main tại commit fbd3d4d538692b8ae383f561165c844fdf9d0bf2 |
 | Người quyết định nghiệp vụ | Chủ hệ thống/đại diện vận hành sân; cần chỉ định người phê duyệt cụ thể |
 | Nhóm thực hiện | Nhóm phát triển 5 người; phân công cá nhân thực hiện ngoài tài liệu này |
@@ -47,7 +47,7 @@ Việc giữ các màn hình booking gốc giúp tiếp tục sử dụng bố c
 | Mã mục tiêu | Kết quả nghiệp vụ mong muốn | Cách kiểm chứng |
 | --- | --- | --- |
 | OBJ-01 | Ghi nhận booking đúng sân/ngày/giờ, không chiếm trùng slot | Nghiệm thu tranh chấp đồng thời; đối chiếu booking và phân bổ slot |
-| OBJ-02 | Khách tự tìm, đặt, xem và hủy lịch thuộc quyền của mình | Hoàn thành các kịch bản Web và kiểm tra quyền sở hữu |
+| OBJ-02 | Khách tự tìm, đặt, xem lịch và hủy giữ chỗ tạm thời; khóa hủy booking confirmed cho mọi vai trò (không hỗ trợ hoàn tiền) | Hoàn thành các kịch bản Web, kiểm tra quyền sở hữu và phân quyền RBAC |
 | OBJ-03 | Quản lý lập và vận hành lịch sân, gồm lịch cố định | Kiểm tra chuỗi nhiều ngày và phạm vi trung tâm được giao |
 | OBJ-04 | Trợ lý AI giữ ngữ cảnh và chỉ đặt khi được xác nhận cuối | Nghiệm thu hội thoại nhiều lượt, thay đổi điều kiện và xác nhận |
 | OBJ-05 | Có thể điều tra lỗi và phục hồi yêu cầu chưa rõ kết quả | Theo dõi mã yêu cầu, kiểm tra retry, trạng thái booking và dữ liệu lưu |
@@ -65,112 +65,155 @@ Các chỉ số dùng khi chạy thử:
 
 Kết quả golden dùng provider giả lập chỉ đo hồi quy trên bộ mẫu. Không dùng tỷ lệ đó làm độ chính xác tiếng Việt của model thật hoặc mức thành công thực tế của sản phẩm.
 
-## 4. Bên liên quan và vai trò
+## 4. Bên liên quan và 3 Actor nghiệp vụ cốt lõi
 
-| Bên liên quan | Trách nhiệm/lợi ích |
-| --- | --- |
-| Chủ hệ thống/đại diện nghiệp vụ | Chốt phạm vi, chính sách giá/hủy, chỉ tiêu chất lượng và phê duyệt nghiệm thu |
-| Khách đặt sân | Tìm khung giờ phù hợp, xác nhận lựa chọn, theo dõi lịch và hủy theo quy định |
-| Quản lý trung tâm | Quản lý lịch, sân và bảng giá của trung tâm được phân công; tạo lịch cố định cho khách |
-| Quản trị hệ thống | Quản lý các trung tâm, phân công quản lý và thực hiện quyền quản trị toàn hệ thống |
-| Nhóm phát triển/kiểm thử | Xây dựng, kiểm tra yêu cầu, ghi nhận thiếu hụt và duy trì hợp đồng tích hợp |
-| Người vận hành kỹ thuật | Quản lý môi trường, theo dõi lỗi, sao lưu/khôi phục và bảo vệ dữ liệu |
-| Hệ thống cấp danh tính bên ngoài | Cấp phiên/token và thông tin chọn khách/quản lý; chưa được triển khai thành Identity service trong repo này |
-| Nhà cung cấp LLM | Cung cấp khả năng xử lý ngôn ngữ; không quyết định quyền hoặc nguồn sự thật về lịch sân |
+Hệ thống được thiết kế theo mô hình **SaaS Platform kết nối thể thao phong trào**, phân định rõ ranh giới trách nhiệm, thẩm quyền và tương tác giữa 3 Actor chính:
 
-### 4.1. Ma trận quyền nghiệp vụ
+1. **Khách hàng (`user`):**
+   - Người chơi có nhu cầu tìm kiếm sân bãi, tra cứu thông tin cơ sở, xem bảng giờ trống theo ngày (05:00–24:00) hoặc tương tác trực tiếp với Trợ lý AI.
+   - Thao tác đặt ngày, nhận báo giá chốt tức thời, giữ chỗ 10 phút (`HELD`), tự hủy giữ chỗ sớm qua `DELETE /api/v1/reservations/:id` để nhường slot.
+   - Quản lý lịch sử đặt sân cá nhân, ẩn vé đã chơi/hủy, theo dõi biểu đồ thống kê giờ chơi cá nhân.
+   - Khi có việc bận không thể đến sân: Sang nhượng slot qua **Chợ Pass Sân (Pass Marketplace)** với cơ chế ký quỹ (Escrow) vì hệ thống khóa tuyệt đối quyền tự hủy booking đã confirmed.
 
-Tên vai trò hiện tại: khách đã có phiên là **user**, quản lý là **center_manager**, quản trị là **super_admin**.
+2. **Quản lý trung tâm (`center_manager`):**
+   - Đối tác sở hữu/quản lý cụm sân cụ thể, được Super Admin bàn giao quyền vận hành cơ sở thông qua định danh `managerId`.
+   - **Tự tay thiết lập & hoàn thiện hồ sơ cơ sở (Self-serve Facility Setup):** Cập nhật địa chỉ chi tiết, hotline liên hệ lễ tân, giờ mở/đóng cửa, viết bio giới thiệu, chọn tiện ích (wifi, bãi đỗ xe, phòng tắm nóng lạnh...), tải logo và album ảnh thực tế mặt sân; thiết lập số lượng sân và cấu hình bảng giá linh hoạt theo giờ vàng / giờ thấp điểm, ngày thường / cuối tuần.
+   - **Kích hoạt mở bán cơ sở:** Chủ động kích hoạt mở bán (`isActive: true`) sau khi hoàn tất hồ sơ thiết lập ban đầu để hiển thị công khai trên Web khách hàng.
+   - Quản lý cấu hình sân nội bộ (đổi tên sân, thông số mặt sân thảm PVC/gỗ) trong cơ sở được phân công.
+   - Tạm khóa / mở lại từng sân khi cần bảo trì, thay lưới (`isActive: false`), hệ thống tự động bảo vệ các slot tương lai đã có người đặt.
+   - Tạo lịch cố định (Recurring Series 1–60 ngày) dạng chuỗi nguyên vẹn (atomic transaction) cho các CLB / khách quen.
+   - Bảng điều khiển trạng thái sân thời gian thực (Real-time Court Grid 05:00–24:00) phục vụ đón tiếp và check-in khách tại quầy.
+   - Xem báo cáo, thống kê lượt đặt và doanh số nội bộ của riêng trung tâm mình.
+   - Soạn thảo & gửi hồ sơ đề xuất Sự kiện, Giải đấu CLB, Khuyến mại lớn lên Super Admin để thẩm định và duyệt đăng toàn sàn.
+   - Báo cáo các bình luận đánh giá tiêu cực / chơi xấu từ đối thủ và gửi thông báo khẩn cấp đến khách có lịch chơi trong ngày tại sân khi xảy ra sự cố cơ sở (mất điện, dột mưa).
 
-| Thao tác | Chưa có phiên | user | center_manager | super_admin |
-| --- | --- | --- | --- | --- |
-| Xem danh sách trung tâm và lịch trống công khai | Có | Có | Có | Có |
-| Đặt ngày, xem/hủy/ẩn lịch cá nhân | Không | Booking của mình | Booking của mình | Booking của mình |
-| Đọc lịch/booking phục vụ quản lý | Không | Không | Trung tâm được giao | Mọi trung tâm |
-| Sửa thông tin trung tâm, sân, bảng giá | Không | Không | Trung tâm được giao, trừ đổi người quản lý | Mọi trung tâm |
-| Tạo trung tâm/phân công quản lý | Không | Không | Không | Có |
-| Tạo lịch cố định cho khách | Không | Không | Trung tâm được giao | Mọi trung tâm |
-| Hủy booking theo quyền quản lý, trước giờ bắt đầu | Không | Chỉ booking của mình | Trung tâm được giao | Mọi trung tâm |
-| Dùng AI để tìm/đặt cho chính mình | Không | Có | Có | Có |
-| Đọc/ghi hội thoại AI của người khác | Không | Không | Không | Không |
+3. **Quản trị viên nền tảng (`super_admin` - Platform Operator):**
+   - Đơn vị sở hữu và vận hành sàn công nghệ (Platform Operator), đóng vai trò điều phối hệ sinh thái, không can thiệp vào các hoạt động bán lẻ hay đặt lịch hàng ngày của từng cơ sở.
+   - **Onboarding đối tác & Khởi tạo trung tâm (Platform Onboarding):** Tiếp nhận hồ sơ khi đối tác ký kết hợp đồng B2B; khởi tạo vỏ trung tâm ban đầu (Tên trung tâm/pháp nhân, gói thuê bao SaaS) và phân công tài khoản quản trị viên cơ sở (`managerId`); cơ sở khởi tạo ở trạng thái ban đầu `DRAFT` (`isActive: false`) chờ đối tác tự cấu hình; Super Admin không can thiệp gõ thay từng chi tiết địa chỉ, ảnh, bio hay tiện ích của sân.
+   - **Quản lý Hợp đồng Đối tác & Thuê bao SaaS (B2B Partner Contracts):** Khởi tạo hợp đồng thuê bao (gói 3 tháng, 6 tháng, 1 năm); gia hạn hợp đồng khi đối tác thanh toán định kỳ; theo dõi thời hạn hiệu lực và công nợ phí phần mềm.
+   - **Phân công & Điều chuyển quản lý cơ sở:** Gán và thay đổi `managerId` cho trung tâm khi đối tác thay đổi nhân sự quản lý (Center Manager không có quyền tự đổi người).
+   - **Quản lý vòng đời cơ sở (Center Lifecycle):** Kích hoạt hoặc tạm dừng hoạt động trung tâm (`isActive: false`) khi đối tác nợ phí thuê bao hoặc hết hạn hợp đồng chưa gia hạn (Core tự động chặn đặt sân mới).
+   - **Thẩm định, duyệt & Đăng tải Sự kiện / Giải đấu CLB:** Tiếp nhận đề xuất từ các Center Manager, kiểm duyệt nội dung/poster và phát hành công khai lên trang chủ toàn sàn (Web/App) để người chơi toàn hệ thống tiếp cận.
+   - **Kiểm duyệt Đánh giá (Rating Text Moderation):** Trọng tài độc lập xử lý khiếu nại đánh giá xấu; ẩn/xóa bình luận bôi nhọ, tục tĩu vi phạm tiêu chuẩn cộng đồng.
+   - **Truyền thông & Phát thông báo toàn sàn (Broadcast Notification):** Gửi thông báo hệ thống tới toàn bộ người dùng (lịch nghỉ lễ Tết, bảo trì máy chủ, chính sách sàn mới).
+   - **Dashboard giám sát vĩ mô toàn sàn:** Báo cáo tổng thể toàn bộ mạng lưới trung tâm, tổng lượt đặt, GMV toàn hệ sinh thái phục vụ đối soát và phân tích tăng trưởng nền tảng.
+   - **Quản trị tài khoản & An toàn hệ thống:** Khóa tài khoản người dùng vi phạm chính sách / bot spam slot (Ban user).
 
-Vai trò và thông tin hiển thị trong browser không tự cấp quyền. Mọi quyền tác động dữ liệu phải được backend kiểm tra từ danh tính đã xác minh và quan hệ với tài nguyên.
+### 4.1. Ma trận quyền nghiệp vụ 3 Actor
 
-## 5. Phạm vi
+| Nghiệp vụ / Hành động | Chưa có phiên | user (Khách hàng) | center_manager (Quản lý sân) | super_admin (Vận hành sàn) |
+| :--- | :---: | :---: | :---: | :---: |
+| **Xem danh mục trung tâm, ảnh, tiện ích, lịch trống công khai** | Có | Có | Có | Có |
+| **Giữ chỗ 10p (HELD) & Tự hủy giữ chỗ sớm (DELETE /reservations/:id)** | Không | Booking của mình | Không | Không |
+| **Xác nhận đặt ngày (CONFIRMED) & Xem/ẩn lịch sử cá nhân** | Không | Booking của mình | Booking của mình | Booking của mình |
+| **Hủy booking CONFIRMED & Hoàn tiền** | Không | **Không (Chặn 403, sang Chợ Pass)** | **Không (Hệ thống không hoàn tiền)** | **Không (Hệ thống không hoàn tiền)** |
+| **Sang nhượng slot qua Chợ Pass Sân (Pass Marketplace)** | Không | Toàn quyền (mua / bán) | Không | Giám sát ký quỹ (Escrow) |
+| **Sử dụng Trợ lý AI (Drawer / Chatbot) tìm kiếm & hỏi đáp FAQ** | Không | Có | Có | Có |
+| **Cấu hình sân nội bộ, bảng giá giờ cao/thấp điểm** | Không | Không | Trung tâm được giao | Không tự ý can thiệp |
+| **Tạm khóa / bảo trì từng sân (isActive: false)** | Không | Không | Trung tâm được giao | Không can thiệp lẻ |
+| **Tạo lịch cố định nhiều ngày (chuỗi atomic 1–60 ngày)** | Không | Không | Trung tâm được giao | Không can thiệp |
+| **Bảng grid trạng thái sân thời gian thực & Check-in đón khách** | Không | Không | Trung tâm được giao | Mọi trung tâm (chế độ xem) |
+| **Xem báo cáo doanh số, lượt đặt nội bộ sân mình** | Không | Không | Trung tâm được giao | Không can thiệp nội bộ |
+| **Onboarding đối tác & Ký HĐ SaaS (tạo vỏ cơ sở ban đầu)** | Không | Không | Ký HĐ & nhận bàn giao | **Toàn quyền khi ký HĐ B2B** |
+| **Thiết lập hồ sơ cơ sở (hotline, địa chỉ, ảnh, bio, tiện ích, số sân)** | Không | Không | **Toàn quyền (sân được giao)** | Giám sát / hỗ trợ |
+| **Kích hoạt mở bán cơ sở sau setup (isActive: true)** | Không | Không | **Chủ động kích hoạt** | Toàn quyền kiểm soát |
+| **Quản lý Hợp đồng Đối tác & Gia hạn thuê bao SaaS** | Không | Không | Xem hạn HĐ & liên hệ gia hạn | **Toàn quyền (Tạo/Gia hạn/Dừng)** |
+| **Gán và điều chuyển người quản lý (managerId)** | Không | Không | Không | **Toàn quyền** |
+| **Tạm dừng / Đóng trung tâm hết hạn HĐ (isActive: false)** | Không | Không | Không | **Toàn quyền** |
+| **Đề xuất Sự kiện, Giải đấu CLB, Khuyến mại cơ sở** | Không | Không | Soạn thảo & gửi đề xuất | Thẩm định & duyệt |
+| **Phê duyệt & Đăng tải Tin tức / Sự kiện lên trang chủ toàn sàn** | Xem & đăng ký | Xem & tham gia | Chờ phê duyệt | **Toàn quyền duyệt & đăng** |
+| **Kiểm duyệt Đánh giá (Rating Text Moderation) & xóa bình luận xấu** | Viết đánh giá | Báo cáo khiếu nại | Không tự xóa | **Toàn quyền ẩn / xóa** |
+| **Gửi thông báo sự cố cục bộ tới khách trong ngày tại sân** | Nhận thông báo | Không | Gửi khách có lịch hôm nay | Không can thiệp |
+| **Phát thông báo toàn hệ thống (Broadcast Notification)** | Nhận thông báo | Không | Nhận thông báo | **Toàn quyền gửi toàn sàn** |
+| **Dashboard giám sát vĩ mô toàn sàn & GMV hệ sinh thái** | Không | Không | Không | **Toàn quyền** |
+| **Khóa tài khoản vi phạm chính sách / Bot spam slot (Ban)** | Không | Không | Báo cáo vi phạm | **Toàn quyền** |
+
+Vai trò và thông tin hiển thị trong browser không tự cấp quyền. Mọi quyền tác động dữ liệu phải được backend kiểm tra từ danh tính đã xác minh (JWT claims) và quan hệ tài nguyên (`managerId`).
+
+## 5. Phạm vi và Mô hình Vận hành Nền tảng
 
 ### 5.1. Trong phạm vi phiên bản hiện tại
 
+Hệ thống triển khai theo mô hình **B2B SaaS Subscription (Phần mềm dịch vụ thu phí thuê bao theo tháng/năm)**, duy trì **1 ứng dụng Web khách hàng** và **1 ứng dụng Admin hợp nhất (`apps/admin`)** phân quyền RBAC:
+
 | Nhóm | Nội dung |
 | --- | --- |
-| Danh mục sân | Trung tâm, sân, địa chỉ/thông tin mô tả, tiện ích, trạng thái hoạt động, giờ mở cửa và bảng giá |
-| Đặt sân theo ngày | Lịch trống, chọn sân/slot, báo giá, giữ chỗ có hạn, xác nhận, tra cứu và hủy |
-| Lịch cố định | Quản lý chọn khách và lịch nhiều ngày; kiểm tra toàn chuỗi; tạo toàn bộ hoặc từ chối toàn bộ |
-| Lịch sử/thống kê booking | Xem/lọc lịch cá nhân, thống kê hoạt động, ẩn booking đủ điều kiện; quản lý xem booking theo quyền |
-| Trợ lý AI | Tiếng Việt nhiều lượt, thu thập điều kiện, tìm phương án từ Core, lập lại kế hoạch, chọn, xác nhận cuối và lấy biên nhận |
-| Giao diện | Giữ JSX/CSS/bố cục booking gốc của Web/Admin; thêm trang AI theo kế hoạch hội thoại |
-| Kiểm soát và vận hành | Kiểm tra quyền, bảo vệ thao tác lặp, lưu dấu sự kiện nghiệp vụ, logs/metrics/health và kiểm thử |
-| Tích hợp | Gateway nối Web/Admin với Booking Core và AI; AI gọi API Core theo danh sách công cụ cho phép |
+| **Danh mục sân & Onboarding** | Quy trình Onboarding 2 bước: Super Admin khởi tạo vỏ trung tâm & HĐ SaaS (Tên cơ sở + gói thuê bao + gán `managerId`) ở trạng thái DRAFT; Center Manager tự tay hoàn thiện hồ sơ vận hành (hotline, địa chỉ, ảnh, bio, tiện ích, số lượng sân, bảng giá) và kích hoạt mở bán (`isActive: true`). |
+| **Quản lý Hợp đồng SaaS** | Super Admin quản lý hợp đồng thuê bao đối tác (gói 3/6/12 tháng), ngày bắt đầu/kết thúc, trạng thái thanh toán và gia hạn; tự động/thủ công tạm dừng cơ sở khi quá hạn. |
+| **Cấu hình & Vận hành cơ sở** | Center Manager điều chỉnh giá giờ vàng/thấp điểm, ngày thường/cuối tuần; bật/tắt bảo trì từng sân; quản lý grid sân check-in khách. |
+| **Đặt sân & Concurrency** | Lịch trống 05:00–24:00, GiST Exclusion Constraint chống race condition; giữ chỗ 10 phút; tự hủy giữ chỗ sớm; khóa hủy booking confirmed. |
+| **Lịch cố định (Series)** | Center Manager đặt lịch chuỗi 1–60 ngày cho CLB/khách quen; kiểm tra toàn chuỗi; ghi nhận nguyên vẹn (atomic transaction). |
+| **Truyền thông & Đăng tin** | Center Manager đề xuất sự kiện/giải đấu $\rightarrow$ Super Admin thẩm định, duyệt và phát hành lên trang chủ toàn sàn. |
+| **Đánh giá & Kiểm duyệt** | Khách hàng đánh giá sao/bình luận; Center Manager báo cáo khiếu nại; Super Admin kiểm duyệt từ ngữ độc hại và ẩn/xóa bình luận bôi nhọ. |
+| **Thông báo hệ thống** | Super Admin phát thông báo toàn sàn (Broadcast); Center Manager phát thông báo khẩn cấp cục bộ cho khách có booking trong ngày. |
+| **Trợ lý AI** | Drawer trượt Amazon Q-Style, tiếng Việt tự nhiên, LangGraph workflow, đối chiếu lịch Core, hỗ trợ FAQ và consent đặt sân. |
+| **Chợ Pass Sân** | Khách hàng đăng bài nhượng slot có cơ chế ký quỹ (Escrow) minh bạch khi không thể đến chơi. |
+| **Giao diện hợp nhất** | Web khách hàng kế thừa bố cục booking; Admin portal hợp nhất dùng chung cho cả Center Manager và Super Admin với menu lọc theo vai trò. |
 
-Booking Core là nơi quyết định lịch trống, quyền tác động booking và giá cuối. AI lưu hội thoại/trạng thái xử lý riêng; không trực tiếp sửa database booking.
+Booking Core là nguồn sự thật duy nhất (Single Source of Truth) quyết định lịch trống, phân bổ slot, quyền tác động booking và giá chốt.
 
 ### 5.2. Ngoài phạm vi
 
-- Pass/nhượng sân, chuyển quyền sở hữu booking, marketplace và hoàn tiền.
-- Payment gateway, thu tiền, ví, đối soát, hóa đơn thuế và xác nhận đã thanh toán.
-- Đăng ký/đăng nhập, OAuth, quên mật khẩu, refresh/logout/revocation và hệ thống quản lý tài khoản độc lập.
-- Kho hàng, bán hàng, báo cáo thương mại; tin tức, đánh giá; bạn bè/chat xã hội; thông báo email/SMS/push.
-- Storage service và upload ảnh; dữ liệu ảnh có sẵn chỉ là metadata/tài nguyên phục vụ giao diện.
-- Giải đấu, thời tiết, định vị GPS và tính khoảng cách thực tế.
-- Fine-tune model, RAG/FAQ có nguồn tri thức riêng, vector database và thuật toán tối ưu mới.
-- Di chuyển database/người dùng thật từ repo cũ; seed demo không phải migration dữ liệu kinh doanh.
-- Cam kết đã triển khai production hoặc đã có một stack monitoring hoàn chỉnh.
+- Payment gateway thu hộ / chi hộ tiền đặt sân giữa khách hàng và chủ sân (tiền sân thanh toán trực tiếp tại quầy hoặc chuyển khoản cơ sở; giao dịch phí phần mềm giữa Super Admin và Center Manager là hợp đồng dịch vụ B2B định kỳ).
+- Ví điện tử, đối soát ngân hàng tự động T+7/T+15, xuất hóa đơn thuế điện tử tự động.
+- Hệ thống chat mạng xã hội thời gian thực giữa người chơi với nhau (chỉ duy trì kênh trợ lý AI và thông báo hệ thống).
+- Giải đấu quy mô chuyên nghiệp tính điểm Elo, bốc thăm chia bảng tự động (chỉ hỗ trợ đăng tin tức/sự kiện giải đấu).
+- Định vị GPS thời gian thực và tính khoảng cách di chuyển chính xác theo km (khu vực AI xử lý theo quận/tên địa danh).
 
-Màn hình Admin có tên kế thừa “Đơn hàng/Hóa đơn” chỉ quản lý booking và giá trị đặt sân. Booking confirmed không đồng nghĩa đã thu tiền; tổng giá booking không được trình bày như doanh thu đã thu.
+## 6. Yêu cầu chức năng theo 3 Actor nghiệp vụ
 
-## 6. Yêu cầu chức năng
+Ưu tiên: **P0** là điều kiện bắt buộc cho luồng đúng và an toàn; **P1** là chức năng cần có trong phạm vi bàn giao; **P2** là cải thiện sau khi luồng chính được nghiệm thu. Trạng thái “Có” đối chiếu với hiện trạng mã nguồn.
 
-Ưu tiên: **P0** là điều kiện bắt buộc cho luồng đúng và an toàn; **P1** là chức năng cần có trong phạm vi bàn giao; **P2** là cải thiện sau khi luồng chính được nghiệm thu. Trạng thái “Có” không tự thay thế quyết định nghiệm thu.
-
-### 6.1. Catalogue, giá và quản lý trung tâm
+### 6.1. Nghiệp vụ Khách hàng (`user`)
 
 | Mã | Yêu cầu | Ưu tiên | Trạng thái đối chiếu |
 | --- | --- | --- | --- |
-| FR-01 | Người dùng xem danh sách/chi tiết trung tâm, sân, thông tin địa điểm, tiện ích và lịch trống theo ngày | P1 | Có |
-| FR-02 | Hiển thị mức giá theo ngày thường/cuối tuần và khung giờ; giá chốt phải do Core tính từ dữ liệu tin cậy | P0 | Có |
-| FR-03 | Quản trị tạo trung tâm và phân công quản lý; quản lý sửa cấu hình trong phạm vi được giao | P1 | Có; directory danh tính do host cấp |
-| FR-04 | Quản lý số sân/trạng thái/giá và bảo vệ những booking còn hiệu lực khi thay đổi cấu hình | P0 | Có; cần giữ UI và giờ cấu hình nhất quán, xem GAP-03 |
+| FR-U01 | Tra cứu danh mục trung tâm, sân, địa chỉ, ảnh thực tế, tiện ích và lịch trống theo ngày (05:00–24:00) | P1 | Có |
+| FR-U02 | Hiển thị mức giá minh bạch theo ngày thường/cuối tuần và khung giờ; giá chốt do Core tính từ dữ liệu tin cậy | P0 | Có |
+| FR-U03 | Khách chọn một hoặc nhiều sân/slot cùng trung tâm, cùng ngày, xem tóm tắt rồi xác nhận đặt | P0 | Có |
+| FR-U04 | Giữ chỗ có hạn 10 phút (`HELD`), ngăn chiếm trùng slot và giải phóng giữ chỗ quá hạn/hủy | P0 | Có |
+| FR-U05 | Khách hàng tự hủy giữ chỗ tạm thời (`HELD`) qua `DELETE /api/v1/reservations/:id` để giải phóng slot ngay lập tức | P0 | Có |
+| FR-U06 | Bảo vệ chống trùng lặp (Idempotency): Gửi lại cùng mã yêu cầu trả cùng booking confirmed, không tạo đơn mới | P0 | Có ở Core/Gateway; Web đặt ngày cần key ổn định |
+| FR-U07 | Chủ booking xem lịch sử cá nhân, lọc trạng thái, xem chi tiết và biểu đồ thống kê giờ chơi cá nhân | P1 | Có |
+| FR-U08 | Khóa hủy booking `CONFIRMED`: Hệ thống từ chối mọi yêu cầu hủy confirmed với HTTP 403 Forbidden do không hỗ trợ hoàn tiền; khách hàng được ẩn vé đã kết thúc/hủy khỏi lịch cá nhân | P0 | Có |
+| FR-U09 | Đăng bài sang nhượng slot trên Chợ Pass Sân (Pass Marketplace) có Escrow khi không thể đến chơi | P1 | Có ở tầng kiến trúc & tri thức AI |
+| FR-U10 | Tương tác Trợ lý AI (Drawer / Chatbot) tiếng Việt: Thu thập điều kiện, gợi ý slot, giải đáp FAQ, consent đặt sân và khôi phục hội thoại | P1 | Có |
 
-### 6.2. Booking và lịch cá nhân
-
-| Mã | Yêu cầu | Ưu tiên | Trạng thái đối chiếu |
-| --- | --- | --- | --- |
-| FR-05 | Khách chọn một hoặc nhiều sân/slot cùng trung tâm, cùng ngày, xem tóm tắt rồi xác nhận đặt | P0 | Có |
-| FR-06 | Giữ chỗ có hạn, ngăn chiếm trùng và giải phóng giữ chỗ hết hạn/hủy | P0 | Có ở Core; Web trực tiếp reserve rồi confirm trong một lần xác nhận, không có màn hình hold riêng |
-| FR-07 | Một ý định đặt được gửi lại với cùng mã yêu cầu phải trả cùng kết quả, không tạo đơn mới | P0 | Một phần; Core/Gateway và AI hỗ trợ, client đặt ngày còn GAP-02 |
-| FR-08 | Chủ booking xem lịch sử, lọc, xem chi tiết và thống kê booking của mình | P1 | Có |
-| FR-09 | Hủy booking trước giờ bắt đầu; giải phóng lịch; cho phép ẩn booking đã hủy/đã kết thúc nhưng giữ hồ sơ nghiệp vụ | P0 | Có |
-| FR-10 | Quản lý xem booking và trạng thái sân thuộc trung tâm được giao; quản trị xem toàn bộ | P1 | Có |
-| FR-11 | Quản lý tạo lịch cố định cho khách từ directory host, xem lịch khả dụng và tạo chuỗi nguyên vẹn | P1 | Có; giới hạn preview/UI cần thống nhất theo GAP-03 |
-
-### 6.3. Trợ lý hội thoại
+### 6.2. Nghiệp vụ Quản lý trung tâm (`center_manager`)
 
 | Mã | Yêu cầu | Ưu tiên | Trạng thái đối chiếu |
 | --- | --- | --- | --- |
-| FR-12 | Nhận tiếng Việt, trích ngày, giờ/khoảng giờ bắt đầu, thời lượng, khu vực và tổng ngân sách; hỏi lại thông tin thiếu/mơ hồ | P1 | Có; chất lượng model thật còn cần đánh giá |
-| FR-13 | Giữ điều kiện không đổi qua nhiều lượt; cho sửa/bỏ điều kiện; vô hiệu lựa chọn/xác nhận cũ khi yêu cầu thay đổi | P0 | Có |
-| FR-14 | Tìm phương án dựa trên lịch/giá của Core; phân biệt điều kiện bắt buộc và ưu tiên có thể nới | P0 | Có; có giới hạn số trung tâm được tìm |
-| FR-15 | Trình bày sân/ngày/giờ/thời lượng/tổng giá; chọn phương án chỉ mở bước xác nhận, chưa tạo giữ chỗ hoặc booking | P0 | Có |
-| FR-16 | Chỉ đặt sau xác nhận cuối hợp lệ; chỉ báo thành công khi Core trả booking confirmed và mã booking | P0 | Có theo code hiện tại; chính sách AI cần chốt ở D-01 |
-| FR-17 | Khi xung đột, đổi giá hoặc timeout, phản hồi đúng trạng thái; không âm thầm thay điều kiện hoặc tạo đơn khác | P0 | Có; cần nghiệm thu thêm với provider thật |
-| FR-18 | Lưu và khôi phục hội thoại/yêu cầu chưa rõ kết quả; chỉ chủ hội thoại được đọc/ghi lịch sử và trace | P0 | Có; chính sách lưu giữ chưa chốt |
+| FR-M01 | Tự hoàn thiện hồ sơ cơ sở (Self-serve Setup): Cập nhật hotline, địa chỉ chi tiết, link Google Maps, giờ mở/đóng cửa, bio, tiện ích, tải ảnh/logo, thiết lập số lượng sân (`totalCourts`) và kích hoạt mở bán (`isActive: true`) | P0 | Có (`PATCH /centers/:id` hỗ trợ đủ fields) |
+| FR-M02 | Quản lý cấu hình sân nội bộ (đổi tên sân, thông số mặt sân thảm/gỗ) trong cơ sở được phân công | P1 | Có |
+| FR-M03 | Thiết lập bảng giá linh hoạt theo giờ vàng / giờ thấp điểm, ngày thường / cuối tuần của trung tâm mình | P0 | Có |
+| FR-M04 | Tạm khóa / bảo trì từng sân (`isActive: false`) khi có sự cố kỹ thuật; Core chặn đóng sân nếu còn allocation tương lai | P0 | Có |
+| FR-M05 | Tạo lịch cố định (Recurring Series 1–60 ngày) cho CLB / khách quen; kiểm tra khả dụng toàn chuỗi và ghi nhận nguyên vẹn (atomic) | P1 | Có |
+| FR-M06 | Bảng điều khiển trạng thái sân thời gian thực (Real-time Court Grid 05:00–24:00) phục vụ đón tiếp và check-in khách tại quầy | P1 | Có |
+| FR-M07 | Báo cáo doanh số & thống kê lượt đặt nội bộ của riêng trung tâm mình; không xem hoặc can thiệp dữ liệu trung tâm khác | P1 | Có |
+| FR-M08 | Soạn thảo & gửi hồ sơ đề xuất Sự kiện, Giải đấu CLB, Khuyến mại cơ sở lên Super Admin để thẩm định và duyệt đăng toàn sàn | P2 | Có baseline từ `new_service` & `Competition.jsx` |
+| FR-M09 | Báo cáo đánh giá tiêu cực / chơi xấu từ đối thủ lên Super Admin; gửi thông báo sự cố cục bộ đến khách có booking trong ngày | P2 | Có baseline từ `rating_service` & `notification_service` |
 
-### 6.4. Tích hợp và vận hành
+### 6.3. Nghiệp vụ Quản trị viên nền tảng (`super_admin` - Platform Operator)
 
 | Mã | Yêu cầu | Ưu tiên | Trạng thái đối chiếu |
 | --- | --- | --- | --- |
-| FR-19 | Bảo vệ thao tác bằng danh tính đã xác minh, vai trò và quyền sở hữu/phân công trung tâm | P0 | Có phần xác minh/quyền; cấp và quản lý phiên nằm ngoài repo, xem GAP-01 |
-| FR-20 | Có mã đối chiếu yêu cầu, logs/metrics/health và dấu sự kiện booking phục vụ điều tra sự cố | P1 | Có instrumentation/outbox; chưa có stack monitoring hoặc publisher |
-| FR-21 | Giữ giao diện booking gốc trong Web/Admin, chỉ hiện chức năng thuộc Booking Core và AI | P1 | Có; nguồn UI ghi trong legacy-ui-provenance.json |
+| FR-A01 | Onboarding đối tác & Ký hợp đồng B2B: Khởi tạo vỏ trung tâm, thiết lập gói thuê bao SaaS ban đầu và phân công `managerId` ở trạng thái DRAFT (`isActive: false`) | P0 | Có (`createCenter` chỉ cho phép `super_admin`) |
+| FR-A02 | Giám sát truyền thông & Hỗ trợ cơ sở: Thẩm định hình ảnh/nội dung cơ sở, hỗ trợ kỹ thuật; Center Manager là đầu mối tự tải ảnh và cập nhật thông tin sân mình | P1 | Có |
+| FR-A03 | Quản lý Hợp đồng Đối tác B2B (SaaS Contracts): Tạo hợp đồng thuê bao (3/6/12 tháng), gia hạn hợp đồng, quản lý ngày bắt đầu/kết thúc và công nợ phí phần mềm | P1 | Kiến trúc SaaS & Tab Contracts trên Admin |
+| FR-A04 | Phân công & điều chuyển người quản lý cơ sở (`managerId`) cho trung tâm; Center Manager không có quyền tự đổi người | P0 | Có (`assertCenterManager` và `updateCenter` chặn cứng) |
+| FR-A05 | Quản lý vòng đời cơ sở: Kích hoạt hoặc tạm dừng hoạt động trung tâm (`isActive: false`) khi đối tác nợ phí hoặc hết hạn HĐ | P0 | Có |
+| FR-A06 | Thẩm định, phê duyệt và đăng tải Sự kiện / Giải đấu CLB / Tin tức toàn sàn lên trang chủ Web/App | P2 | Có baseline `content-service` / `@Roles('super_admin')` |
+| FR-A07 | Kiểm duyệt đánh giá (Text Moderation): Trọng tài độc lập xử lý khiếu nại, ẩn/xóa bình luận bôi nhọ, tục tĩu vi phạm tiêu chuẩn cộng đồng | P2 | Có baseline `content-service` ratings moderation |
+| FR-A08 | Dashboard giám sát vĩ mô toàn sàn: Báo cáo tổng thể toàn bộ mạng lưới trung tâm, tổng lượt đặt, GMV toàn hệ sinh thái | P1 | Có baseline `Report.jsx` & telemetry |
+| FR-A09 | Quản trị an toàn tài khoản: Khóa tài khoản người dùng vi phạm chính sách / bot spam slot (Ban user); phát thông báo toàn sàn (Broadcast) | P1 | Có |
+
+### 6.4. Tích hợp và bảo đảm kiến trúc hệ thống
+
+| Mã | Yêu cầu | Ưu tiên | Trạng thái đối chiếu |
+| --- | --- | --- | --- |
+| FR-SYS01 | Bảo vệ thao tác bằng JWT xác minh danh tính, phân quyền RBAC và kiểm tra quan hệ tài nguyên cơ sở (`managerId`) | P0 | Có (`api-gateway` và `booking-core`) |
+| FR-SYS02 | Mã đối chiếu yêu cầu (`X-Request-Id`), logs có cấu trúc JSON, Prometheus metrics, healthcheck và transactional outbox | P1 | Có đầy đủ |
+| FR-SYS03 | Duy trì 1 ứng dụng Admin hợp nhất (`apps/admin`) phân quyền menu theo vai trò (`super_admin` và `center_manager`) | P1 | Có trong `Dashboard.jsx` và RBAC context |
 
 ## 7. Quy tắc nghiệp vụ
 
@@ -188,7 +231,7 @@ Màn hình Admin có tên kế thừa “Đơn hàng/Hóa đơn” chỉ quản 
 | BR-10 | Giữ chỗ còn hạn và booking confirmed đều chiếm slot. Tại một thời điểm, không được có hai phân bổ còn hiệu lực chồng lên cùng sân/giờ. |
 | BR-11 | Xác nhận lần đầu chỉ áp dụng cho giữ chỗ HELD còn hạn; gửi lại xác nhận đã thành công trả booking cũ theo BR-12. Giữ chỗ hết hạn bị từ chối, giải phóng slot và yêu cầu chọn lại. |
 | BR-12 | Cùng actor, cùng mã yêu cầu và cùng nội dung phải cho cùng kết quả; dùng mã cũ cho nội dung khác phải bị từ chối. Đổi ý định đặt thì dùng mã mới. |
-| BR-13 | Booking confirmed chỉ được hủy trước slot bắt đầu sớm nhất. Chủ booking hoặc quản lý có quyền tài nguyên mới được hủy; không có phí hủy/hoàn tiền trong phiên bản này. |
+| BR-13 | Quy tắc hủy nghiêm ngặt (Strict Cancellation Policy): Hệ thống KHÔNG hỗ trợ nghiệp vụ hủy booking đã `CONFIRMED` cho bất kỳ vai trò nào (`user`, `center_manager`, `super_admin`) do hệ thống không hỗ trợ nghiệp vụ hoàn tiền (refund) phức tạp. Mọi yêu cầu gọi `POST /api/v1/bookings/:id/cancel` đều bị từ chối với mã lỗi HTTP 403 Forbidden. Khách hàng muốn chuyển nhượng slot phải đăng bán qua Chợ Pass Sân (Pass Marketplace). Khách hàng chỉ có thể tự hủy giữ chỗ tạm thời (`HELD` 10 phút khi chưa thanh toán) qua `DELETE /api/v1/reservations/:id` để giải phóng slot ngay lập tức. |
 | BR-14 | “Xóa” lịch cá nhân là ẩn đối với chủ booking sau khi booking đã hủy hoặc toàn bộ giờ chơi đã kết thúc. Không xóa cứng booking và dấu nghiệp vụ cần lưu; phân bổ slot có thể được giải phóng khi hủy hoặc hết hạn. |
 | BR-15 | Lịch cố định gồm 1–60 ngày có lịch, trong giới hạn đặt trước; tối đa 8 sân mỗi ngày theo hợp đồng Core. Có thể chọn sân/giờ khác nhau theo ngày. Bất kỳ ngày nào xung đột thì toàn bộ lần tạo chuỗi bị hoàn tác. |
 | BR-16 | Tạm đóng trung tâm/sân hoặc giảm số sân không được làm mất phân bổ tương lai còn hiệu lực. “Xóa trung tâm” của UI gốc thực hiện ngừng hoạt động, không xóa hồ sơ cũ. |
@@ -213,7 +256,7 @@ Ví dụ giá theo baseline: đặt 2 sân, mỗi sân 2 slot, mỗi slot 80.000
 | Booking | CANCELLED | Đơn đã hủy; slot được giải phóng; giữ hồ sơ |
 | Hiển thị lịch cá nhân | Hiện/ẩn | Thuộc tính hiển thị riêng, không phải trạng thái thanh toán hoặc xóa booking |
 
-Sau khi đã confirm, việc hủy booking dùng nghiệp vụ hủy booking. Không dùng thao tác bỏ giữ chỗ để thay thế. Hội thoại AI lưu trạng thái kế hoạch/lựa chọn/xác nhận/biên nhận riêng, không phải nguồn thay thế trạng thái booking tại Core.
+Sau khi đã confirm, booking không thể hủy bởi bất kỳ ai (kể cả quản lý hay quản trị viên) do hệ thống không hỗ trợ nghiệp vụ hoàn tiền; khách hàng có nhu cầu sang nhượng slot phải đăng bài qua Chợ Pass Sân. Thao tác bỏ giữ chỗ (`DELETE /api/v1/reservations/:id`) chỉ áp dụng khi giữ chỗ đang ở trạng thái `HELD` (trong vòng 10 phút chưa thanh toán). Hội thoại AI lưu trạng thái kế hoạch/lựa chọn/xác nhận/biên nhận riêng, không phải nguồn thay thế trạng thái booking tại Core.
 
 ## 8. Luồng nghiệp vụ chính
 
@@ -229,16 +272,17 @@ Sau khi đã confirm, việc hủy booking dùng nghiệp vụ hủy booking. Kh
 
 **Ngoại lệ:** slot vừa bị người khác lấy thì báo xung đột và tải lại lịch; giữ chỗ hết hạn thì chọn lại; mất kết quả thì phải tra cứu/gửi lại đúng ý định với cùng mã yêu cầu. Lịch trống lúc xem không phải cam kết giữ sân. Điểm gửi lại từ Web còn thiếu ở GAP-02.
 
-### UC-02 — Xem, hủy và ẩn booking cá nhân
+### UC-02 — Xem, quản lý lịch cá nhân và quy trình hủy giữ chỗ / booking
 
-**Tác nhân:** chủ booking; người quản lý có thể hủy theo quyền tài nguyên nhưng không ẩn lịch cá nhân của khách. **Liên quan:** FR-08, FR-09, FR-19.
+**Tác nhân:** chủ booking (khách hàng); người quản lý trung tâm (`center_manager`); quản trị viên (`super_admin`). **Liên quan:** FR-08, FR-09, FR-19.
 
-1. Khách mở lịch sử, lọc theo điều kiện được hỗ trợ và chọn booking.
-2. Nếu chưa tới giờ bắt đầu, khách yêu cầu hủy và xác nhận thao tác.
-3. Core hủy booking, giải phóng slot và lưu dấu sự kiện; danh sách phản ánh trạng thái mới.
-4. Với booking đã hủy hoặc đã kết thúc toàn bộ giờ chơi, khách có thể xác nhận ẩn khỏi lịch cá nhân.
+1. Khách mở lịch sử, lọc theo điều kiện được hỗ trợ và chọn booking của mình.
+2. Với giữ chỗ tạm thời (`HELD` trong 10 phút chưa thanh toán), khách có thể tự hủy giữ chỗ để giải phóng slot (`DELETE /api/v1/reservations/:id`).
+3. Với booking đã `CONFIRMED`:
+   - Bất kỳ ai gửi yêu cầu hủy booking đã xác nhận (kể cả `user`, `center_manager`, `super_admin`, trực tiếp qua API hoặc qua Chatbot AI): Hệ thống **từ chối với mã lỗi HTTP 403 Forbidden**, thông báo rõ: *"Booking đã xác nhận không thể tự hủy. Bạn vui lòng sử dụng tính năng Chợ Pass sân hoặc liên hệ quản lý trung tâm."* Chatbot tự động hướng dẫn người dùng sang quy trình đăng bài Chợ Pass Sân (`pass-booking-rules`). Không hỗ trợ hủy và hoàn tiền.
+4. Với booking đã ở trạng thái `CANCELLED` (do timeout giữ chỗ) hoặc đã kết thúc toàn bộ giờ chơi, khách có thể xác nhận ẩn khỏi lịch cá nhân (giữ nguyên hồ sơ lưu trữ và kiểm toán).
 
-**Ngoại lệ:** sai chủ/quyền thì từ chối; booking đã bắt đầu thì không cho hủy theo chính sách hiện tại. Không phát sinh thu tiền hoặc hoàn tiền.
+**Ngoại lệ:** Mọi yêu cầu hủy booking đã CONFIRMED đều nhận lỗi HTTP 403 Forbidden; hệ thống không hỗ trợ hoàn tiền trực tiếp tự động.
 
 ### UC-03 — Tạo lịch cố định
 
@@ -268,27 +312,44 @@ Ví dụ nhu cầu: “Mai khoảng 19 giờ, chơi 2 tiếng, gần Cầu Giấ
 
 **Ngoại lệ:** đổi điều kiện thì chọn/xác nhận cũ mất hiệu lực; giá thay đổi thì xin xác nhận lại; slot bị lấy thì tìm lại; timeout thì phục hồi yêu cầu cũ để xác định kết quả. Tin nhắn “hủy” trong hội thoại có thể hủy kế hoạch/lựa chọn, không mặc nhiên thực hiện hủy một booking đã confirmed; khách dùng luồng hủy booking hiện có.
 
-### UC-05 — Thay đổi trung tâm, sân và bảng giá
+### UC-05 — Center Manager tự thiết lập cơ sở (Self-serve Setup), cấu hình sân và bảng giá
 
-**Tác nhân:** quản lý có quyền trung tâm hoặc quản trị. **Liên quan:** FR-02, FR-03, FR-04.
+**Tác nhân:** người quản lý trung tâm (`center_manager`). **Liên quan:** FR-M01, FR-M02, FR-M03, FR-M04.
 
-1. Người quản lý mở form gốc, sửa thông tin/sân/bảng giá.
-2. Backend kiểm tra quyền và tính đầy đủ/hợp lệ của bảng giá.
-3. Nếu thay đổi làm đóng/mất sân có phân bổ tương lai còn hiệu lực, hệ thống từ chối và nêu lý do.
-4. Với thay đổi hợp lệ, cập nhật nhất quán; báo giá đã chốt trước đó được giữ nguyên.
+1. **Tiếp nhận cơ sở:** Center Manager đăng nhập cổng Admin, mở cơ sở vừa được Super Admin bàn giao (đang ở trạng thái ban đầu `DRAFT` / `isActive: false`).
+2. **Tự hoàn thiện thông tin & tư liệu:** Nhập số hotline lễ tân đón khách, địa chỉ chi tiết, link Google Maps chỉ đường, giờ mở cửa và giờ đóng cửa (`openMinute`, `closeMinute`); soạn thảo bio giới thiệu cơ sở; tích chọn danh mục tiện ích sẵn có (wifi, phòng tắm nước nóng, bãi gửi ô tô, cho thuê vợt). Tải logo đại diện và album ảnh chụp thực tế mặt sân.
+3. **Khai báo số sân & cấu hình sân:** Nhập số lượng sân ban đầu (`totalCourts`), tùy chỉnh tên hiển thị từng sân (Sân 1, Sân 2, Sân VIP) và thông số mặt sân (thảm PVC tiêu chuẩn BWF / sàn gỗ).
+4. **Thiết lập bảng giá linh hoạt:** Cài đặt giá giờ chuẩn, giá giờ vàng (cao điểm chiều tối) và giờ thấp điểm, phân tách rõ khung giá ngày thường và cuối tuần.
+5. **Kích hoạt mở bán (Go-Live):** Sau khi hoàn tất danh mục kiểm tra tối thiểu (có địa chỉ, số hotline, ít nhất 1 sân và bảng giá), Center Manager gạt nút **[Kích hoạt mở bán]** (`isActive: true`). Cơ sở lập tức xuất hiện công khai trên Web khách hàng để nhận đặt lịch.
+6. **Vận hành & bảo trì thường nhật:** Khi cần thay lưới hoặc bảo dưỡng định kỳ, Center Manager chuyển trạng thái sân sang `isActive: false`. Backend Booking Core kiểm tra: nếu sân đang có allocation tương lai còn hiệu lực thì từ chối (HTTP 409 Conflict) để bảo vệ quyền lợi của khách hàng đã đặt; nếu không có tranh chấp thì cho phép tạm khóa.
+7. Báo giá của các booking/giữ chỗ đã chốt trước thời điểm cập nhật bảng giá được giữ nguyên vẹn (Price Snapshot).
 
-Chỉ quản trị được tạo trung tâm hoặc đổi người quản lý. Phiên bản này không có bước upload ảnh; chỉnh thông tin không được làm mất metadata ảnh cũ.
+### UC-06 — Super Admin Onboarding trung tâm & Quản lý Hợp đồng Đối tác B2B (SaaS Contracts)
 
-### UC-06 — Tiếp nhận sự cố và phục hồi
+**Tác nhân:** quản trị viên nền tảng (`super_admin` - Platform Operator). **Liên quan:** FR-A01, FR-A02, FR-A03, FR-A04, FR-A05.
 
-**Tác nhân:** khách, quản lý và người vận hành. **Liên quan:** FR-07, FR-17, FR-20.
+1. **Khởi tạo đối tác & Hợp đồng B2B (Bước 1 Onboarding):** Sau khi đối tác ký kết hợp đồng hợp tác dịch vụ, Super Admin vào tab "Quản lý Hợp đồng Đối tác", bấm **[+ Ký mới / Tạo Hợp đồng]**.
+2. **Thiết lập thông số hợp đồng SaaS:** Super Admin nhập thông tin định danh cốt lõi: Tên pháp nhân / tên thương hiệu cơ sở, chọn gói thuê bao (3 tháng, 6 tháng, 1 năm), hệ thống tự động xác định ngày bắt đầu và ngày kết thúc hợp đồng; chọn tài khoản đối tác (`center_manager`) để gán quyền quản lý qua `managerId`.
+3. **Bàn giao quyền cho cơ sở (DRAFT):** Trung tâm được khởi tạo với trạng thái ban đầu là `DRAFT` (`isActive: false`). Hệ thống phân công cơ sở cho Center Manager để đối tác tự tay cấu hình chi tiết (theo UC-05). Super Admin không phải làm thay các công việc nhập ảnh, bio, tiện ích hay bảng giá.
+4. **Gia hạn hợp đồng & Xử lý nợ phí:** Khi đối tác thanh toán phí duy trì định kỳ, Super Admin bấm **[Gia hạn hợp đồng]** để cộng thêm thời gian hiệu lực. Nếu đối tác quá hạn nợ phí hoặc hết hạn hợp đồng chưa tái ký, Super Admin gạt nút **Tạm dừng hoạt động** (`isActive: false`), Booking Core lập tức khóa chức năng đặt sân mới của cơ sở này; Center Manager không thể tự gạt mở lại nếu chưa gia hạn hợp đồng.
+5. **Điều chuyển nhân sự:** Khi chủ sân thay đổi người quản lý, chỉ Super Admin mới có quyền gán lại `managerId` mới cho trung tâm (Center Manager bị từ chối đổi quyền).
 
-1. UI trả kết quả hoặc lỗi có mã yêu cầu để đối chiếu.
-2. Nếu chưa rõ đã đặt thành công hay chưa, người dùng kiểm tra lịch/biên nhận và gửi lại cùng yêu cầu; không tạo một ý định đặt khác ngay.
-3. Người vận hành dùng request ID để đối chiếu log của Gateway/AI/Core và tình trạng kết nối database.
-4. Khi xác định kết quả, trả đúng mã booking/trạng thái hoặc cho phép chọn lại nếu chưa có booking hợp lệ.
+### UC-07 — Đề xuất, Duyệt và Đăng tải Sự kiện / Giải đấu CLB toàn sàn
 
-Không thông báo đặt thành công dựa riêng vào lời model, HTTP timeout hoặc một giữ chỗ chưa confirmed.
+**Tác nhân:** người quản lý trung tâm (`center_manager`) đề xuất; quản trị viên (`super_admin`) thẩm định và duyệt. **Liên quan:** FR-M07, FR-A06.
+
+1. Center Manager lập kế hoạch tổ chức giải đấu nội bộ hoặc sự kiện giao lưu tại cơ sở; soạn thảo hồ sơ (tiêu đề, thể lệ, poster ảnh, thời gian, giải thưởng) và bấm gửi đề xuất sự kiện lên Super Admin.
+2. Yêu cầu chuyển sang trạng thái chờ duyệt (Pending Review). Center Manager không thể tự ý phát hành trực tiếp lên trang chủ.
+3. Super Admin nhận thông báo, kiểm tra tính pháp lý, tính thẩm mỹ của banner và văn phong bài viết.
+4. Nếu đạt chuẩn: Super Admin bấm **[Phê duyệt & Đăng tải]**. Bài viết / sự kiện lập tức xuất hiện tại mục Tin tức & Sự kiện trên trang chủ Web/App cho toàn bộ người chơi toàn sàn theo dõi và đăng ký. Nếu chưa đạt: Super Admin phản hồi lý do yêu cầu cơ sở chỉnh sửa lại.
+
+### UC-08 — Kiểm duyệt Đánh giá xấu & Phát thông báo hệ thống
+
+**Tác nhân:** khách hàng (`user`), quản lý trung tâm (`center_manager`), quản trị viên (`super_admin`). **Liên quan:** FR-M08, FR-A07, FR-A09.
+
+1. **Xử lý khiếu nại đánh giá:** Khách chơi xong gửi đánh giá sao và bình luận về cơ sở. Nếu xuất hiện bình luận vu khống, chửi bới ác ý từ đối thủ, Center Manager bấm nút **[Báo cáo khiếu nại]** gửi lên Super Admin. Super Admin sử dụng công cụ kiểm duyệt độc lập (Text Moderation), xác minh và thực hiện ẩn/xóa bình luận độc hại khỏi hệ thống.
+2. **Phát thông báo toàn sàn (Broadcast):** Khi cần bảo trì máy chủ hoặc cập nhật chính sách Chợ Pass sân mới, Super Admin soạn thông báo và phát hành toàn hệ thống tới tất cả người dùng Web/App.
+3. **Phát thông báo sự cố sân cục bộ:** Khi trung tâm gặp sự cố bất khả kháng (mất điện, dột nước), Center Manager vào trang trung tâm mình bấm **[Gửi thông báo khẩn cấp]**. Hệ thống tự động lọc danh sách khách hàng có booking trong ngày tại cơ sở đó để gửi cảnh báo sớm.
 
 ## 9. Dữ liệu nghiệp vụ và nguồn sự thật
 
@@ -348,8 +409,8 @@ Các tình huống dưới đây là bộ UAT tối thiểu. Một ca có test t
 | AC-03 | FR-06 | Hai khách cùng gửi yêu cầu chiếm cùng một slot | Chỉ một phân bổ còn hiệu lực thành công; yêu cầu còn lại bị từ chối xung đột |
 | AC-04 | FR-06 | Xác nhận một giữ chỗ đã hết hạn, hoặc để worker dọn hết hạn | Không tạo booking confirmed; slot được giải phóng và có thể được đặt lại |
 | AC-05 | FR-07 | Gửi lại cùng mã/nội dung; sau đó dùng mã đó cho nội dung khác | Cùng ý định trả cùng booking; nội dung khác bị từ chối; phải kiểm tra xuyên Web, không chỉ API |
-| AC-06 | FR-08, FR-09 | Chủ booking xem lịch/thống kê, hủy trước giờ bắt đầu và ẩn sau hủy | Trạng thái/lịch cập nhật đúng; ẩn không xóa hồ sơ nghiệp vụ; không phát sinh hoàn tiền |
-| AC-07 | FR-09, FR-19 | Khách đổi ID để đọc/hủy/ẩn booking người khác; hủy booking đã bắt đầu | Truy cập trái quyền và hủy quá thời điểm cho phép đều bị từ chối |
+| AC-06 | FR-08, FR-09 | Chủ booking xem lịch/thống kê; hủy giữ chỗ HELD; mọi vai trò hủy booking CONFIRMED bị chặn 403 | Trạng thái/lịch cập nhật đúng; gọi hủy booking confirmed nhận 403 kèm hướng dẫn Chợ Pass; ẩn không xóa hồ sơ nghiệp vụ |
+| AC-07 | FR-09, FR-19 | Quản lý hoặc admin cố gắng hủy booking CONFIRMED | Bị từ chối HTTP 403 Forbidden; hệ thống không hỗ trợ hủy và hoàn tiền đối với confirmed booking |
 | AC-08 | FR-03, FR-04, FR-10, FR-19 | Quản lý trung tâm A sửa/xem dữ liệu A rồi thử dữ liệu B | Chỉ A được phép; việc tạo trung tâm/đổi quản lý dành cho super_admin |
 | AC-09 | FR-11 | Tạo chuỗi nhiều ngày, một ngày giữa chuỗi đã bị chiếm | Không có booking mới nào của lần tạo chuỗi bị ghi dở; trường hợp không trùng tạo đủ các ngày |
 | AC-10 | FR-02, FR-04 | Đổi giá sau khi một hold đã được chốt; thử đóng sân đang có phân bổ tương lai | Giá chốt cũ giữ nguyên; thay đổi trạng thái gây mất phân bổ bị từ chối |
@@ -359,8 +420,11 @@ Các tình huống dưới đây là bộ UAT tối thiểu. Một ca có test t
 | AC-14 | FR-13, FR-17 | Đổi điều kiện, giá thay đổi hoặc slot bị người khác lấy trước xác nhận | Xác nhận cũ không dùng lại được; xin xác nhận giá mới hoặc tìm lại; không báo thành công sai |
 | AC-15 | FR-17, FR-18 | Mất response sau khi Core đã ghi booking, tải lại và gửi lại cùng mã lượt | Khôi phục đúng kết quả, không tạo booking thứ hai |
 | AC-16 | FR-18, FR-19 | Actor khác, kể cả admin, thử đọc/ghi hội thoại không thuộc mình | Bị từ chối; owner vẫn khôi phục được hội thoại/checkpoint |
-| AC-17 | FR-20 | Gây lỗi kết nối/timeout trong môi trường kiểm thử | Có mã đối chiếu, log/metric phù hợp; không lộ secret/transcript trong log; không thông báo đặt thành công |
-| AC-18 | FR-01, FR-04, FR-05, FR-11 | Chọn ngày/giờ sát biên UI và giới hạn Core, xem preview rồi tạo lịch | UI/API/preview cùng tuân theo phạm vi đã chốt; đây là ca cần hoàn thiện GAP-03 |
+| AC-17 | FR-20, FR-SYS02 | Gây lỗi kết nối/timeout trong môi trường kiểm thử | Có mã đối chiếu, log/metric phù hợp; không lộ secret/transcript trong log; không thông báo đặt thành công |
+| AC-18 | FR-U01, FR-M04 | Chọn ngày/giờ sát biên UI và giới hạn Core, xem preview rồi tạo lịch | UI/API/preview cùng tuân theo phạm vi đã chốt; đây là ca cần hoàn thiện GAP-03 |
+| AC-19 | FR-A01, FR-M01, FR-A04 | Onboarding 2 bước và phân công quản lý cơ sở | Super Admin khởi tạo trung tâm & HĐ SaaS và gán managerId; Center Manager tự cập nhật chi tiết profile, ảnh, bio, tiện ích, số sân, bảng giá và kích hoạt mở bán; Center Manager thử đổi managerId bị từ chối HTTP 403 Forbidden |
+| AC-20 | FR-A03, FR-A05 | Quản lý hợp đồng SaaS và tạm dừng trung tâm hết hạn / nợ phí | Super Admin gia hạn hợp đồng thành công; khi cơ sở chuyển isActive: false do nợ phí, Core chặn đứng mọi luồng đặt sân mới |
+| AC-21 | FR-M07, FR-A06 | Đề xuất và phê duyệt sự kiện / giải đấu CLB toàn sàn | Center Manager gửi đề xuất sự kiện; bài viết ở trạng thái chờ duyệt và chỉ xuất hiện công khai trên trang chủ sau khi Super Admin bấm duyệt |
 
 **Điều kiện chấp nhận bản bàn giao:** chủ hệ thống xác nhận phạm vi và các quyết định ảnh hưởng P0; các ca liên quan P0 đạt trên môi trường UAT; thiếu hụt P1 có kế hoạch và người chấp thuận; có bằng chứng kiểm thử và danh sách giới hạn còn lại. Phê duyệt chạy production cần thêm DEP-01/02, NFR-05/07/08 và phương án vận hành, không gộp với nghiệm thu demo.
 
@@ -382,11 +446,12 @@ GAP-02 được đối chiếu trực tiếp trong [client đặt ngày Web](../
 | Mã | Quyết định cần xác nhận | Baseline/đề xuất để xem xét | Người quyết định |
 | --- | --- | --- | --- |
 | D-01 | AI chỉ tư vấn hay được thực thi đặt sân? | Code hiện tại và kế hoạch hội thoại cho phép gọi Core sau xác nhận cuối. Tài liệu kiến trúc v2 trước đó đề xuất read-only. BRD mô tả baseline đang có, không coi khác biệt này đã được phê duyệt | Chủ hệ thống |
-| D-02 | Giữ hay thay chính sách loyalty/giảm nhiều sân và chính sách hủy? | Baseline BR-07 và BR-13; chưa có phí hủy hoặc thu tiền. Cần xác nhận nguồn điểm và cách áp dụng khi đặt hộ | Chủ hệ thống/đại diện trung tâm |
+| D-02 | Chính sách hủy booking và Chợ Pass sân | ĐÃ CHỐT: Không cho phép bất kỳ vai trò nào (`user`, `center_manager`, `super_admin`) hủy booking đã CONFIRMED do hệ thống không hỗ trợ hoàn tiền (Core chặn 403 Forbidden); chuyển sang mô hình Chợ Pass Sân (Pass Marketplace) có Escrow; chỉ người dùng được hủy giữ chỗ tạm thời HELD trong 10 phút (`DELETE /reservations/:id`). | Chủ hệ thống / Đã phê duyệt |
 | D-03 | Phạm vi ngày/giờ chính thức mà Web/Admin phải hỗ trợ | Khả năng Core tới 90 ngày; giao diện/preview đang hẹp hơn, cần quyết định thống nhất trước nghiệm thu | Chủ hệ thống và nhóm sản phẩm |
 | D-04 | Nguồn danh tính, directory khách/quản lý và quy trình cấp/thu hồi quyền | Host/Identity bên ngoài; không sử dụng demo session làm tài khoản khách thật | Chủ hệ thống và phụ trách tích hợp |
 | D-05 | Chỉ tiêu vận hành, chi phí LLM và chính sách dữ liệu | Chốt tải, SLO, RPO/RTO, thời gian lưu hội thoại, người được truy cập dữ liệu và hạn mức sử dụng model | Chủ hệ thống/người vận hành |
 | D-06 | Thời hạn, ngân sách, người nghiệm thu và các mốc bàn giao | Chưa được cung cấp; không lấy lịch 8 tuần trong kế hoạch tham khảo làm cam kết dự án mới | Chủ hệ thống/nhóm phát triển |
+| D-07 | Mô hình kinh doanh & Vận hành Nền tảng (Platform Monetization) | ĐÃ CHỐT: Áp dụng mô hình B2B SaaS Subscription (phần mềm dịch vụ thu phí thuê bao theo tháng/năm thu từ đối tác quản lý cơ sở). Không làm trung gian thu hộ/chi hộ tiền đặt sân giữa khách và chủ sân; quản lý vòng đời hợp đồng B2B gắn liền trực tiếp với trạng thái trung tâm trong Core; duy trì 1 ứng dụng Admin hợp nhất (`apps/admin`) phân quyền RBAC. | Chủ hệ thống / Đã phê duyệt |
 
 Các thay đổi D-01/02/03 cần cập nhật yêu cầu, quy tắc và ca nghiệm thu liên quan trước khi triển khai. Nếu chọn AI read-only, FR-16 và luồng UC-04 phải được thay đổi có chủ đích; không chỉ sửa câu chữ trong tài liệu.
 
@@ -472,3 +537,5 @@ Mỗi lần đổi phạm vi, slot, giá, chính sách hủy, quyền hoặc kh�
 | Phiên bản | Ngày | Nội dung |
 | --- | --- | --- |
 | 1.0 | 18/10/2026 | Lập BRD theo baseline Booking Core + AI, UI gốc, quy tắc slot 60 phút; ghi riêng khoảng trống và quyết định chưa chốt |
+| 1.1 | 09/11/2026 | Chuẩn hóa chính sách hủy booking nghiêm ngặt (Strict Cancellation Policy): Chặn 403 Forbidden cho mọi vai trò, chỉ giữ hủy giữ chỗ HELD cho user |
+| 2.0 | 09/11/2026 | Tái cấu trúc toàn diện theo 3 Actor nghiệp vụ (user, center_manager, super_admin); bổ sung mô hình kinh doanh B2B SaaS Subscription (Hợp đồng thuê bao cơ sở); chuẩn hóa quy trình thẩm định duyệt Sự kiện / Giải đấu CLB và Thông báo hệ thống |

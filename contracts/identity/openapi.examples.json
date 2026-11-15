@@ -6,6 +6,13 @@
         "email": "demo@example.invalid",
         "password": "example-password"
       }
+    },
+    {
+      "schema": "UserStatusUpdate",
+      "value": {
+        "isActive": false,
+        "reason": "Phát hiện tài khoản bot spam đặt giữ chỗ ảo hàng loạt"
+      }
     }
   ],
   "invalid": [
@@ -14,6 +21,13 @@
       "value": {
         "email": "not-an-email",
         "password": "example-password"
+      }
+    },
+    {
+      "schema": "UserStatusUpdate",
+      "value": {
+        "isActive": "false",
+        "reason": "Sai kiểu boolean"
       }
     }
   ]
