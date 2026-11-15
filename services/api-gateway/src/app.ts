@@ -24,6 +24,7 @@ export function createApp(
     core = new BookingCoreClient(config, transport),
     monitor = telemetry();
   app.disable("x-powered-by");
+  app.set("trust proxy", config.trustProxy ?? 1);
   app.use(monitor.middleware, helmet());
   app.use(
     cors({

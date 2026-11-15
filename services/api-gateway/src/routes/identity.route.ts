@@ -44,6 +44,10 @@ export function identityRoutes(
       headers["X-Request-Id"] = req.requestId;
     }
 
+    if (req.ip) {
+      headers["X-Forwarded-For"] = req.ip;
+    }
+
     try {
       const response = await transport(
         `${config.identityUrl || "http://localhost:8084"}${path}`,

@@ -54,7 +54,7 @@ const app = createApp(async () => {
 }, sendVerificationEmail)).use(emailVerificationRouter(
   verification.verify,
   sendVerificationEmail && { reissue: verification.reissue, send: sendVerificationEmail },
-)));
+)), config.trustProxy);
 const server = app.listen(config.port, "0.0.0.0", () => {
   console.log(JSON.stringify({ event: "identity_started", port: config.port }));
 });
