@@ -1,10 +1,31 @@
+import type { MailpitConfig } from "../mailpit";
+
 export interface IdentityConfig {
   port: number;
   databaseUrl: string;
   jwtSecret: string;
   issuer: string;
   audience: string;
+  secureRefreshCookie: boolean;
+  mailpit?: MailpitConfig;
 }
+
+function mailpitConfiguration(env: NodeJS.ProcessEnv): MailpitConfig | undefined {
+  const origin = env.MAILPIT_URL?.trim();
+  if (env.NODE_ENV !== "development" || !origin) return undefined;
+
+  const mailpitOrigin = new URL(origin);
+  const verificationPage = new URL(
+    env.EMAIL_VERIFICATION_PAGE_URL || "http://localhost:8082/verify-email",
+  );
+  for (const url of [mailpitOrigin, verificationPage]) {
+    if (!["http:", "https:"].includes(url.protocol) || url.username || url.password) {
+      throw Error("Mailpit and verification page URLs must use HTTP(S) without credentials");
+    }
+  }
+  return { origin: mailpitOrigin, verificationPage };
+}
+
 export function configuration(
   env: NodeJS.ProcessEnv = process.env,
 ): IdentityConfig {
@@ -34,5 +55,7 @@ export function configuration(
     jwtSecret,
     issuer: env.JWT_ISSUER || "badminton-identity",
     audience: env.JWT_AUDIENCE || "badminton-system",
+    secureRefreshCookie: env.NODE_ENV === "production",
+    mailpit: mailpitConfiguration(env),
   };
 }

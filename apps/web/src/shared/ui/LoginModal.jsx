@@ -1,4 +1,5 @@
 import { useEffect, useId, useRef, useState } from "react";
+import { Link } from "react-router-dom";
 import "../styles/login-modal.css";
 
 // onSubmit sẽ được nối với API Identity ở bước tích hợp.
@@ -110,6 +111,14 @@ export default function LoginModal({ isOpen, onClose, onSubmit }) {
               {busy ? "Đang đăng nhập…" : "Đăng nhập"}
             </button>
           </form>
+          {!busy && (
+            <p className="mb-0 mt-4 text-center text-sm text-slate-600">
+              Chưa có tài khoản?{" "}
+              <Link to="/register" className="font-semibold text-emerald-800">
+                Đăng ký
+              </Link>
+            </p>
+          )}
         </section>
       </div>
     </dialog>

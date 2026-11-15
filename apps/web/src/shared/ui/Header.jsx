@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useContext } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { Sparkles, LogOut } from "lucide-react";
 import "../styles/header.css";
 import LoginModal from "./LoginModal.jsx";
@@ -12,12 +12,18 @@ const Header = () => {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
-  const [isLoginOpen, setIsLoginOpen] = useState(false);
+  const { pathname, search, hash, state } = useLocation();
+  const openLogin = state?.openLogin === true;
+  const [isLoginOpen, setIsLoginOpen] = useState(openLogin);
 
   const { user, loading, updateSession, logout } =
     useContext(SessionContext) || {};
   const { openChat } = useChat();
   const navigate = useNavigate();
+
+  useEffect(() => {
+    if (openLogin) navigate({ pathname, search, hash }, { replace: true, state: null });
+  }, [openLogin, navigate, pathname, search, hash]);
 
   const DEFAULT_AVATAR_URL =
     "https://res.cloudinary.com/dm4uxmmtg/image/upload/v1762859721/badminton_app/avatars/default_user_avatar.png";
