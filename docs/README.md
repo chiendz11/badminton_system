@@ -4,6 +4,7 @@ Kho tài liệu kỹ thuật và nghiệp vụ của dự án **Badminton Manage
 
 ```
 docs/
+├── blueprint/             # Bộ tài liệu chuẩn hợp nhất (BA -> Yêu cầu/Bảo mật -> Kiến trúc 10 Góc nhìn -> Hiện trạng & Demo)
 ├── planning/              # Kế hoạch tổng thể 10 tuần (Excel, CSV, Markdown, Provenance)
 ├── week-4/                # Khảo sát nghiệp vụ: Master BRD, BRD V2, 5 Artifacts W04
 ├── week-5/                # Thiết kế kỹ thuật: Master Architecture, Contracts, ADRs, 5 Artifacts W05
@@ -13,6 +14,18 @@ docs/
 ├── services/              # Tài liệu kỹ thuật chi tiết các dịch vụ (Core, Gateway, UI, AI Subsystem)
 └── devops/                # Tự động hóa CI/CD, Giám sát Prometheus/Grafana, Kiểm chứng & Runbooks
 ```
+
+---
+
+## 0. Bộ Tài liệu Kiến trúc & Phân tích Hợp nhất ([blueprint/](blueprint/README.md))
+
+Chuỗi tài liệu chuẩn mực xuyên suốt từ bài toán nghiệp vụ đến triển khai thực tế sau **PR #32** (TLS Ingress, Identity + Mailpit, Secure Cookies, GiST ACID):
+
+- [**00. Chỉ mục & Chuỗi Lập luận Nhanh (blueprint/README.md)**](blueprint/README.md)
+- [**01. Phân tích Nghiệp vụ (01-business-analysis.md)**](blueprint/01-business-analysis.md): Bối cảnh SaaS 3 Actor, 6 vấn đề `PB-01..06`, Stakeholder, KPI, Phạm vi MVP, Quy trình To-Be, `BR-01..22` & `GAP`.
+- [**02. Kỹ nghệ Yêu cầu, Tải & Bảo mật (02-requirements-and-traceability.md)**](blueprint/02-requirements-and-traceability.md): `UC-01..08`, Tiêu chí `Given/When/Then` (`AC-01..23`), NFR đo được, 9 yêu cầu bảo mật `SEC1..9`, Phân tích tải, Ma trận `RBAC/ABAC`, Truy vết khép kín.
+- [**03. Kiến trúc 10 Góc nhìn & ADRs (03-architecture-views-and-adrs.md)**](blueprint/03-architecture-views-and-adrs.md): `ADR-001..009` + Post-PR#32, **10 Góc nhìn kiến trúc** (Context, Bounded Contexts, Logical, Polyglot Data, ACID & Outbox, AI LangGraph, Security 6-layer, AWS EKS vs k3d Parity, 3-Repo GitOps, Observability).
+- [**04. Hiện trạng Mã nguồn, Kiểm thử & Vận hành Demo (04-implementation-status-and-verification.md)**](blueprint/04-implementation-status-and-verification.md): Tech Stack, `Implemented` vs `Skeleton`, Contracts, Bằng chứng CI/ACID/Eval & Hướng dẫn Demo HTTPS local.
 
 ---
 
