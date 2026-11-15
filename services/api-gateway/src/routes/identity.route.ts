@@ -2,6 +2,13 @@ import { Router, type Request, type Response } from "express";
 import type { GatewayConfig } from "../configs/environment";
 import { GatewayError } from "../middleware/http-errors";
 
+const refreshCookiePrefix = "refresh_token=";
+
+function forwardRefreshCookie(res: Response, headers: Headers) {
+  const cookie = headers.getSetCookie().find((value) => value.startsWith(refreshCookiePrefix));
+  if (cookie) res.append("Set-Cookie", cookie);
+}
+
 export function identityRoutes(
   config: GatewayConfig,
   transport: typeof fetch = fetch,
@@ -12,6 +19,7 @@ export function identityRoutes(
     req: Request,
     res: Response,
     path: string,
+    timeoutMs = config.timeout,
   ) {
     res.set("Cache-Control", "no-store");
 
@@ -20,8 +28,16 @@ export function identityRoutes(
     };
 
     
-    if (req.get("authorization")) {
-      headers.Authorization = req.get("authorization")!;
+    if (path === "/api/auth/refresh" || path === "/api/auth/logout") {
+      // Preserve duplicates so Identity can reject ambiguous refresh cookies.
+      const cookie = req.get("cookie")?.split(";")
+        .map((value) => value.trim())
+        .filter((value) => value.startsWith(refreshCookiePrefix))
+        .join("; ");
+      if (cookie) headers.Cookie = cookie;
+    } else {
+      const authorization = req.get("authorization");
+      if (authorization) headers.Authorization = authorization;
     }
 
     if (req.requestId) {
@@ -38,10 +54,16 @@ export function identityRoutes(
             req.method === "POST"
               ? JSON.stringify(req.body ?? {})
               : undefined,
-          signal: AbortSignal.timeout(config.timeout),
+          signal: AbortSignal.timeout(timeoutMs),
           redirect: "error",
         },
       );
+
+      if (response.status === 204) {
+        if (path === "/api/auth/logout") forwardRefreshCookie(res, response.headers);
+        res.status(204).end();
+        return;
+      }
 
       let data: unknown;
 
@@ -67,6 +89,9 @@ export function identityRoutes(
         res.set("Retry-After", retryAfter);
       }
 
+      if (response.status === 200 && (path === "/api/auth/login" || path === "/api/auth/refresh")) {
+        forwardRefreshCookie(res, response.headers);
+      }
       res.status(response.status).json(data);
     } catch (error) {
       if (error instanceof GatewayError) {
@@ -88,6 +113,27 @@ export function identityRoutes(
 
   router.post("/login", (req, res) =>
     forward(req, res, "/api/auth/login"),
+  );
+
+  router.post("/refresh", (req, res) =>
+    forward(req, res, "/api/auth/refresh"),
+  );
+
+  router.post("/logout", (req, res) =>
+    forward(req, res, "/api/auth/logout"),
+  );
+
+  // Identity may wait up to five seconds for email delivery after creating the user.
+  router.post("/register", (req, res) =>
+    forward(req, res, "/api/auth/register", Math.max(config.timeout, 10_000)),
+  );
+
+  router.post("/verify-email", (req, res) =>
+    forward(req, res, "/api/auth/verify-email"),
+  );
+
+  router.post("/resend-verification", (req, res) =>
+    forward(req, res, "/api/auth/resend-verification"),
   );
 
   router.get("/me", (req, res) =>
