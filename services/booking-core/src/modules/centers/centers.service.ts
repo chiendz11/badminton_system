@@ -15,6 +15,8 @@ import { Clock, Telemetry } from "../../common/observability/telemetry";
 import { Tx } from "../../infrastructure/database/booking-records";
 import { BookingTransactions } from "../../infrastructure/database/booking-transactions.service";
 import { PrismaService } from "../../infrastructure/database/prisma.service";
+import { OutboxService } from "../../infrastructure/outbox/outbox.service";
+import { IdentityClientService } from "../internal/identity-client.service";
 import { CENTER_INCLUDE } from "./center.select";
 import { CenterDto, UpdateCenterDto } from "./dto/center.dto";
 @Injectable()
@@ -25,6 +27,9 @@ export class CentersService {
     private readonly transactions: BookingTransactions,
     @Inject(Clock) private readonly clock: Clock,
     @Inject(Telemetry) private readonly telemetry: Telemetry,
+    @Inject(OutboxService) private readonly outbox: OutboxService,
+    @Inject(IdentityClientService)
+    private readonly identityClient: IdentityClientService,
   ) {}
   async getInTransaction(tx: Tx, id: string) {
     const center = await tx.center.findUnique({
@@ -80,17 +85,27 @@ export class CentersService {
         pricePerHour,
       }));
     validateBands(bands, data.openMinute, data.closeMinute);
-    const center = await this.prisma.center.create({
-      data: {
-        ...fields,
-        pricing: { create: bands },
-        courts: {
-          create: Array.from({ length: totalCourts }, (_, index) => ({
-            name: `Sân ${index + 1}`,
-          })),
+    await this.identityClient.assertManageableUser(data.managerId);
+    const center = await this.prisma.$transaction(async (tx) => {
+      const created = await tx.center.create({
+        data: {
+          ...fields,
+          pricing: { create: bands },
+          courts: {
+            create: Array.from({ length: totalCourts }, (_, index) => ({
+              name: `Sân ${index + 1}`,
+            })),
+          },
         },
-      },
-      include: CENTER_INCLUDE,
+        include: CENTER_INCLUDE,
+      });
+      await this.outbox.recordCenterAssigned(tx, {
+        centerId: created.id,
+        centerName: created.name,
+        managerId: created.managerId,
+        isActive: created.isActive,
+      });
+      return created;
     });
     this.telemetry.event("center_created", {
       centerId: center.id,
@@ -99,6 +114,9 @@ export class CentersService {
     return center;
   }
   async updateCenter(actor: Actor, id: string, data: UpdateCenterDto) {
+    if (data.managerId !== undefined && actor.role === "super_admin") {
+      await this.identityClient.assertManageableUser(data.managerId);
+    }
     const result = await this.transactions.run("center_update", async (tx) => {
       await this.transactions.lock(tx, id);
       const center = await this.getInTransaction(tx, id);
@@ -164,7 +182,7 @@ export class CentersService {
           }
         }
       }
-      return tx.center.update({
+      const updated = await tx.center.update({
         where: { id },
         data: {
           ...fields,
@@ -175,6 +193,18 @@ export class CentersService {
         },
         include: CENTER_INCLUDE,
       });
+      if (
+        updated.managerId !== center.managerId ||
+        updated.isActive !== center.isActive
+      ) {
+        await this.outbox.recordCenterAssigned(tx, {
+          centerId: updated.id,
+          centerName: updated.name,
+          managerId: updated.managerId,
+          isActive: updated.isActive,
+        });
+      }
+      return updated;
     });
     this.telemetry.event("center_updated", {
       centerId: id,

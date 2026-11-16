@@ -112,6 +112,14 @@ model Booking {
   createdAt DateTime @default(now()) @db.Timestamptz(3)
   cancelledAt DateTime? @db.Timestamptz(3)
   hiddenAt DateTime? @db.Timestamptz(3)
+  reminders BookingReminder[]
+}
+model BookingReminder {
+  bookingId String @db.Uuid
+  reminderWindow String
+  createdAt DateTime @default(now()) @db.Timestamptz(3)
+  booking Booking @relation(fields:[bookingId],references:[id],onDelete:Cascade)
+  @@id([bookingId,reminderWindow])
 }
 model BookingSeries {
   id String @id @default(uuid()) @db.Uuid
@@ -125,6 +133,7 @@ model OutboxEvent {
   id String @id @default(uuid()) @db.Uuid
   type String
   aggregateId String @db.Uuid
+  correlationId String?
   payload Json
   createdAt DateTime @default(now()) @db.Timestamptz(3)
   publishedAt DateTime? @db.Timestamptz(3)
