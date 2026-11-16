@@ -36,11 +36,19 @@
 | `booking.pass-transferred.v1` | `booking-core` | `fromUserId` & `toUserId` | Báo hoàn tất chuyển nhượng vé giữa người bán và người mua. |
 | `booking.pass-closed.v1` | `booking-core` | `sellerUserId` | Báo bài pass đã đóng (`CANCELLED` hoặc `EXPIRED`). |
 | `social.message-created.v1` | `social-service` | `recipientUserIds` | Báo tin nhắn mới (tôn trọng mute/online state nếu có). |
+| `social.friendship-requested.v1` *(Nên có nếu bật Kết bạn)* | `social-service` | `targetUserId` | Báo có người chơi (`requesterUserId`) gửi lời mời kết bạn. |
+| `social.friendship-accepted.v1` *(Nên có nếu bật Kết bạn)* | `social-service` | `requesterUserId` | Báo lời mời kết bạn đã được `targetUserId` chấp nhận. |
 | `content.news-submitted.v1` | `content-service` | **`super_admin`** | Báo có đề xuất Sự kiện/Giải đấu CLB mới chờ duyệt (`UC-07`). |
 | `content.news-publication-changed.v1` | `content-service` | `authorUserId` (`center_manager`) | Báo kết quả duyệt (`PUBLISHED` / `REJECTED` / `ARCHIVED`). |
 | `content.review-reported.v1` | `content-service` | **`super_admin`** | Báo có khiếu nại đánh giá xấu cần kiểm duyệt (`UC-08`). |
-| `contract.status-changed.v1` | `commerce-service` | `managerId` (`center_manager`) | Nhắc hết hạn / gia hạn / tạm dừng HĐ B2B SaaS. |
+| `content.review-moderated.v1` *(Nên có)* | `content-service` | `reporterUserId` (`center_manager`) / `authorUserId` | Báo kết quả xử lý kiểm duyệt review (`HIDDEN` hoặc `PUBLISHED` kèm `reason`). |
+| `content.review-created.v1` *(Tùy chọn)* | `content-service` | `managerId` (`center_manager`) | Báo khi cơ sở nhận đánh giá mới (ưu tiên cảnh báo đánh giá sao thấp 1–2★ để kịp phản hồi). |
+| `contract.status-changed.v1` | `commerce-service` | `managerId` (`center_manager`) | Thông báo khi hợp đồng B2B SaaS chuyển trạng thái (`ACTIVE`/`EXPIRED`/`SUSPENDED`). |
+| `contract.expiry-reminder.v1` *(Nên có)* | `commerce-service` | `managerId` (`center_manager`) | Scheduler nhắc sắp hết hạn hợp đồng SaaS trước **7 / 3 / 1 ngày** (gửi `URGENT` + email Mailpit khi còn 1 ngày). |
 | `commerce.sale-created.v1` | `commerce-service` | Tùy chọn | Biên nhận POS nếu gắn tài khoản khách. |
+| `commerce.low-stock-alert.v1` *(Tùy chọn)* | `commerce-service` | `managerId` (`center_manager`) | Cảnh báo mặt hàng POS giảm xuống dưới ngưỡng tồn kho tối thiểu sau khi bán. |
+| `booking.payment-reconciliation.v1` *(Bắt buộc khi bật PayOS)* | `booking-core` | `userId` & **`super_admin`** | Phát khi webhook PayOS trả về sau lúc hold đã `EXPIRED` hoặc lệch số tiền, báo khẩn để đối soát/hoàn tiền. |
+| `identity.user-updated.v1` *(Dùng lại qua Email/Mailpit)* | `identity` | `userId` | Khi tài khoản bị khóa/mở khóa (`isActive`) hoặc đổi vai trò (`role`), ưu tiên gửi qua Email/SMTP vì user bị Ban không còn phiên in-app. |
 
 ### B. Thông báo Chủ động từ Admin / Quản lý Sân (REST → Internal Event)
 - **`notification.broadcast.v1`** (`POST /notifications/broadcast` — chỉ `super_admin`): phát toàn sàn theo `targetAudience` (`ALL` | `MANAGERS` | `PLAYERS`) và `priority`.

@@ -47,6 +47,22 @@
         "startMinute": 1140,
         "reminderWindow": "T-24h"
       }
+    },
+    {
+      "id": "a1104000-0000-4000-8000-000000000012",
+      "type": "contract.expiry-reminder.v1",
+      "aggregateId": "a1104000-0000-4000-8000-000000000040",
+      "createdAt": "2026-11-16T08:15:00Z",
+      "schemaVersion": 1,
+      "producer": "commerce-service",
+      "correlationId": "req-example-contract-1",
+      "payload": {
+        "contractId": "a1104000-0000-4000-8000-000000000040",
+        "centerId": "a1104000-0000-4000-8000-000000000020",
+        "managerId": "manager-1",
+        "daysRemaining": 3,
+        "endDate": "2026-11-19"
+      }
     }
   ],
   "invalid": [
