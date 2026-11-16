@@ -1700,6 +1700,235 @@
         ],
         "x-gateway-path": "/api/booking/bookings/{bookingId}/pass-eligibility"
       }
+    },
+    "/internal/booking/centers/{centerId}/ownership": {
+      "get": {
+        "operationId": "getInternalCenterOwnership",
+        "tags": [
+          "Internal"
+        ],
+        "summary": "Verify center ownership and active status",
+        "description": "Service-only internal endpoint protected by INTERNAL_SERVICE_TOKEN (x-internal-token or Authorization Bearer). Excluded from API Gateway.",
+        "parameters": [
+          {
+            "name": "centerId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "managerId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Center ownership metadata",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "centerId",
+                    "name",
+                    "managerId",
+                    "isActive"
+                  ],
+                  "properties": {
+                    "centerId": {
+                      "type": "string",
+                      "format": "uuid"
+                    },
+                    "name": {
+                      "type": "string"
+                    },
+                    "managerId": {
+                      "type": "string"
+                    },
+                    "isActive": {
+                      "type": "boolean"
+                    },
+                    "isManager": {
+                      "type": "boolean"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Error401"
+          },
+          "404": {
+            "$ref": "#/components/responses/Error404"
+          }
+        },
+        "security": [
+          {
+            "ServiceBearer": []
+          }
+        ],
+        "x-implementation-status": "implemented"
+      }
+    },
+    "/internal/booking/centers/{centerId}/customers": {
+      "get": {
+        "operationId": "getInternalCenterCustomers",
+        "tags": [
+          "Internal"
+        ],
+        "summary": "List distinct userIds with CONFIRMED bookings on a date",
+        "description": "Service-only internal endpoint for urgent center notifications, protected by INTERNAL_SERVICE_TOKEN. Excluded from API Gateway.",
+        "parameters": [
+          {
+            "name": "centerId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "date",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "date"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Customer IDs for the specified date",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "centerId",
+                    "date",
+                    "userIds"
+                  ],
+                  "properties": {
+                    "centerId": {
+                      "type": "string",
+                      "format": "uuid"
+                    },
+                    "date": {
+                      "type": "string",
+                      "format": "date"
+                    },
+                    "userIds": {
+                      "type": "array",
+                      "items": {
+                        "type": "string"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/Error400"
+          },
+          "401": {
+            "$ref": "#/components/responses/Error401"
+          },
+          "404": {
+            "$ref": "#/components/responses/Error404"
+          }
+        },
+        "security": [
+          {
+            "ServiceBearer": []
+          }
+        ],
+        "x-implementation-status": "implemented"
+      }
+    },
+    "/internal/booking/centers/{centerId}/eligibility": {
+      "get": {
+        "operationId": "getInternalBookingEligibility",
+        "tags": [
+          "Internal"
+        ],
+        "summary": "Check whether a user has at least one CONFIRMED booking at a center",
+        "description": "Service-only internal endpoint for review eligibility checks (UC-08), protected by INTERNAL_SERVICE_TOKEN. Excluded from API Gateway.",
+        "parameters": [
+          {
+            "name": "centerId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "userId",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "minLength": 1
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Eligibility result",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "centerId",
+                    "userId",
+                    "hasConfirmedBooking"
+                  ],
+                  "properties": {
+                    "centerId": {
+                      "type": "string",
+                      "format": "uuid"
+                    },
+                    "userId": {
+                      "type": "string"
+                    },
+                    "hasConfirmedBooking": {
+                      "type": "boolean"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/Error400"
+          },
+          "401": {
+            "$ref": "#/components/responses/Error401"
+          },
+          "404": {
+            "$ref": "#/components/responses/Error404"
+          }
+        },
+        "security": [
+          {
+            "ServiceBearer": []
+          }
+        ],
+        "x-implementation-status": "implemented"
+      }
     }
   },
   "components": {
