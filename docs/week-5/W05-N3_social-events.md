@@ -62,9 +62,15 @@ Message: UUID id, conversationId,senderUserId,clientMessageId,content,createdAt;
 | identity.user-updated.v1 | Identity | Domain projections | userId,isActive,role,version |
 | commerce.sale-created.v1 | Commerce | Reporting/Notification nếu bật | saleId,centerId,totalAmount,currency |
 | social.message-created.v1 | Social | Notification | conversationId,messageId,senderUserId,recipientUserIds |
-| notification.broadcast.v1 | Admin / Notification | Toàn bộ User / Center Manager | broadcastId,title,content,targetAudience,createdAt |
-| notification.urgent.v1 | Center Manager / Notification | Khách có booking trong ngày | urgentId,centerId,date,title,content,reason,createdAt |
-| contract.status-changed.v1 | Core / Identity | Core booking, Notification | contractId,centerId,packageType,status=ACTIVE/EXPIRED/SUSPENDED,endDate |
+| notification.broadcast.v1 | Admin / Notification | Toàn bộ User / Center Manager | broadcastId,title,message,targetAudience,priority |
+| notification.urgent.v1 | Center Manager / Notification | Khách có booking trong ngày (in-app + Mailpit/SMTP fallback) | urgentId,centerId,date,title,message,impactedBookingsCount |
+| contract.status-changed.v1 | Commerce / Core | Core booking, Notification | contractId,centerId,managerId,status=ACTIVE/EXPIRED/SUSPENDED,reason |
+| content.news-submitted.v1 | Content | Notification (tới Super Admin) | newsId,centerId?,authorUserId,title |
+| content.news-publication-changed.v1 | Content | Notification (tới Center Manager tác giả) | newsId,authorUserId,status=PUBLISHED/REJECTED/ARCHIVED,reason? |
+| content.review-reported.v1 | Content | Notification (tới Super Admin) | reviewId,centerId,reporterUserId,reason |
+| booking.center-assigned.v1 | Core | Notification (tới Center Manager) | centerId,centerName,managerId,isActive |
+| booking.series-confirmed.v1 | Core outbox | Notification (gom 1 thông báo/chuỗi) | seriesId,centerId,recipientUserId,totalOccurrences,startDate,endDate |
+| booking.reminder.v1 | Core scheduler | Notification (nhắc T-24h/T-2h để kịp pass sân nếu bận) | bookingId,centerId,userId,date,startMinute,reminderWindow |
 
 Mỗi event có immutable id; publisher outbox retry cùng id. At-least-once, không tuyên bố exactly-once. Inbox/dedupe theo event và consumer; event version trên identity/projection để chống out-of-order, transfer phải đối soát Core nếu thiếu sự kiện. Event envelope mới giữ tên trường id/type/aggregateId/createdAt/payload quen Core, thêm metadata cho loại mới; không đổi schema hai loại booking đang chạy.
 

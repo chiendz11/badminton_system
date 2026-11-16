@@ -781,6 +781,486 @@
         "payload"
       ],
       "additionalProperties": false
+    },
+    {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "type": {
+          "type": "string",
+          "const": "content.news-submitted.v1"
+        },
+        "aggregateId": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "schemaVersion": {
+          "type": "integer",
+          "const": 1
+        },
+        "producer": {
+          "type": "string",
+          "const": "content-service"
+        },
+        "correlationId": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128
+        },
+        "payload": {
+          "type": "object",
+          "properties": {
+            "newsId": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 128
+            },
+            "centerId": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "authorUserId": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 128
+            },
+            "title": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 200
+            }
+          },
+          "required": [
+            "newsId",
+            "authorUserId",
+            "title"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "id",
+        "type",
+        "aggregateId",
+        "createdAt",
+        "schemaVersion",
+        "producer",
+        "correlationId",
+        "payload"
+      ],
+      "additionalProperties": false
+    },
+    {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "type": {
+          "type": "string",
+          "const": "content.news-publication-changed.v1"
+        },
+        "aggregateId": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "schemaVersion": {
+          "type": "integer",
+          "const": 1
+        },
+        "producer": {
+          "type": "string",
+          "const": "content-service"
+        },
+        "correlationId": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128
+        },
+        "payload": {
+          "type": "object",
+          "properties": {
+            "newsId": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 128
+            },
+            "authorUserId": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 128
+            },
+            "status": {
+              "type": "string",
+              "enum": [
+                "PUBLISHED",
+                "REJECTED",
+                "ARCHIVED"
+              ]
+            },
+            "reason": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 500
+            }
+          },
+          "required": [
+            "newsId",
+            "authorUserId",
+            "status"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "id",
+        "type",
+        "aggregateId",
+        "createdAt",
+        "schemaVersion",
+        "producer",
+        "correlationId",
+        "payload"
+      ],
+      "additionalProperties": false
+    },
+    {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "type": {
+          "type": "string",
+          "const": "content.review-reported.v1"
+        },
+        "aggregateId": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "schemaVersion": {
+          "type": "integer",
+          "const": 1
+        },
+        "producer": {
+          "type": "string",
+          "const": "content-service"
+        },
+        "correlationId": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128
+        },
+        "payload": {
+          "type": "object",
+          "properties": {
+            "reviewId": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 128
+            },
+            "centerId": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "reporterUserId": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 128
+            },
+            "reason": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 500
+            }
+          },
+          "required": [
+            "reviewId",
+            "centerId",
+            "reporterUserId",
+            "reason"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "id",
+        "type",
+        "aggregateId",
+        "createdAt",
+        "schemaVersion",
+        "producer",
+        "correlationId",
+        "payload"
+      ],
+      "additionalProperties": false
+    },
+    {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "type": {
+          "type": "string",
+          "const": "booking.center-assigned.v1"
+        },
+        "aggregateId": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "schemaVersion": {
+          "type": "integer",
+          "const": 1
+        },
+        "producer": {
+          "type": "string",
+          "const": "booking-core"
+        },
+        "correlationId": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128
+        },
+        "payload": {
+          "type": "object",
+          "properties": {
+            "centerId": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "centerName": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 200
+            },
+            "managerId": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 128
+            },
+            "isActive": {
+              "type": "boolean"
+            }
+          },
+          "required": [
+            "centerId",
+            "centerName",
+            "managerId",
+            "isActive"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "id",
+        "type",
+        "aggregateId",
+        "createdAt",
+        "schemaVersion",
+        "producer",
+        "correlationId",
+        "payload"
+      ],
+      "additionalProperties": false
+    },
+    {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "type": {
+          "type": "string",
+          "const": "booking.series-confirmed.v1"
+        },
+        "aggregateId": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "schemaVersion": {
+          "type": "integer",
+          "const": 1
+        },
+        "producer": {
+          "type": "string",
+          "const": "booking-core"
+        },
+        "correlationId": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128
+        },
+        "payload": {
+          "type": "object",
+          "properties": {
+            "seriesId": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "centerId": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "recipientUserId": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 128
+            },
+            "totalOccurrences": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 60
+            },
+            "startDate": {
+              "type": "string",
+              "format": "date"
+            },
+            "endDate": {
+              "type": "string",
+              "format": "date"
+            }
+          },
+          "required": [
+            "seriesId",
+            "centerId",
+            "recipientUserId",
+            "totalOccurrences",
+            "startDate",
+            "endDate"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "id",
+        "type",
+        "aggregateId",
+        "createdAt",
+        "schemaVersion",
+        "producer",
+        "correlationId",
+        "payload"
+      ],
+      "additionalProperties": false
+    },
+    {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "type": {
+          "type": "string",
+          "const": "booking.reminder.v1"
+        },
+        "aggregateId": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "schemaVersion": {
+          "type": "integer",
+          "const": 1
+        },
+        "producer": {
+          "type": "string",
+          "const": "booking-core"
+        },
+        "correlationId": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128
+        },
+        "payload": {
+          "type": "object",
+          "properties": {
+            "bookingId": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "centerId": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "userId": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 128
+            },
+            "date": {
+              "type": "string",
+              "format": "date"
+            },
+            "startMinute": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 1380
+            },
+            "reminderWindow": {
+              "type": "string",
+              "enum": [
+                "T-24h",
+                "T-2h"
+              ]
+            }
+          },
+          "required": [
+            "bookingId",
+            "centerId",
+            "userId",
+            "date",
+            "startMinute",
+            "reminderWindow"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "id",
+        "type",
+        "aggregateId",
+        "createdAt",
+        "schemaVersion",
+        "producer",
+        "correlationId",
+        "payload"
+      ],
+      "additionalProperties": false
     }
   ]
 }

@@ -33,6 +33,33 @@
         "message": "Do hỏng hệ thống chiếu sáng tại Sân 1, ca chơi chiều nay sẽ được chuyển sang Sân 3.",
         "actionRequired": "RELOCATE"
       }
+    },
+    {
+      "schema": "UnreadCountResponse",
+      "value": {
+        "unreadCount": 4,
+        "urgentUnreadCount": 1
+      }
+    },
+    {
+      "schema": "Notification",
+      "value": {
+        "id": "a1104000-0000-4000-8000-000000000099",
+        "recipientUserId": "manager-1",
+        "eventId": "a1104000-0000-4000-8000-000000000098",
+        "type": "content.news-publication-changed.v1",
+        "title": "Sự kiện CLB đã được duyệt đăng",
+        "message": "Bài viết Giải Cầu Lông Mùa Đông đã được Super Admin duyệt và hiển thị công khai.",
+        "priority": "HIGH",
+        "deepLink": {
+          "type": "NEWS_DETAIL",
+          "targetId": "60d5ec49f1b2c82d88c9f111",
+          "urlPath": "/news/60d5ec49f1b2c82d88c9f111"
+        },
+        "isRead": false,
+        "readAt": null,
+        "createdAt": "2026-11-16T08:10:00Z"
+      }
     }
   ],
   "invalid": [
