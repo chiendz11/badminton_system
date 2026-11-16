@@ -43,7 +43,7 @@
 
 Toàn bộ API, Event và Socket của hệ thống được chuẩn hóa máy-đọc tại [`contracts/`](../../contracts/README.md) và kiểm tra chéo tự động bởi `.github/scripts/validate_contracts.py`, `check_node_contract.mjs`, `check_python_contract.py`:
 - **9 OpenAPI 3.1 Specs:** `booking`, `gateway`, `ai`, `identity`, `commerce`, `content`, `social`, `notification` (đã tối ưu thêm `/notifications/unread-count`, `priority`, `deepLink`, `readAt` và nối đủ Gateway paths), `storage` (gắn cờ `x-implementation-status`: `implemented` vs `proposed`).
-- **Events & Sockets:** `events/booking-event.schema.json` (`booking.confirmed.v1`), `events/domain-event.schema.json` (16 event types v1 gồm Pass, Identity, Commerce, Social, Notification Broadcast/Urgent, SaaS Contract, **Content** `news-submitted` / `news-publication-changed` / `review-reported`, **Booking** `center-assigned` / `series-confirmed` / `reminder`), `sockets/social-event.schema.json` (9 Socket.IO events).
+- **Events & Sockets:** `events/booking-event.schema.json` (`booking.confirmed.v1`), `events/domain-event.schema.json` (23 event types v1 gồm Pass, Identity, Commerce + Low Stock + SaaS Expiry Reminder, Social Messages + Friendships, Notification Broadcast/Urgent, **Content** `news-*` / `review-*`, **Booking** `center-assigned` / `series-confirmed` / `reminder` / `payment-reconciliation`), `sockets/social-event.schema.json` (9 Socket.IO events).
 - **AI Tools & Shared Errors:** `ai-tools/`, `shared/error.schema.json`.
 
 ---
