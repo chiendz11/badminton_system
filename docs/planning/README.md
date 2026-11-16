@@ -15,17 +15,17 @@ Thư mục này lưu trữ toàn bộ hồ sơ kế hoạch tổng thể 10 tu�
 
 ---
 
-## 2. Phân công Vai trò 5 Thành viên
+## 2. Phân công Vai trò 5 Thành viên (Cập nhật Thực tế 16/11/2026)
 
-Hệ thống được xây dựng bởi đội ngũ 5 kỹ sư, mỗi người sở hữu một phân hệ chuyên biệt xuyên suốt 10 tuần:
+Hệ thống được xây dựng bởi đội ngũ 5 thành viên theo phân công hiện tại:
 
 | Thành viên | Vai trò chính (DRI) | Phân hệ phụ trách |
 | :--- | :--- | :--- |
-| **Người 1** | Tech Lead & Core Backend | `services/booking-core`, quy tắc nghiệp vụ đặt sân, ACID transaction, concurrency slot locking. |
-| **Người 2** | Frontend & Marketplace Lead | `apps/web`, giao diện người dùng Web, tính năng sang nhượng sân (Pass Marketplace). |
-| **Người 3** | Real-time & Communication Lead | `services/social-service`, `services/notification-service`, WebSocket chat, tin nhắn bảo mật, thông báo đẩy. |
-| **Người 4** | Identity & Platform Admin Lead | `services/identity-service`, `services/commerce-service`, `services/content-service`, `apps/admin`, RBAC, POS bán hàng, CMS tin tức. |
-| **Người 5** | AI Platform & DevOps Lead | `services/ai-service`, Trợ lý ảo AI LangGraph/LLM, hạ tầng Docker Compose, CI/CD GitHub Actions, hệ thống Prometheus/Grafana. |
+| **Bùi Anh Chiến (`chiendz11`)** | Tech Lead · Booking Core · AI · DevOps/MLOps & Platform | `services/booking-core` (không gồm Pass/PayOS), `services/ai-service`, `services/api-gateway`, Docker Compose / k3d / AWS EKS & RDS, CI/CD, GitOps, Observability. |
+| **Thành viên 5** | Pass Marketplace · PayOS · Social Realtime · Notification | Chợ Pass Sân (PassPost, Pass Transfer, UI Web), PayOS Sandbox & Webhook, `services/social-service` (Chat 1-1 Socket.IO), `services/notification-service` (RabbitMQ + Mailpit + Chuông UI). |
+| **Bạch Công Dũng (`BACHCONGDUNG`)** | Identity Service · Auth & RBAC | `services/identity`, đăng ký/xác minh Mailpit, JWT + Refresh Token rotation, RBAC (`user`, `center_manager`, `super_admin`), quản lý user & Auth UI (`apps/web`, `apps/admin`). |
+| **Nguyễn Văn Hùng (`nvahug`)** | Commerce Service (POS & B2B SaaS) | `services/commerce-service` (PostgreSQL + Prisma), tồn kho ACID, POS bán hàng tại quầy, hợp đồng B2B SaaS, doanh thu POS, 4 Notification events & Admin POS UI. |
+| **Dương Tiến Đạt (`rwukii`)** | Content Service (Tin tức & Đánh giá) | `services/content-service` (NestJS + MongoDB), Tin tức/Sự kiện CLB (`UC-07`), Đánh giá & Kiểm duyệt review (`UC-08`), 5 Notification events, Gateway sync & UI Content. |
 
 ---
 
