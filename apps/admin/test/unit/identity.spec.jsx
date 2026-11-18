@@ -23,9 +23,10 @@ let fail;
 function Location() {
   return <p data-testid="path">{useLocation().pathname}</p>;
 }
-function setup(path = "/center-status", session = null) {
+function setup(path = "/center-status", session = null, passSessionProp = true) {
+  const sessionProps = passSessionProp ? { session } : {};
   return render(
-    <SessionProvider session={session}>
+    <SessionProvider {...sessionProps}>
       <MemoryRouter initialEntries={[path]}>
         <Location />
         <Routes>
@@ -102,8 +103,9 @@ describe("admin identity integration", () => {
         await screen.findByRole("heading", { name: "Đăng nhập quản trị" }),
       ).toBeInTheDocument();
       expect(window.__BADMINTON_SESSION__).toBeNull();
+      expect(calls.some((call) => call.url === "/api/auth/logout")).toBe(true);
       await http.get("/api/booking/bookings");
-      expect(calls[2].headers.Authorization).toBeUndefined();
+      expect(calls.at(-1).headers.Authorization).toBeUndefined();
     },
   );
   it.each(["user", "unknown"])(
@@ -180,5 +182,67 @@ describe("admin identity integration", () => {
       screen.getByRole("heading", { name: "Đăng nhập quản trị" }),
     ).toBeInTheDocument();
     expect(window.__BADMINTON_SESSION__).toBeNull();
+  });
+
+  it("restores the admin session via /api/auth/refresh when no host session is injected", async () => {
+    delete window.__BADMINTON_SESSION__;
+    http.defaults.adapter = async (config) => {
+      calls.push(config);
+      if (config.url === "/api/auth/refresh") {
+        return {
+          data: { ...adminSession("center_manager"), accessToken: "restored-token" },
+          status: 200,
+          statusText: "OK",
+          headers: {},
+          config,
+        };
+      }
+      return { data: {}, status: 200, statusText: "OK", headers: {}, config };
+    };
+    setup("/center-status", undefined, false);
+    expect(
+      await screen.findByRole("heading", { name: "Trạng thái sân" }),
+    ).toBeInTheDocument();
+    expect(calls[0].url).toBe("/api/auth/refresh");
+    await http.get("/api/booking/bookings");
+    expect(calls[1].headers.Authorization).toBe("Bearer restored-token");
+  });
+
+  it("deduplicates concurrent 401 refreshes and retries failed requests once", async () => {
+    setup();
+    await submit();
+    await screen.findByRole("heading", { name: "Trạng thái sân" });
+    calls.length = 0;
+
+    let refreshCount = 0;
+    http.defaults.adapter = async (config) => {
+      calls.push(config);
+      if (config.url === "/api/auth/refresh") {
+        refreshCount += 1;
+        await new Promise((resolve) => setTimeout(resolve, 10));
+        return {
+          data: { ...adminSession(), accessToken: "rotated-admin-token" },
+          status: 200,
+          statusText: "OK",
+          headers: {},
+          config,
+        };
+      }
+      if (config.headers.Authorization === "Bearer test-access-token") {
+        throw { response: { status: 401 }, config };
+      }
+      return { data: { ok: true }, status: 200, statusText: "OK", headers: {}, config };
+    };
+
+    const [first, second] = await Promise.all([
+      http.get("/api/booking/one"),
+      http.get("/api/booking/two"),
+    ]);
+    expect(first.data).toEqual({ ok: true });
+    expect(second.data).toEqual({ ok: true });
+    expect(refreshCount).toBe(1);
+    expect(
+      calls.filter((call) => call.url.startsWith("/api/booking/") && call.headers.Authorization === "Bearer rotated-admin-token"),
+    ).toHaveLength(2);
   });
 });

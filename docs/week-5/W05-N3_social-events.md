@@ -62,9 +62,22 @@ Message: UUID id, conversationId,senderUserId,clientMessageId,content,createdAt;
 | identity.user-updated.v1 | Identity | Domain projections | userId,isActive,role,version |
 | commerce.sale-created.v1 | Commerce | Reporting/Notification nếu bật | saleId,centerId,totalAmount,currency |
 | social.message-created.v1 | Social | Notification | conversationId,messageId,senderUserId,recipientUserIds |
-| notification.broadcast.v1 | Admin / Notification | Toàn bộ User / Center Manager | broadcastId,title,content,targetAudience,createdAt |
-| notification.urgent.v1 | Center Manager / Notification | Khách có booking trong ngày | urgentId,centerId,date,title,content,reason,createdAt |
-| contract.status-changed.v1 | Core / Identity | Core booking, Notification | contractId,centerId,packageType,status=ACTIVE/EXPIRED/SUSPENDED,endDate |
+| notification.broadcast.v1 | Admin / Notification | Toàn bộ User / Center Manager | broadcastId,title,message,targetAudience,priority |
+| notification.urgent.v1 | Center Manager / Notification | Khách có booking trong ngày (in-app + Mailpit/SMTP fallback) | urgentId,centerId,date,title,message,impactedBookingsCount |
+| contract.status-changed.v1 | Commerce / Core | Core booking, Notification | contractId,centerId,managerId,status=ACTIVE/EXPIRED/SUSPENDED,reason |
+| contract.expiry-reminder.v1 | Commerce | Notification (tới Center Manager) | contractId,centerId,managerId,daysRemaining=7/3/1,endDate |
+| commerce.low-stock-alert.v1 | Commerce | Notification (tới Center Manager) | productId,centerId,managerId,currentStock,threshold |
+| content.news-submitted.v1 | Content | Notification (tới Super Admin) | newsId,centerId?,authorUserId,title |
+| content.news-publication-changed.v1 | Content | Notification (tới Center Manager tác giả) | newsId,authorUserId,status=PUBLISHED/REJECTED/ARCHIVED,reason? |
+| content.review-reported.v1 | Content | Notification (tới Super Admin) | reviewId,centerId,reporterUserId,reason |
+| content.review-moderated.v1 | Content | Notification (tới Center Manager / Author) | reviewId,centerId,reporterUserId?,authorUserId,status=PUBLISHED/HIDDEN,reason |
+| content.review-created.v1 | Content | Notification (tới Center Manager — tùy chọn) | reviewId,centerId,managerId,authorUserId,score |
+| social.friendship-requested.v1 | Social | Notification (tới Target User) | friendshipId,requesterUserId,targetUserId |
+| social.friendship-accepted.v1 | Social | Notification (tới Requester User) | friendshipId,requesterUserId,targetUserId |
+| booking.center-assigned.v1 | Core | Notification (tới Center Manager) | centerId,centerName,managerId,isActive |
+| booking.series-confirmed.v1 | Core outbox | Notification (gom 1 thông báo/chuỗi) | seriesId,centerId,recipientUserId,totalOccurrences,startDate,endDate |
+| booking.reminder.v1 | Core scheduler | Notification (nhắc T-24h/T-2h để kịp pass sân nếu bận) | bookingId,centerId,userId,date,startMinute,reminderWindow |
+| booking.payment-reconciliation.v1 | Core (PayOS Target) | Notification (tới User & Super Admin) | paymentAttemptId,bookingId?,userId,amount,reason |
 
 Mỗi event có immutable id; publisher outbox retry cùng id. At-least-once, không tuyên bố exactly-once. Inbox/dedupe theo event và consumer; event version trên identity/projection để chống out-of-order, transfer phải đối soát Core nếu thiếu sự kiện. Event envelope mới giữ tên trường id/type/aggregateId/createdAt/payload quen Core, thêm metadata cho loại mới; không đổi schema hai loại booking đang chạy.
 

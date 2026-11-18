@@ -15,6 +15,54 @@
         "fromUserId": "user-seller",
         "toUserId": "user-buyer"
       }
+    },
+    {
+      "id": "a1104000-0000-4000-8000-000000000010",
+      "type": "content.news-submitted.v1",
+      "aggregateId": "60d5ec49f1b2c82d88c9f111",
+      "createdAt": "2026-11-16T08:00:00Z",
+      "schemaVersion": 1,
+      "producer": "content-service",
+      "correlationId": "req-example-content-1",
+      "payload": {
+        "newsId": "60d5ec49f1b2c82d88c9f111",
+        "centerId": "a1104000-0000-4000-8000-000000000020",
+        "authorUserId": "manager-1",
+        "title": "Giải Cầu Lông CLB Mùa Đông 2026"
+      }
+    },
+    {
+      "id": "a1104000-0000-4000-8000-000000000011",
+      "type": "booking.reminder.v1",
+      "aggregateId": "a1104000-0000-4000-8000-000000000030",
+      "createdAt": "2026-11-16T08:05:00Z",
+      "schemaVersion": 1,
+      "producer": "booking-core",
+      "correlationId": "req-example-reminder-1",
+      "payload": {
+        "bookingId": "a1104000-0000-4000-8000-000000000030",
+        "centerId": "a1104000-0000-4000-8000-000000000020",
+        "userId": "user-1",
+        "date": "2026-11-17",
+        "startMinute": 1140,
+        "reminderWindow": "T-24h"
+      }
+    },
+    {
+      "id": "a1104000-0000-4000-8000-000000000012",
+      "type": "contract.expiry-reminder.v1",
+      "aggregateId": "a1104000-0000-4000-8000-000000000040",
+      "createdAt": "2026-11-16T08:15:00Z",
+      "schemaVersion": 1,
+      "producer": "commerce-service",
+      "correlationId": "req-example-contract-1",
+      "payload": {
+        "contractId": "a1104000-0000-4000-8000-000000000040",
+        "centerId": "a1104000-0000-4000-8000-000000000020",
+        "managerId": "manager-1",
+        "daysRemaining": 3,
+        "endDate": "2026-11-19"
+      }
     }
   ],
   "invalid": [

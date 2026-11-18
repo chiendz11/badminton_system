@@ -18,9 +18,20 @@ notification-service/
   tests/integration/
 ```
 
-## Boundary và dữ liệu
+## Boundary, sự kiện toàn hệ thống và tối ưu kiến trúc
 
-MongoDB riêng; Notification, DeliveryAttempt, Inbox. Unique eventId/recipient/channel, ack sau khi persist, retry hữu hạn và DLQ.
+MongoDB riêng; `Notification`, `BroadcastCampaign` (tối ưu broadcast toàn sàn không chặn request), `DeliveryAttempt`, `Inbox`. Unique `(eventId, recipientUserId, channel)`, ACK RabbitMQ sau khi persist, retry exponential backoff + DLQ.
+
+### Sự kiện cần tiêu thụ xuyên suốt hệ thống
+- **Booking & Onboarding (`booking-core` Outbox):** `booking.confirmed.v1`, `booking.series-confirmed.v1` (gom chuỗi lịch cố định 1–60 ngày thành 1 thông báo), `booking.reminder.v1` (`T-24h` / `T-2h` trước giờ chơi để kịp đăng Chợ Pass vì đơn confirmed khóa hủy 403), `booking.center-assigned.v1` (báo `center_manager` khi `super_admin` bàn giao/tạm dừng cơ sở), và `booking.payment-reconciliation.v1` (bắt buộc khi bật PayOS nếu webhook vào sau lúc hold hết hạn).
+- **Chợ Pass & Chat (`booking-core` + `social-service`):** `booking.pass-created.v1`, `booking.pass-interest-added.v1`, `booking.pass-transferred.v1`, `booking.pass-closed.v1`, `social.message-created.v1`, `social.friendship-requested.v1`, `social.friendship-accepted.v1`.
+- **Content & Kiểm duyệt (`content-service`):** `content.news-submitted.v1` (báo `super_admin` duyệt sự kiện CLB mới), `content.news-publication-changed.v1` (báo `center_manager` kết quả duyệt/từ chối), `content.review-reported.v1` (báo `super_admin` có khiếu nại đánh giá xấu), `content.review-moderated.v1` (báo kết quả kiểm duyệt review), `content.review-created.v1` (tùy chọn báo review mới/thấp sao cho chủ sân).
+- **Quản trị, POS & Danh tính (`commerce-service`, `identity`, Notification API):** `contract.status-changed.v1`, `contract.expiry-reminder.v1` (nhắc hạn HĐ SaaS trước 7/3/1 ngày), `commerce.low-stock-alert.v1` (tùy chọn cảnh báo hết tồn POS), `identity.user-updated.v1` (email thông báo khóa/mở khóa/đổi vai trò), `notification.broadcast.v1` (`POST /notifications/broadcast` cho `super_admin`), `notification.urgent.v1` (`POST /notifications/urgent` cho `center_manager` đúng cơ sở kèm `Idempotency-Key` + fallback email qua SMTP/`Mailpit`).
+
+### Tối ưu trải nghiệm & Vận hành
+- **Badge & Deep-Link:** `Notification` hỗ trợ `title`, `priority` (`NORMAL|HIGH|URGENT`), `deepLink`, `readAt` và endpoint nhẹ `GET /notifications/unread-count`.
+- **Email Urgent Fallback:** Các thông báo `URGENT` (sự cố sân trong ngày, nhắc hạn HĐ SaaS `1` ngày) gửi kèm email qua SMTP (`mailpit:1025` ở local/test) ngoài kênh in-app.
+- **Broadcast Fan-out an toàn:** `POST /notifications/broadcast` trả `202` ngay, worker chia batch ghi bất đồng bộ theo `targetAudience` (`ALL`/`MANAGERS`/`PLAYERS`) tránh timeout API Admin.
 
 API, event và quyền nằm trong [system contract](../../docs/week-5/SYSTEM_CONTRACTS.md), quyết định ở [ADR](../../docs/week-5/adr/README.md) (ADR-009). Dùng tên kebab-case để khớp repo hiện tại; tương ứng tên underscore trong tài liệu kiến trúc.
 

@@ -68,18 +68,24 @@ jobs:
             image: badminton-identity-service
             target: ""
             build_args: ""
+          - name: identity-service-migrations
+            context: .
+            dockerfile: services/identity/Dockerfile
+            image: badminton-identity-service-migrations
+            target: migrate
+            build_args: ""
           - name: web
             context: .
             dockerfile: apps/web/Dockerfile
             image: badminton-web
             target: ""
-            build_args: "VITE_API_GATEWAY_URL=http://127.0.0.1:18081"
+            build_args: ""
           - name: admin
             context: .
             dockerfile: apps/admin/Dockerfile
             image: badminton-admin
             target: ""
-            build_args: "VITE_API_GATEWAY_URL=http://127.0.0.1:18081"
+            build_args: ""
 
     steps:
       - name: Checkout code

@@ -232,6 +232,60 @@
         "x-gateway-path": "/api/notifications/read-all"
       }
     },
+    "/notifications/unread-count": {
+      "get": {
+        "operationId": "getUnreadNotificationCount",
+        "tags": [
+          "Notification"
+        ],
+        "summary": "Count unread notifications for current actor",
+        "description": "PROPOSED — lightweight endpoint for Web/Admin bell badge.",
+        "x-delivery-status": "proposed",
+        "x-owner-policy": "Recipient=actor only.",
+        "responses": {
+          "200": {
+            "description": "Unread count response",
+            "headers": {
+              "X-Request-Id": {
+                "schema": {
+                  "type": "string"
+                },
+                "description": "Correlation ID"
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UnreadCountResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Error401"
+          },
+          "429": {
+            "$ref": "#/components/responses/Error429"
+          },
+          "503": {
+            "$ref": "#/components/responses/Error503"
+          }
+        },
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/XRequestId"
+          }
+        ],
+        "x-implementation-status": "proposed",
+        "x-owner": "Người 3",
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "x-gateway-path": "/api/notifications/unread-count"
+      }
+    },
     "/health/live": {
       "get": {
         "operationId": "healthLive",
@@ -566,12 +620,54 @@
             "type": "string",
             "minLength": 1
           },
+          "title": {
+            "type": "string",
+            "maxLength": 200
+          },
           "message": {
             "type": "string",
             "maxLength": 2000
           },
+          "priority": {
+            "type": "string",
+            "enum": [
+              "NORMAL",
+              "HIGH",
+              "URGENT"
+            ],
+            "default": "NORMAL"
+          },
+          "deepLink": {
+            "type": "object",
+            "properties": {
+              "type": {
+                "type": "string",
+                "minLength": 1
+              },
+              "targetId": {
+                "type": "string",
+                "minLength": 1
+              },
+              "urlPath": {
+                "type": "string",
+                "minLength": 1
+              }
+            },
+            "required": [
+              "type",
+              "targetId"
+            ],
+            "additionalProperties": false
+          },
           "isRead": {
             "type": "boolean"
+          },
+          "readAt": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "date-time"
           },
           "createdAt": {
             "type": "string",
@@ -586,6 +682,24 @@
           "message",
           "isRead",
           "createdAt"
+        ],
+        "additionalProperties": false
+      },
+      "UnreadCountResponse": {
+        "type": "object",
+        "properties": {
+          "unreadCount": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "urgentUnreadCount": {
+            "type": "integer",
+            "minimum": 0
+          }
+        },
+        "required": [
+          "unreadCount",
+          "urgentUnreadCount"
         ],
         "additionalProperties": false
       },

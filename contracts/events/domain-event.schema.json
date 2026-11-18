@@ -781,6 +781,665 @@
         "payload"
       ],
       "additionalProperties": false
+    },
+    {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "type": {
+          "type": "string",
+          "const": "content.news-submitted.v1"
+        },
+        "aggregateId": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "schemaVersion": {
+          "type": "integer",
+          "const": 1
+        },
+        "producer": {
+          "type": "string",
+          "const": "content-service"
+        },
+        "correlationId": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128
+        },
+        "payload": {
+          "type": "object",
+          "properties": {
+            "newsId": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 128
+            },
+            "centerId": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "authorUserId": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 128
+            },
+            "title": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 200
+            }
+          },
+          "required": [
+            "newsId",
+            "authorUserId",
+            "title"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "id",
+        "type",
+        "aggregateId",
+        "createdAt",
+        "schemaVersion",
+        "producer",
+        "correlationId",
+        "payload"
+      ],
+      "additionalProperties": false
+    },
+    {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "type": {
+          "type": "string",
+          "const": "content.news-publication-changed.v1"
+        },
+        "aggregateId": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "schemaVersion": {
+          "type": "integer",
+          "const": 1
+        },
+        "producer": {
+          "type": "string",
+          "const": "content-service"
+        },
+        "correlationId": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128
+        },
+        "payload": {
+          "type": "object",
+          "properties": {
+            "newsId": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 128
+            },
+            "authorUserId": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 128
+            },
+            "status": {
+              "type": "string",
+              "enum": [
+                "PUBLISHED",
+                "REJECTED",
+                "ARCHIVED"
+              ]
+            },
+            "reason": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 500
+            }
+          },
+          "required": [
+            "newsId",
+            "authorUserId",
+            "status"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "id",
+        "type",
+        "aggregateId",
+        "createdAt",
+        "schemaVersion",
+        "producer",
+        "correlationId",
+        "payload"
+      ],
+      "additionalProperties": false
+    },
+    {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "type": {
+          "type": "string",
+          "const": "content.review-reported.v1"
+        },
+        "aggregateId": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "schemaVersion": {
+          "type": "integer",
+          "const": 1
+        },
+        "producer": {
+          "type": "string",
+          "const": "content-service"
+        },
+        "correlationId": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128
+        },
+        "payload": {
+          "type": "object",
+          "properties": {
+            "reviewId": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 128
+            },
+            "centerId": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "reporterUserId": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 128
+            },
+            "reason": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 500
+            }
+          },
+          "required": [
+            "reviewId",
+            "centerId",
+            "reporterUserId",
+            "reason"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "id",
+        "type",
+        "aggregateId",
+        "createdAt",
+        "schemaVersion",
+        "producer",
+        "correlationId",
+        "payload"
+      ],
+      "additionalProperties": false
+    },
+    {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "type": {
+          "type": "string",
+          "const": "booking.center-assigned.v1"
+        },
+        "aggregateId": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "schemaVersion": {
+          "type": "integer",
+          "const": 1
+        },
+        "producer": {
+          "type": "string",
+          "const": "booking-core"
+        },
+        "correlationId": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128
+        },
+        "payload": {
+          "type": "object",
+          "properties": {
+            "centerId": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "centerName": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 200
+            },
+            "managerId": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 128
+            },
+            "isActive": {
+              "type": "boolean"
+            }
+          },
+          "required": [
+            "centerId",
+            "centerName",
+            "managerId",
+            "isActive"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "id",
+        "type",
+        "aggregateId",
+        "createdAt",
+        "schemaVersion",
+        "producer",
+        "correlationId",
+        "payload"
+      ],
+      "additionalProperties": false
+    },
+    {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "type": {
+          "type": "string",
+          "const": "booking.series-confirmed.v1"
+        },
+        "aggregateId": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "schemaVersion": {
+          "type": "integer",
+          "const": 1
+        },
+        "producer": {
+          "type": "string",
+          "const": "booking-core"
+        },
+        "correlationId": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128
+        },
+        "payload": {
+          "type": "object",
+          "properties": {
+            "seriesId": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "centerId": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "recipientUserId": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 128
+            },
+            "totalOccurrences": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 60
+            },
+            "startDate": {
+              "type": "string",
+              "format": "date"
+            },
+            "endDate": {
+              "type": "string",
+              "format": "date"
+            }
+          },
+          "required": [
+            "seriesId",
+            "centerId",
+            "recipientUserId",
+            "totalOccurrences",
+            "startDate",
+            "endDate"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "id",
+        "type",
+        "aggregateId",
+        "createdAt",
+        "schemaVersion",
+        "producer",
+        "correlationId",
+        "payload"
+      ],
+      "additionalProperties": false
+    },
+    {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "type": {
+          "type": "string",
+          "const": "booking.reminder.v1"
+        },
+        "aggregateId": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "schemaVersion": {
+          "type": "integer",
+          "const": 1
+        },
+        "producer": {
+          "type": "string",
+          "const": "booking-core"
+        },
+        "correlationId": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128
+        },
+        "payload": {
+          "type": "object",
+          "properties": {
+            "bookingId": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "centerId": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "userId": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 128
+            },
+            "date": {
+              "type": "string",
+              "format": "date"
+            },
+            "startMinute": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 1380
+            },
+            "reminderWindow": {
+              "type": "string",
+              "enum": [
+                "T-24h",
+                "T-2h"
+              ]
+            }
+          },
+          "required": [
+            "bookingId",
+            "centerId",
+            "userId",
+            "date",
+            "startMinute",
+            "reminderWindow"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "id",
+        "type",
+        "aggregateId",
+        "createdAt",
+        "schemaVersion",
+        "producer",
+        "correlationId",
+        "payload"
+      ],
+      "additionalProperties": false
+    },
+    {
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "format": "uuid" },
+        "type": { "type": "string", "const": "social.friendship-requested.v1" },
+        "aggregateId": { "type": "string", "format": "uuid" },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "schemaVersion": { "type": "integer", "const": 1 },
+        "producer": { "type": "string", "const": "social-service" },
+        "correlationId": { "type": "string", "minLength": 1, "maxLength": 128 },
+        "payload": {
+          "type": "object",
+          "properties": {
+            "friendshipId": { "type": "string", "format": "uuid" },
+            "requesterUserId": { "type": "string", "minLength": 1, "maxLength": 128 },
+            "targetUserId": { "type": "string", "minLength": 1, "maxLength": 128 }
+          },
+          "required": ["friendshipId", "requesterUserId", "targetUserId"],
+          "additionalProperties": false
+        }
+      },
+      "required": ["id", "type", "aggregateId", "createdAt", "schemaVersion", "producer", "correlationId", "payload"],
+      "additionalProperties": false
+    },
+    {
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "format": "uuid" },
+        "type": { "type": "string", "const": "social.friendship-accepted.v1" },
+        "aggregateId": { "type": "string", "format": "uuid" },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "schemaVersion": { "type": "integer", "const": 1 },
+        "producer": { "type": "string", "const": "social-service" },
+        "correlationId": { "type": "string", "minLength": 1, "maxLength": 128 },
+        "payload": {
+          "type": "object",
+          "properties": {
+            "friendshipId": { "type": "string", "format": "uuid" },
+            "requesterUserId": { "type": "string", "minLength": 1, "maxLength": 128 },
+            "targetUserId": { "type": "string", "minLength": 1, "maxLength": 128 }
+          },
+          "required": ["friendshipId", "requesterUserId", "targetUserId"],
+          "additionalProperties": false
+        }
+      },
+      "required": ["id", "type", "aggregateId", "createdAt", "schemaVersion", "producer", "correlationId", "payload"],
+      "additionalProperties": false
+    },
+    {
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "format": "uuid" },
+        "type": { "type": "string", "const": "content.review-moderated.v1" },
+        "aggregateId": { "type": "string", "minLength": 1, "maxLength": 128 },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "schemaVersion": { "type": "integer", "const": 1 },
+        "producer": { "type": "string", "const": "content-service" },
+        "correlationId": { "type": "string", "minLength": 1, "maxLength": 128 },
+        "payload": {
+          "type": "object",
+          "properties": {
+            "reviewId": { "type": "string", "minLength": 1, "maxLength": 128 },
+            "centerId": { "type": "string", "format": "uuid" },
+            "reporterUserId": { "type": "string", "minLength": 1, "maxLength": 128 },
+            "authorUserId": { "type": "string", "minLength": 1, "maxLength": 128 },
+            "status": { "type": "string", "enum": ["PUBLISHED", "HIDDEN"] },
+            "reason": { "type": "string", "minLength": 1, "maxLength": 500 }
+          },
+          "required": ["reviewId", "centerId", "authorUserId", "status", "reason"],
+          "additionalProperties": false
+        }
+      },
+      "required": ["id", "type", "aggregateId", "createdAt", "schemaVersion", "producer", "correlationId", "payload"],
+      "additionalProperties": false
+    },
+    {
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "format": "uuid" },
+        "type": { "type": "string", "const": "content.review-created.v1" },
+        "aggregateId": { "type": "string", "minLength": 1, "maxLength": 128 },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "schemaVersion": { "type": "integer", "const": 1 },
+        "producer": { "type": "string", "const": "content-service" },
+        "correlationId": { "type": "string", "minLength": 1, "maxLength": 128 },
+        "payload": {
+          "type": "object",
+          "properties": {
+            "reviewId": { "type": "string", "minLength": 1, "maxLength": 128 },
+            "centerId": { "type": "string", "format": "uuid" },
+            "managerId": { "type": "string", "minLength": 1, "maxLength": 128 },
+            "authorUserId": { "type": "string", "minLength": 1, "maxLength": 128 },
+            "score": { "type": "integer", "minimum": 1, "maximum": 5 }
+          },
+          "required": ["reviewId", "centerId", "managerId", "authorUserId", "score"],
+          "additionalProperties": false
+        }
+      },
+      "required": ["id", "type", "aggregateId", "createdAt", "schemaVersion", "producer", "correlationId", "payload"],
+      "additionalProperties": false
+    },
+    {
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "format": "uuid" },
+        "type": { "type": "string", "const": "contract.expiry-reminder.v1" },
+        "aggregateId": { "type": "string", "format": "uuid" },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "schemaVersion": { "type": "integer", "const": 1 },
+        "producer": { "type": "string", "const": "commerce-service" },
+        "correlationId": { "type": "string", "minLength": 1, "maxLength": 128 },
+        "payload": {
+          "type": "object",
+          "properties": {
+            "contractId": { "type": "string", "format": "uuid" },
+            "centerId": { "type": "string", "format": "uuid" },
+            "managerId": { "type": "string", "minLength": 1, "maxLength": 128 },
+            "daysRemaining": { "type": "integer", "enum": [7, 3, 1] },
+            "endDate": { "type": "string", "format": "date" }
+          },
+          "required": ["contractId", "centerId", "managerId", "daysRemaining", "endDate"],
+          "additionalProperties": false
+        }
+      },
+      "required": ["id", "type", "aggregateId", "createdAt", "schemaVersion", "producer", "correlationId", "payload"],
+      "additionalProperties": false
+    },
+    {
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "format": "uuid" },
+        "type": { "type": "string", "const": "commerce.low-stock-alert.v1" },
+        "aggregateId": { "type": "string", "format": "uuid" },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "schemaVersion": { "type": "integer", "const": 1 },
+        "producer": { "type": "string", "const": "commerce-service" },
+        "correlationId": { "type": "string", "minLength": 1, "maxLength": 128 },
+        "payload": {
+          "type": "object",
+          "properties": {
+            "productId": { "type": "string", "format": "uuid" },
+            "centerId": { "type": "string", "format": "uuid" },
+            "managerId": { "type": "string", "minLength": 1, "maxLength": 128 },
+            "currentStock": { "type": "integer", "minimum": 0 },
+            "threshold": { "type": "integer", "minimum": 0 }
+          },
+          "required": ["productId", "centerId", "managerId", "currentStock", "threshold"],
+          "additionalProperties": false
+        }
+      },
+      "required": ["id", "type", "aggregateId", "createdAt", "schemaVersion", "producer", "correlationId", "payload"],
+      "additionalProperties": false
+    },
+    {
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "format": "uuid" },
+        "type": { "type": "string", "const": "booking.payment-reconciliation.v1" },
+        "aggregateId": { "type": "string", "format": "uuid" },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "schemaVersion": { "type": "integer", "const": 1 },
+        "producer": { "type": "string", "const": "booking-core" },
+        "correlationId": { "type": "string", "minLength": 1, "maxLength": 128 },
+        "payload": {
+          "type": "object",
+          "properties": {
+            "paymentAttemptId": { "type": "string", "format": "uuid" },
+            "bookingId": { "type": "string", "format": "uuid" },
+            "userId": { "type": "string", "minLength": 1, "maxLength": 128 },
+            "amount": { "type": "integer", "minimum": 0 },
+            "reason": { "type": "string", "minLength": 1, "maxLength": 500 }
+          },
+          "required": ["paymentAttemptId", "userId", "amount", "reason"],
+          "additionalProperties": false
+        }
+      },
+      "required": ["id", "type", "aggregateId", "createdAt", "schemaVersion", "producer", "correlationId", "payload"],
+      "additionalProperties": false
     }
   ]
 }

@@ -34,7 +34,30 @@ describe("identity configuration", () => {
       issuer: "badminton-identity",
       audience: "badminton-system",
       port: 8084,
+      trustProxy: 1,
+      secureRefreshCookie: false,
     });
+  });
+  it("supports Mailpit, COOKIE_SECURE, and TRUST_PROXY independently of NODE_ENV", () => {
+    const prodConfig = configuration({
+      ...env,
+      NODE_ENV: "production",
+      JWT_SECRET: "a-real-production-secret-key-at-least-32-chars",
+      MAILPIT_URL: "http://mailpit:8025",
+      EMAIL_VERIFICATION_PAGE_URL: "https://web.badminton.local/verify-email",
+      COOKIE_SECURE: "false",
+      TRUST_PROXY: "2",
+    });
+    expect(prodConfig.secureRefreshCookie).toBe(false);
+    expect(prodConfig.trustProxy).toBe(2);
+    expect(prodConfig.mailpit?.origin.href).toBe("http://mailpit:8025/");
+    expect(prodConfig.mailpit?.verificationPage.href).toBe(
+      "https://web.badminton.local/verify-email",
+    );
+    expect(configuration({ ...env, COOKIE_SECURE: "true" }).secureRefreshCookie).toBe(true);
+    expect(configuration({ ...env, TRUST_PROXY: "false" }).trustProxy).toBe(false);
+    expect(() => configuration({ ...env, COOKIE_SECURE: "yes" })).toThrow();
+    expect(() => configuration({ ...env, TRUST_PROXY: "invalid" })).toThrow();
   });
   it("rejects incomplete/invalid config and production demo secrets", () => {
     expect(() => configuration({ ...env, JWT_SECRET: "short" })).toThrow();
