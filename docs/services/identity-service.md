@@ -7,7 +7,7 @@
 | **Package / CI Component** | `@badminton/identity` (`identity_service` trong `.github/ci/components.yml`) |
 | **Port / DB** | Port runtime `8084` (`3002` trên OpenAPI proposal) · **PostgreSQL 16 + Prisma (`identity` DB)** |
 | **Contract & ADR** | [contracts/identity/openapi.json](../../contracts/identity/openapi.json) · [ADR-006](../week-5/adr/ADR-006.md) |
-| **Trạng thái hiện tại** | **Implemented & Live** phần Self-serve Auth + Mailpit + Cookie Refresh; còn phần **Admin User/Manager APIs (`proposed`)** |
+| **Trạng thái hiện tại** | **Implemented & Live** phần Self-serve Auth + Mailpit + Cookie Refresh; đã bổ sung **Profile + Admin User/Manager APIs**, audit và RabbitMQ outbox |
 
 ---
 
@@ -40,14 +40,14 @@
 | `GET /api/auth/me` | `GET /api/auth/me` | Yêu cầu Bearer JWT hợp lệ. |
 | `GET /health`, `GET /health/ready` | Internal only | `/health/ready` kiểm tra DB (`503` an toàn, không lộ DB URL). |
 
-### Cần làm thêm để hoàn chỉnh (`proposed` trong OpenAPI & BRD V2.0)
-| Endpoint cần thêm | Quyền & Yêu cầu nghiệp vụ |
+### Hồ sơ và quản trị tài khoản (`implemented`)
+| Endpoint | Quyền & Yêu cầu nghiệp vụ |
 | :--- | :--- |
 | `PATCH /api/v1/me` (`/api/identity/me`) | User tự cập nhật `name`, `phone` trong `Profile`. **Cấm tuyệt đối** nhận `role`, `isActive`, `isVerified` trong body (whitelist DTO). |
 | `GET /api/v1/users` | Chỉ **`super_admin`**: lọc danh sách theo `role` (`center_manager`, `user`), `isActive`, tìm theo email/tên (phục vụ Admin chọn gán `managerId` ở `UC-06`). |
 | `PATCH /api/v1/users/{userId}/status` | Chỉ **`super_admin`**: khóa/mở khóa tài khoản vi phạm/bot (`isActive: false`, `AD-11`). Khi khóa bắt buộc **revoke tất cả `Session` chưa hết hạn** của user đó và phát `identity.user-updated.v1`. |
 | `PUT /api/v1/users/{userId}/role` | Chỉ **`super_admin`**: đổi vai trò kèm audit lý do, chặn tự nâng quyền hoặc hạ quyền chính mình (`self privilege escalation`). |
-| `PUT /api/v1/center-assignments` | Chỉ **`super_admin`**: xác minh user tồn tại + đúng role `center_manager`, ghi nhận phân công trung tâm. |
+| `PUT /api/v1/center-assignments` | Chỉ **`super_admin`**: xác minh user tồn tại + đúng role `center_manager`, ghi nhận phân công trung tâm trong `CenterAssignment` (mỗi center một phân công hiện tại). Booking Core tiếp tục sở hữu `Center.managerId`. |
 | `GET /internal/identity/users/{userId}` | **Internal only** (không expose qua public ingress): bảo vệ bằng `INTERNAL_SERVICE_TOKEN` hoặc service credential cho Gateway/Core/Social/AI tra cứu. |
 
 ---
@@ -61,7 +61,7 @@
 | `JWT_ISSUER` / `JWT_AUDIENCE` | Cố định mặc định `badminton-identity` / `badminton-system` khớp toàn bộ verifier. |
 | `COOKIE_SECURE` & `TRUST_PROXY` | Khi sau TLS Ingress (`*.badminton.local` / ALB): **`COOKIE_SECURE=true`**, **`TRUST_PROXY=1`** để Express đọc `X-Forwarded-Proto` & `X-Forwarded-For`. |
 | `MAILPIT_URL` & `EMAIL_VERIFICATION_PAGE_URL` | Local trỏ tới `http://mailpit:8025` (hoặc SMTP) và `https://web.badminton.local/verify-email` (không nhúng credential trong URL). |
-| `METRICS_TOKEN` | Bắt buộc dùng constant-time check (`timingSafeEqual`) khi bổ sung `/metrics`. |
+| `METRICS_TOKEN` | Bắt buộc dùng constant-time check (`timingSafeEqual`) cho `/metrics`. |
 
 ---
 
@@ -70,3 +70,13 @@
 - **Scripts `package.json` bắt buộc:** `lint`, `typecheck`, `test:unit`, `test:contract`, `test:integration`, `build`, `prisma:validate`, `prisma:generate`, `prisma:migrate:deploy`.
 - **Migration Docker:** Stage `migrate` trong `services/identity/Dockerfile` chạy thành image riêng `ghcr.io/chiendz11/badminton-identity-service-migrations` làm **Argo CD `PreSync` Job** (`identity-service-migrate`). Mọi thay đổi Prisma schema phải kèm migration file trong `services/identity/prisma/migrations/`.
 - **Negative tests cần giữ xanh:** Sai/thiếu token (`401`), account chưa verify/bị khóa bị từ chối login/refresh, reuse refresh token thu hồi cả session, `super_admin` không thể bị tự gán qua `PATCH /me`.
+
+## 5. Hồ sơ, audit và sự kiện
+
+`GET/PATCH /api/v1/me` trả `{ profile }` với `name`, `phone`. Public Gateway dùng `/api/identity/me`. `GET /api/v1/users` hỗ trợ `role`, `isActive`, `search`, `offset`, `limit` (1..100). Mỗi lần đổi trạng thái/role ghi `IdentityAudit`, tăng `User.version` và ghi `IdentityOutbox` trong cùng transaction. Khóa user thu hồi toàn bộ session còn hạn. Đổi role cũng thu hồi session để buộc đăng nhập lại với quyền hiện tại. User bị khóa hoặc mất role quản lý sẽ có các phân công active bị vô hiệu hóa. Middleware kiểm tra role hiện tại trong DB ở mỗi yêu cầu quản trị.
+
+Worker outbox dùng `RABBITMQ_URL` và `RABBITMQ_EXCHANGE` (mặc định `badminton.events`), publisher confirms, retry và row locking. `identity.user-updated.v1` dùng event id cố định để consumer loại trùng. Khi không có URL RabbitMQ, sự kiện vẫn nằm trong outbox. Notification-service cần bind queue vào routing key này. Compose local có RabbitMQ riêng và volume bền vững.
+
+`GET /health/live` và `GET /metrics` gọi trực tiếp Identity. Metrics dùng `METRICS_TOKEN`, service lookup dùng `INTERNAL_SERVICE_TOKEN`, hỗ trợ `x-internal-token` để tương thích Booking Core hoặc Bearer service token. Các route nội bộ và probe không được proxy qua `/api/identity`.
+
+Web có trang `/profile`. Admin có trang `/users`, kiểm tra quyền `super_admin`, lọc danh sách, đổi role/trạng thái với lý do và chọn manager để phân công theo UUID trung tâm.

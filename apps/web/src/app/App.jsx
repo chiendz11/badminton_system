@@ -16,6 +16,7 @@ import LoginPromptModal from "../features/assistant/components/LoginPromptModal.
 import LoginModal from "../features/assistant/components/LoginModal.jsx";
 
 const Home = lazy(() => import("../features/home/pages/Home.jsx"));
+const Profile = lazy(() => import("../features/identity/pages/ProfilePage.jsx"));
 const Register = lazy(
   () => import("../features/identity/pages/RegisterPage.jsx"),
 );
@@ -56,7 +57,7 @@ export default function App() {
             <Route path="/my-bookings" element={<MyBookings />} />
             <Route
               path="/profile"
-              element={<Navigate to="/my-bookings" replace />}
+              element={<Profile />}
             />
             <Route path="/booking-assistant" element={<BookingAssistant />} />
             <Route path="/register" element={<Register />} />

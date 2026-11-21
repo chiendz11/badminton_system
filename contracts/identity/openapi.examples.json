@@ -25,6 +25,12 @@
       "value": {
         "email": "demo@example.invalid"
       }
+    },
+    {
+      "schema": "ProfileUpdate",
+      "value": {
+        "phone": null
+      }
     }
   ],
   "invalid": [
@@ -53,6 +59,29 @@
       "value": {
         "email": "not-an-email"
       }
+    },
+    {
+      "schema": "ProfileUpdate",
+      "value": {
+        "name": "A",
+        "role": "super_admin"
+      }
+    },
+    {
+      "schema": "ProfileUpdate",
+      "value": {
+        "isActive": true
+      }
+    },
+    {
+      "schema": "ProfileUpdate",
+      "value": {
+        "isVerified": true
+      }
+    },
+    {
+      "schema": "ProfileUpdate",
+      "value": {}
     }
   ]
 }

@@ -9,6 +9,10 @@ import { createApp } from "./app";
 import { mailpitSender } from "./mailpit";
 import { createSessionStore, emailVerificationEligibility } from "./session-store";
 
+import { managementRouter } from "./management";
+import { createManagementStore } from "./management-store";
+import { rabbitPublisher, startOutbox } from "./outbox";
+
 const config = configuration();
 const prisma = new PrismaClient({
   datasources: { db: { url: config.databaseUrl } },
@@ -54,7 +58,10 @@ const app = createApp(async () => {
 }, sendVerificationEmail)).use(emailVerificationRouter(
   verification.verify,
   sendVerificationEmail && { reissue: verification.reissue, send: sendVerificationEmail },
-)), config.trustProxy);
+)), config.trustProxy, config.metricsToken, managementRouter(createManagementStore(prisma), config));
+const stopOutbox = config.rabbitmqUrl
+  ? startOutbox(prisma, rabbitPublisher(config.rabbitmqUrl, config.rabbitmqExchange))
+  : async () => {};
 const server = app.listen(config.port, "0.0.0.0", () => {
   console.log(JSON.stringify({ event: "identity_started", port: config.port }));
 });
@@ -65,7 +72,7 @@ function shutdown() {
   const timer = setTimeout(() => process.exit(1), 10000);
   timer.unref();
   server.close(() => {
-    void prisma.$disconnect().then(
+    void stopOutbox().then(() => prisma.$disconnect()).then(
       () => process.exit(0),
       () => process.exit(1),
     );
