@@ -907,6 +907,9 @@
     "/api/identity/logout": {
       "$ref": "../identity/openapi.json#/paths/~1logout"
     },
+    "/api/identity/users": {
+      "$ref": "../identity/openapi.json#/paths/~1users"
+    },
     "/api/identity/me": {
       "$ref": "../identity/openapi.json#/paths/~1me"
     },

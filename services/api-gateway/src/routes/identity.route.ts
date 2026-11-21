@@ -55,7 +55,7 @@ export function identityRoutes(
           method: req.method,
           headers,
           body:
-            req.method === "POST"
+            ["POST", "PATCH", "PUT"].includes(req.method)
               ? JSON.stringify(req.body ?? {})
               : undefined,
           signal: AbortSignal.timeout(timeoutMs),
@@ -144,5 +144,42 @@ export function identityRoutes(
     forward(req, res, "/api/auth/me"),
   );
 
+  return router;
+}
+
+export function identityManagementRoutes(config: GatewayConfig, transport: typeof fetch = fetch) {
+  const router = Router();
+  const allowed = [
+    { method: "GET", pattern: /^\/me$/ },
+    { method: "PATCH", pattern: /^\/me$/ },
+    { method: "GET", pattern: /^\/users$/ },
+    { method: "PATCH", pattern: /^\/users\/[0-9a-f-]{36}\/status$/i },
+    { method: "PUT", pattern: /^\/users\/[0-9a-f-]{36}\/role$/i },
+    { method: "PUT", pattern: /^\/center-assignments$/ },
+  ];
+  router.use(async (req, res, next) => {
+    if (!allowed.some((route) => route.method === req.method && route.pattern.test(req.path))) {
+      next();
+      return;
+    }
+    if (!req.actor) throw new GatewayError(401, "Cần đăng nhập");
+    res.set("Cache-Control", "no-store");
+    const headers: Record<string, string> = { "Content-Type": "application/json" };
+    const authorization = req.get("authorization");
+    if (authorization) headers.Authorization = authorization;
+    if (req.requestId) headers["X-Request-Id"] = req.requestId;
+    try {
+      const response = await transport(`${config.identityUrl || "http://localhost:8084"}/api/v1${req.url}`, {
+        method: req.method, headers,
+        body: ["PATCH", "PUT"].includes(req.method) ? JSON.stringify(req.body ?? {}) : undefined,
+        signal: AbortSignal.timeout(config.timeout), redirect: "error",
+      });
+      if (response.status === 204) { res.status(204).end(); return; }
+      res.status(response.status).json(await response.json());
+    } catch (error) {
+      const timeout = error instanceof Error && ["TimeoutError", "AbortError"].includes(error.name);
+      throw new GatewayError(timeout ? 504 : 502, "Không thể hoàn thành yêu cầu Identity");
+    }
+  });
   return router;
 }

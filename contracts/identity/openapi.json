@@ -2,13 +2,13 @@
   "openapi": "3.1.0",
   "info": {
     "title": "Badminton Identity API",
-    "version": "0.1.0-proposed",
-    "description": "PROPOSED provider API, not implemented. Public Gateway routes are recorded as x-gateway-path. Decisions remain subject to ADR review."
+    "version": "0.2.0",
+    "description": "Identity authentication, profiles, account administration and private service operations."
   },
   "servers": [
     {
-      "url": "http://identity-service:3002/api/v1",
-      "description": "Proposed provider base URL; no deployed host is claimed."
+      "url": "http://identity:8084/api/v1",
+      "description": "Identity runtime"
     }
   ],
   "paths": {
@@ -19,24 +19,16 @@
           "Identity"
         ],
         "summary": "Register account",
-        "description": "PROPOSED — not implemented. Public; email verification/rate limits required.",
-        "x-delivery-status": "proposed",
+        "description": "Implemented at /api/auth/register.",
+        "x-delivery-status": "implemented",
         "x-owner-policy": "Public; email verification/rate limits required.",
         "responses": {
           "201": {
-            "description": "Proposed success response",
-            "headers": {
-              "X-Request-Id": {
-                "schema": {
-                  "type": "string"
-                },
-                "description": "Correlation ID"
-              }
-            },
+            "description": "Account created pending verification",
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/Actor"
+                  "$ref": "#/components/schemas/RegistrationResponse"
                 }
               }
             }
@@ -84,7 +76,12 @@
         },
         "x-implementation-status": "implemented",
         "x-owner": "Người 4",
-        "x-gateway-path": "/api/auth/register"
+        "x-gateway-path": "/api/auth/register",
+        "servers": [
+          {
+            "url": "http://identity:8084/api/auth"
+          }
+        ]
       }
     },
     "/verify-email": {
@@ -129,7 +126,12 @@
         },
         "x-implementation-status": "implemented",
         "x-owner": "Người 4",
-        "x-gateway-path": "/api/auth/verify-email"
+        "x-gateway-path": "/api/auth/verify-email",
+        "servers": [
+          {
+            "url": "http://identity:8084/api/auth"
+          }
+        ]
       }
     },
     "/resend-verification": {
@@ -189,7 +191,12 @@
         },
         "x-implementation-status": "implemented",
         "x-owner": "Người 4",
-        "x-gateway-path": "/api/auth/resend-verification"
+        "x-gateway-path": "/api/auth/resend-verification",
+        "servers": [
+          {
+            "url": "http://identity:8084/api/auth"
+          }
+        ]
       }
     },
     "/login": {
@@ -199,8 +206,8 @@
           "Identity"
         ],
         "summary": "Login",
-        "description": "PROPOSED — not implemented. Public; set HttpOnly Secure SameSite refresh cookie; brute-force limits.",
-        "x-delivery-status": "proposed",
+        "description": "Implemented at /api/auth/login.",
+        "x-delivery-status": "implemented",
         "x-owner-policy": "Public; set HttpOnly Secure SameSite refresh cookie; brute-force limits.",
         "responses": {
           "200": {
@@ -267,7 +274,12 @@
         },
         "x-implementation-status": "implemented",
         "x-owner": "Người 4",
-        "x-gateway-path": "/api/auth/login"
+        "x-gateway-path": "/api/auth/login",
+        "servers": [
+          {
+            "url": "http://identity:8084/api/auth"
+          }
+        ]
       }
     },
     "/refresh": {
@@ -277,8 +289,8 @@
           "Identity"
         ],
         "summary": "Rotate refresh token",
-        "description": "PROPOSED — not implemented. Requires refresh cookie and CSRF protection; cookie model pending G02.",
-        "x-delivery-status": "proposed",
+        "description": "Implemented at /api/auth/refresh.",
+        "x-delivery-status": "implemented",
         "x-owner-policy": "Requires refresh cookie and CSRF protection; cookie model pending G02.",
         "responses": {
           "200": {
@@ -333,7 +345,12 @@
         ],
         "x-implementation-status": "implemented",
         "x-owner": "Người 4",
-        "x-gateway-path": "/api/auth/refresh"
+        "x-gateway-path": "/api/auth/refresh",
+        "servers": [
+          {
+            "url": "http://identity:8084/api/auth"
+          }
+        ]
       }
     },
     "/logout": {
@@ -343,8 +360,8 @@
           "Identity"
         ],
         "summary": "Revoke session",
-        "description": "PROPOSED — not implemented. Requires session/refresh cookie; revoke family, clear cookie; idempotent.",
-        "x-delivery-status": "proposed",
+        "description": "Implemented at /api/auth/logout.",
+        "x-delivery-status": "implemented",
         "x-owner-policy": "Requires session/refresh cookie; revoke family, clear cookie; idempotent.",
         "responses": {
           "204": {
@@ -392,129 +409,189 @@
         ],
         "x-implementation-status": "implemented",
         "x-owner": "Người 4",
-        "x-gateway-path": "/api/auth/logout"
+        "x-gateway-path": "/api/auth/logout",
+        "servers": [
+          {
+            "url": "http://identity:8084/api/auth"
+          }
+        ]
       }
     },
     "/me": {
       "get": {
-        "operationId": "getMe",
+        "operationId": "getProfile",
         "tags": [
           "Identity"
         ],
-        "summary": "Read own profile",
-        "description": "PROPOSED — not implemented. Authenticated actor only.",
-        "x-delivery-status": "proposed",
-        "x-owner-policy": "Authenticated actor only.",
-        "responses": {
-          "200": {
-            "description": "Proposed success response",
-            "headers": {
-              "X-Request-Id": {
-                "schema": {
-                  "type": "string"
-                },
-                "description": "Correlation ID"
-              }
-            },
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Actor"
-                }
-              }
-            }
-          },
-          "400": {
-            "$ref": "#/components/responses/Error400"
-          },
-          "401": {
-            "$ref": "#/components/responses/Error401"
-          },
-          "403": {
-            "$ref": "#/components/responses/Error403"
-          },
-          "404": {
-            "$ref": "#/components/responses/Error404"
-          },
-          "409": {
-            "$ref": "#/components/responses/Error409"
-          },
-          "429": {
-            "$ref": "#/components/responses/Error429"
-          },
-          "503": {
-            "$ref": "#/components/responses/Error503"
-          }
-        },
-        "parameters": [
-          {
-            "$ref": "#/components/parameters/XRequestId"
-          }
-        ],
-        "x-implementation-status": "implemented",
-        "x-owner": "Người 4",
+        "summary": "Read the current account profile",
         "security": [
           {
             "BearerAuth": []
           }
         ],
-        "x-gateway-path": "/api/auth/me"
-      },
-      "patch": {
-        "operationId": "updateMe",
-        "tags": [
-          "Identity"
-        ],
-        "summary": "Update own profile",
-        "description": "PROPOSED — not implemented. Authenticated actor; no role/isActive/assignments in body.",
-        "x-delivery-status": "proposed",
-        "x-owner-policy": "Authenticated actor; no role/isActive/assignments in body.",
+        "x-owner": "Người 4",
+        "x-implementation-status": "implemented",
+        "x-delivery-status": "implemented",
         "responses": {
           "200": {
-            "description": "Proposed success response",
-            "headers": {
-              "X-Request-Id": {
-                "schema": {
-                  "type": "string"
-                },
-                "description": "Correlation ID"
-              }
-            },
+            "description": "Success",
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/Actor"
+                  "$ref": "#/components/schemas/ProfileResponse"
                 }
               }
             }
           },
           "400": {
-            "$ref": "#/components/responses/Error400"
+            "description": "Request failed",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/IdentityError"
+                }
+              }
+            }
           },
           "401": {
-            "$ref": "#/components/responses/Error401"
+            "description": "Request failed",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/IdentityError"
+                }
+              }
+            }
           },
           "403": {
-            "$ref": "#/components/responses/Error403"
+            "description": "Request failed",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/IdentityError"
+                }
+              }
+            }
           },
           "404": {
-            "$ref": "#/components/responses/Error404"
+            "description": "Request failed",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/IdentityError"
+                }
+              }
+            }
           },
           "409": {
-            "$ref": "#/components/responses/Error409"
+            "description": "Request failed",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/IdentityError"
+                }
+              }
+            }
           },
-          "429": {
-            "$ref": "#/components/responses/Error429"
-          },
-          "503": {
-            "$ref": "#/components/responses/Error503"
+          "500": {
+            "description": "Request failed",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/IdentityError"
+                }
+              }
+            }
           }
         },
-        "parameters": [
+        "x-gateway-path": "/api/identity/me"
+      },
+      "patch": {
+        "operationId": "updateProfile",
+        "tags": [
+          "Identity"
+        ],
+        "summary": "Update name and phone",
+        "security": [
           {
-            "$ref": "#/components/parameters/XRequestId"
+            "BearerAuth": []
           }
         ],
+        "x-owner": "Người 4",
+        "x-implementation-status": "implemented",
+        "x-delivery-status": "implemented",
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProfileResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Request failed",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/IdentityError"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Request failed",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/IdentityError"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Request failed",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/IdentityError"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Request failed",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/IdentityError"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Request failed",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/IdentityError"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Request failed",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/IdentityError"
+                }
+              }
+            }
+          }
+        },
         "requestBody": {
           "required": true,
           "content": {
@@ -525,85 +602,96 @@
             }
           }
         },
-        "x-implementation-status": "proposed",
-        "x-owner": "Người 4",
-        "security": [
-          {
-            "BearerAuth": []
-          }
-        ],
         "x-gateway-path": "/api/identity/me"
       }
     },
     "/users/{userId}/role": {
       "put": {
-        "operationId": "setRole",
+        "operationId": "updateUserRole",
         "tags": [
           "Identity"
         ],
-        "summary": "Assign role",
-        "description": "PROPOSED — not implemented. super_admin, audit reason; prevent self privilege escalation.",
-        "x-delivery-status": "proposed",
-        "x-owner-policy": "super_admin, audit reason; prevent self privilege escalation.",
+        "summary": "Change another account role with an audit reason",
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "x-owner": "Người 4",
+        "x-implementation-status": "implemented",
+        "x-delivery-status": "implemented",
         "responses": {
           "200": {
-            "description": "Proposed success response",
-            "headers": {
-              "X-Request-Id": {
-                "schema": {
-                  "type": "string"
-                },
-                "description": "Correlation ID"
-              }
-            },
+            "description": "Success",
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/Actor"
+                  "$ref": "#/components/schemas/DirectoryUser"
                 }
               }
             }
           },
           "400": {
-            "$ref": "#/components/responses/Error400"
-          },
-          "401": {
-            "$ref": "#/components/responses/Error401"
-          },
-          "403": {
-            "$ref": "#/components/responses/Error403"
-          },
-          "404": {
-            "$ref": "#/components/responses/Error404"
-          },
-          "409": {
-            "$ref": "#/components/responses/Error409"
-          },
-          "429": {
-            "$ref": "#/components/responses/Error429"
-          },
-          "503": {
-            "$ref": "#/components/responses/Error503"
-          }
-        },
-        "parameters": [
-          {
-            "name": "userId",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "minLength": 1,
-              "maxLength": 128
+            "description": "Request failed",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/IdentityError"
+                }
+              }
             }
           },
-          {
-            "$ref": "#/components/parameters/XRequestId"
+          "401": {
+            "description": "Request failed",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/IdentityError"
+                }
+              }
+            }
           },
-          {
-            "$ref": "#/components/parameters/IdempotencyKey"
+          "403": {
+            "description": "Request failed",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/IdentityError"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Request failed",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/IdentityError"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Request failed",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/IdentityError"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Request failed",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/IdentityError"
+                }
+              }
+            }
           }
-        ],
+        },
         "requestBody": {
           "required": true,
           "content": {
@@ -614,11 +702,15 @@
             }
           }
         },
-        "x-implementation-status": "proposed",
-        "x-owner": "Người 4",
-        "security": [
+        "parameters": [
           {
-            "BearerAuth": []
+            "name": "userId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
           }
         ],
         "x-gateway-path": "/api/identity/users/{userId}/role"
@@ -626,25 +718,22 @@
     },
     "/center-assignments": {
       "put": {
-        "operationId": "assignCenter",
+        "operationId": "assignCenterManager",
         "tags": [
           "Identity"
         ],
-        "summary": "Set center assignment",
-        "description": "PROPOSED — not implemented. super_admin only; verify user and center, audit.",
-        "x-delivery-status": "proposed",
-        "x-owner-policy": "super_admin only; verify user and center, audit.",
+        "summary": "Record the active center_manager assigned to a center",
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "x-owner": "Người 4",
+        "x-implementation-status": "implemented",
+        "x-delivery-status": "implemented",
         "responses": {
           "200": {
-            "description": "Proposed success response",
-            "headers": {
-              "X-Request-Id": {
-                "schema": {
-                  "type": "string"
-                },
-                "description": "Correlation ID"
-              }
-            },
+            "description": "Success",
             "content": {
               "application/json": {
                 "schema": {
@@ -654,35 +743,66 @@
             }
           },
           "400": {
-            "$ref": "#/components/responses/Error400"
+            "description": "Request failed",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/IdentityError"
+                }
+              }
+            }
           },
           "401": {
-            "$ref": "#/components/responses/Error401"
+            "description": "Request failed",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/IdentityError"
+                }
+              }
+            }
           },
           "403": {
-            "$ref": "#/components/responses/Error403"
+            "description": "Request failed",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/IdentityError"
+                }
+              }
+            }
           },
           "404": {
-            "$ref": "#/components/responses/Error404"
+            "description": "Request failed",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/IdentityError"
+                }
+              }
+            }
           },
           "409": {
-            "$ref": "#/components/responses/Error409"
+            "description": "Request failed",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/IdentityError"
+                }
+              }
+            }
           },
-          "429": {
-            "$ref": "#/components/responses/Error429"
-          },
-          "503": {
-            "$ref": "#/components/responses/Error503"
+          "500": {
+            "description": "Request failed",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/IdentityError"
+                }
+              }
+            }
           }
         },
-        "parameters": [
-          {
-            "$ref": "#/components/parameters/XRequestId"
-          },
-          {
-            "$ref": "#/components/parameters/IdempotencyKey"
-          }
-        ],
         "requestBody": {
           "required": true,
           "content": {
@@ -693,65 +813,97 @@
             }
           }
         },
-        "x-implementation-status": "proposed",
-        "x-owner": "Người 4",
-        "security": [
-          {
-            "BearerAuth": []
-          }
-        ],
         "x-gateway-path": "/api/identity/center-assignments"
       }
     },
     "/internal/identity/users/{userId}": {
       "get": {
-        "operationId": "internalActor",
+        "operationId": "internalIdentityUser",
         "tags": [
-          "Internal"
+          "Identity"
         ],
-        "summary": "Internal actor lookup",
-        "description": "PROPOSED — not implemented. Service credential with audience identity + scoped caller; not publicly routable.",
-        "x-delivery-status": "proposed",
-        "x-owner-policy": "Service credential with audience identity + scoped caller; not publicly routable.",
+        "summary": "Look up account state using a service credential",
+        "security": [
+          {
+            "ServiceBearer": []
+          },
+          {
+            "InternalToken": []
+          }
+        ],
+        "x-owner": "Người 4",
+        "x-implementation-status": "implemented",
+        "x-delivery-status": "implemented",
         "responses": {
           "200": {
-            "description": "Proposed success response",
-            "headers": {
-              "X-Request-Id": {
-                "schema": {
-                  "type": "string"
-                },
-                "description": "Correlation ID"
-              }
-            },
+            "description": "Success",
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/Actor"
+                  "$ref": "#/components/schemas/InternalUser"
                 }
               }
             }
           },
           "400": {
-            "$ref": "#/components/responses/Error400"
+            "description": "Request failed",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/IdentityError"
+                }
+              }
+            }
           },
           "401": {
-            "$ref": "#/components/responses/Error401"
+            "description": "Request failed",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/IdentityError"
+                }
+              }
+            }
           },
           "403": {
-            "$ref": "#/components/responses/Error403"
+            "description": "Request failed",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/IdentityError"
+                }
+              }
+            }
           },
           "404": {
-            "$ref": "#/components/responses/Error404"
+            "description": "Request failed",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/IdentityError"
+                }
+              }
+            }
           },
           "409": {
-            "$ref": "#/components/responses/Error409"
+            "description": "Request failed",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/IdentityError"
+                }
+              }
+            }
           },
-          "429": {
-            "$ref": "#/components/responses/Error429"
-          },
-          "503": {
-            "$ref": "#/components/responses/Error503"
+          "500": {
+            "description": "Request failed",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/IdentityError"
+                }
+              }
+            }
           }
         },
         "parameters": [
@@ -761,25 +913,13 @@
             "required": true,
             "schema": {
               "type": "string",
-              "minLength": 1,
-              "maxLength": 128
+              "format": "uuid"
             }
-          },
-          {
-            "$ref": "#/components/parameters/XRequestId"
           }
         ],
-        "security": [
-          {
-            "ServiceBearer": []
-          }
-        ],
-        "x-implementation-status": "proposed",
-        "x-owner": "Người 4",
         "servers": [
           {
-            "url": "http://identity-service:3002",
-            "description": "Proposed private service origin; internal endpoint excluded from Gateway."
+            "url": "http://identity:8084"
           }
         ]
       }
@@ -791,20 +931,12 @@
           "Operations"
         ],
         "summary": "Liveness per service",
-        "description": "PROPOSED — not implemented. Private network only; planned for new skeleton services.",
-        "x-delivery-status": "proposed",
+        "description": "Private service probe.",
+        "x-delivery-status": "implemented",
         "x-owner-policy": "Private network only; planned for new skeleton services.",
         "responses": {
           "200": {
-            "description": "Proposed success response",
-            "headers": {
-              "X-Request-Id": {
-                "schema": {
-                  "type": "string"
-                },
-                "description": "Correlation ID"
-              }
-            },
+            "description": "Success",
             "content": {
               "application/json": {
                 "schema": {
@@ -812,27 +944,6 @@
                 }
               }
             }
-          },
-          "400": {
-            "$ref": "#/components/responses/Error400"
-          },
-          "401": {
-            "$ref": "#/components/responses/Error401"
-          },
-          "403": {
-            "$ref": "#/components/responses/Error403"
-          },
-          "404": {
-            "$ref": "#/components/responses/Error404"
-          },
-          "409": {
-            "$ref": "#/components/responses/Error409"
-          },
-          "429": {
-            "$ref": "#/components/responses/Error429"
-          },
-          "503": {
-            "$ref": "#/components/responses/Error503"
           }
         },
         "security": [],
@@ -841,12 +952,11 @@
             "$ref": "#/components/parameters/XRequestId"
           }
         ],
-        "x-implementation-status": "proposed",
+        "x-implementation-status": "implemented",
         "x-owner": "Người 4",
         "servers": [
           {
-            "url": "http://identity-service:3002",
-            "description": "Proposed private service origin"
+            "url": "http://identity:8084"
           }
         ]
       }
@@ -858,48 +968,61 @@
           "Operations"
         ],
         "summary": "Readiness per service",
-        "description": "PROPOSED — not implemented. Private network, fail when mandatory store unavailable.",
-        "x-delivery-status": "proposed",
+        "description": "Private service probe.",
+        "x-delivery-status": "implemented",
         "x-owner-policy": "Private network, fail when mandatory store unavailable.",
         "responses": {
           "200": {
-            "description": "Proposed success response",
-            "headers": {
-              "X-Request-Id": {
-                "schema": {
-                  "type": "string"
-                },
-                "description": "Correlation ID"
-              }
-            },
+            "description": "Database readiness",
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/Health"
+                  "type": "object",
+                  "properties": {
+                    "status": {
+                      "type": "string"
+                    },
+                    "service": {
+                      "type": "string"
+                    },
+                    "database": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "status",
+                    "service",
+                    "database"
+                  ]
                 }
               }
             }
           },
-          "400": {
-            "$ref": "#/components/responses/Error400"
-          },
-          "401": {
-            "$ref": "#/components/responses/Error401"
-          },
-          "403": {
-            "$ref": "#/components/responses/Error403"
-          },
-          "404": {
-            "$ref": "#/components/responses/Error404"
-          },
-          "409": {
-            "$ref": "#/components/responses/Error409"
-          },
-          "429": {
-            "$ref": "#/components/responses/Error429"
-          },
           "503": {
-            "$ref": "#/components/responses/Error503"
+            "description": "Database readiness",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "status": {
+                      "type": "string"
+                    },
+                    "service": {
+                      "type": "string"
+                    },
+                    "database": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "status",
+                    "service",
+                    "database"
+                  ]
+                }
+              }
+            }
           }
         },
         "security": [],
@@ -908,12 +1031,11 @@
             "$ref": "#/components/parameters/XRequestId"
           }
         ],
-        "x-implementation-status": "proposed",
+        "x-implementation-status": "implemented",
         "x-owner": "Người 4",
         "servers": [
           {
-            "url": "http://identity-service:3002",
-            "description": "Proposed private service origin"
+            "url": "http://identity:8084"
           }
         ]
       }
@@ -924,69 +1046,87 @@
         "tags": [
           "Identity"
         ],
-        "summary": "Khóa hoặc mở khóa tài khoản (Super Admin ban/unban)",
-        "description": "Super Admin quản lý trạng thái tài khoản người dùng hoặc chủ sân. Khóa tài khoản (isActive: false) khi vi phạm quy định sàn hoặc mở lại tài khoản.",
-        "x-delivery-status": "proposed",
-        "x-owner-policy": "super_admin only.",
+        "summary": "Lock or unlock an account and revoke sessions when locking",
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "x-owner": "Người 4",
+        "x-implementation-status": "implemented",
+        "x-delivery-status": "implemented",
         "responses": {
           "200": {
-            "description": "Proposed success response",
-            "headers": {
-              "X-Request-Id": {
-                "schema": {
-                  "type": "string"
-                },
-                "description": "Correlation ID"
-              }
-            },
+            "description": "Success",
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/Actor"
+                  "$ref": "#/components/schemas/DirectoryUser"
                 }
               }
             }
           },
           "400": {
-            "$ref": "#/components/responses/Error400"
-          },
-          "401": {
-            "$ref": "#/components/responses/Error401"
-          },
-          "403": {
-            "$ref": "#/components/responses/Error403"
-          },
-          "404": {
-            "$ref": "#/components/responses/Error404"
-          },
-          "409": {
-            "$ref": "#/components/responses/Error409"
-          },
-          "429": {
-            "$ref": "#/components/responses/Error429"
-          },
-          "503": {
-            "$ref": "#/components/responses/Error503"
-          }
-        },
-        "parameters": [
-          {
-            "name": "userId",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "minLength": 1,
-              "maxLength": 128
+            "description": "Request failed",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/IdentityError"
+                }
+              }
             }
           },
-          {
-            "$ref": "#/components/parameters/XRequestId"
+          "401": {
+            "description": "Request failed",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/IdentityError"
+                }
+              }
+            }
           },
-          {
-            "$ref": "#/components/parameters/IdempotencyKey"
+          "403": {
+            "description": "Request failed",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/IdentityError"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Request failed",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/IdentityError"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Request failed",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/IdentityError"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Request failed",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/IdentityError"
+                }
+              }
+            }
           }
-        ],
+        },
         "requestBody": {
           "required": true,
           "content": {
@@ -997,14 +1137,192 @@
             }
           }
         },
-        "x-implementation-status": "proposed",
-        "x-owner": "Người 4",
+        "parameters": [
+          {
+            "name": "userId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "x-gateway-path": "/api/identity/users/{userId}/status"
+      }
+    },
+    "/users": {
+      "get": {
+        "operationId": "listUsers",
+        "tags": [
+          "Identity"
+        ],
+        "summary": "List accounts as super_admin",
         "security": [
           {
             "BearerAuth": []
           }
         ],
-        "x-gateway-path": "/api/identity/users/{userId}/status"
+        "x-owner": "Người 4",
+        "x-implementation-status": "implemented",
+        "x-delivery-status": "implemented",
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserList"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Request failed",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/IdentityError"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Request failed",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/IdentityError"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Request failed",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/IdentityError"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Request failed",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/IdentityError"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Request failed",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/IdentityError"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Request failed",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/IdentityError"
+                }
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "role",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "user",
+                "center_manager",
+                "super_admin"
+              ]
+            }
+          },
+          {
+            "name": "isActive",
+            "in": "query",
+            "schema": {
+              "type": "boolean"
+            }
+          },
+          {
+            "name": "search",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "maxLength": 150
+            }
+          },
+          {
+            "name": "offset",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "minimum": 0,
+              "default": 0
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 100,
+              "default": 20
+            }
+          }
+        ],
+        "x-gateway-path": "/api/identity/users"
+      }
+    },
+    "/metrics": {
+      "get": {
+        "operationId": "identityMetrics",
+        "tags": [
+          "Operations"
+        ],
+        "summary": "Prometheus metrics",
+        "x-implementation-status": "implemented",
+        "x-delivery-status": "implemented",
+        "servers": [
+          {
+            "url": "http://identity:8084"
+          }
+        ],
+        "security": [
+          {
+            "MetricsBearer": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Prometheus exposition",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing or invalid monitoring credential"
+          }
+        }
       }
     }
   },
@@ -1093,15 +1411,15 @@
             "type": "integer",
             "minimum": 1
           },
-          "actor": {
-            "$ref": "#/components/schemas/Actor"
+          "profile": {
+            "$ref": "#/components/schemas/SessionProfile"
           }
         },
         "required": [
           "accessToken",
           "tokenType",
           "expiresIn",
-          "actor"
+          "profile"
         ],
         "additionalProperties": false
       },
@@ -1128,20 +1446,23 @@
       "ProfileUpdate": {
         "type": "object",
         "properties": {
-          "displayName": {
+          "name": {
             "type": "string",
             "minLength": 1,
             "maxLength": 150
           },
-          "avatarFileId": {
-            "type": "string",
-            "format": "uuid"
+          "phone": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "pattern": "^\\+?[0-9 ()-]{3,32}$",
+            "maxLength": 32
           }
         },
-        "required": [
-          "displayName"
-        ],
-        "additionalProperties": false
+        "minProperties": 1,
+        "additionalProperties": false,
+        "description": "Only name and phone are accepted. role, isActive and isVerified are rejected."
       },
       "RoleUpdate": {
         "type": "object",
@@ -1249,6 +1570,187 @@
         },
         "required": [
           "email"
+        ],
+        "additionalProperties": false
+      },
+      "DirectoryUser": {
+        "type": "object",
+        "properties": {
+          "userId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "email": {
+            "type": "string",
+            "format": "email"
+          },
+          "name": {
+            "type": "string"
+          },
+          "phone": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "role": {
+            "type": "string",
+            "enum": [
+              "user",
+              "center_manager",
+              "super_admin"
+            ]
+          },
+          "isActive": {
+            "type": "boolean"
+          },
+          "isVerified": {
+            "type": "boolean"
+          },
+          "version": {
+            "type": "integer",
+            "minimum": 1
+          }
+        },
+        "required": [
+          "userId",
+          "email",
+          "name",
+          "phone",
+          "role",
+          "isActive",
+          "isVerified",
+          "version"
+        ],
+        "additionalProperties": false
+      },
+      "ProfileResponse": {
+        "type": "object",
+        "properties": {
+          "profile": {
+            "$ref": "#/components/schemas/DirectoryUser"
+          }
+        },
+        "required": [
+          "profile"
+        ],
+        "additionalProperties": false
+      },
+      "UserList": {
+        "type": "object",
+        "properties": {
+          "users": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/DirectoryUser"
+            }
+          },
+          "total": {
+            "type": "integer",
+            "minimum": 0
+          }
+        },
+        "required": [
+          "users",
+          "total"
+        ],
+        "additionalProperties": false
+      },
+      "InternalUser": {
+        "type": "object",
+        "properties": {
+          "userId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "role": {
+            "type": "string",
+            "enum": [
+              "user",
+              "center_manager",
+              "super_admin"
+            ]
+          },
+          "isActive": {
+            "type": "boolean"
+          },
+          "version": {
+            "type": "integer",
+            "minimum": 1
+          }
+        },
+        "required": [
+          "userId",
+          "role",
+          "isActive",
+          "version"
+        ],
+        "additionalProperties": false
+      },
+      "IdentityError": {
+        "type": "object",
+        "properties": {
+          "message": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "message"
+        ]
+      },
+      "SessionProfile": {
+        "type": "object",
+        "properties": {
+          "userId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "email": {
+            "type": "string",
+            "format": "email"
+          },
+          "role": {
+            "type": "string",
+            "enum": [
+              "user",
+              "center_manager",
+              "super_admin"
+            ]
+          },
+          "name": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "userId",
+          "email",
+          "role",
+          "name"
+        ],
+        "additionalProperties": false
+      },
+      "RegistrationResponse": {
+        "type": "object",
+        "properties": {
+          "userId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "role": {
+            "const": "user"
+          },
+          "isVerified": {
+            "const": false
+          },
+          "verificationEmailSent": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "userId",
+          "role",
+          "isVerified",
+          "verificationEmailSent"
         ],
         "additionalProperties": false
       }
@@ -1365,10 +1867,20 @@
       "ServiceBearer": {
         "type": "http",
         "scheme": "bearer",
-        "description": "Future workload identity with target audience/scope; user JWT alone is insufficient."
+        "description": "INTERNAL_SERVICE_TOKEN credential, separate from user JWTs."
+      },
+      "InternalToken": {
+        "type": "apiKey",
+        "in": "header",
+        "name": "x-internal-token"
+      },
+      "MetricsBearer": {
+        "type": "http",
+        "scheme": "bearer",
+        "description": "METRICS_TOKEN monitoring credential."
       }
     }
   },
   "x-owner": "Người 4",
-  "x-implementation-status": "proposed"
+  "x-implementation-status": "implemented"
 }

@@ -1,5 +1,5 @@
 import { useContext } from "react";
-import { Navigate, Outlet, useLocation } from "react-router-dom";
+import { Link, Navigate, Outlet, useLocation } from "react-router-dom";
 import { Sparkles } from "lucide-react";
 import { isAdminRole, SessionContext } from "../session/SessionContext.jsx";
 import { useChat } from "../chat/ChatContext.jsx";
@@ -23,6 +23,7 @@ export default function AdminLayout() {
     <>
       <div className="flex justify-end items-center gap-4 px-6 py-3 bg-white border-b border-emerald-100">
         <span>{admin.name}</span>
+        {admin.role === "super_admin" && <Link to="/users">Quản lý người dùng</Link>}
         <button
           type="button"
           onClick={logout}

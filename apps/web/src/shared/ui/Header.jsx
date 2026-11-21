@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useContext } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
-import { Sparkles, LogOut } from "lucide-react";
+import { Sparkles, LogOut, UserRound } from "lucide-react";
 import "../styles/header.css";
 import LoginModal from "./LoginModal.jsx";
 import { login } from "../api/auth.js";
@@ -173,6 +173,17 @@ const Header = () => {
 
                       {isDropdownOpen && (
                         <div className="absolute right-0 mt-2 w-52 bg-white rounded-xl shadow-2xl z-50 transition-all duration-200 overflow-hidden border border-gray-100">
+                          <Link
+                            to="/profile"
+                            onClick={() => {
+                              setIsDropdownOpen(false);
+                              closeMenu();
+                            }}
+                            className="flex items-center gap-3 w-full px-4 py-3 text-left text-gray-800 text-sm hover:bg-gray-50 transition-colors font-medium border-b border-gray-100 cursor-pointer"
+                          >
+                            <UserRound size={16} className="text-gray-500" />
+                            <span>Hồ sơ cá nhân</span>
+                          </Link>
                           <button
                             onClick={() => {
                               setIsDropdownOpen(false);

@@ -85,7 +85,7 @@ Invoke-RestMethod -Method Post -Uri "$gateway/logout" -WebSession $identityCooki
 
 `/refresh` dùng cookie để cấp access token mới và thay refresh token. Dùng lại refresh token cũ thu hồi phiên tương ứng. `/logout` thu hồi phiên và xóa cookie, trả `204` kể cả khi gọi lại. Access token đã cấp hết hiệu lực theo thời hạn của nó.
 
-Web và Admin đã gọi Gateway khi đăng nhập. Tự refresh và gọi API thu hồi phiên từ nút **Đăng xuất** sẽ được nối ở bước giao diện tiếp theo.
+Web và Admin gọi Gateway khi đăng nhập, khôi phục/gia hạn phiên qua refresh cookie và gọi API thu hồi phiên khi chọn **Đăng xuất**.
 
 ## Xem log và dừng
 
@@ -95,3 +95,13 @@ docker compose -f services/identity/compose.dev.yml down
 ```
 
 Lệnh `down` trên giữ volume PostgreSQL local.
+
+## Hồ sơ và quản trị tài khoản
+
+Web có trang `/profile` để xem và sửa `name`, `phone`. Admin có trang `/users` dành cho `super_admin`, gồm tìm kiếm/lọc, khóa/mở khóa, đổi vai trò kèm lý do và phân công `center_manager` theo UUID trung tâm. Identity lưu phân công trong bảng `CenterAssignment`, mỗi trung tâm có một phân công hiện tại. Khi khóa hoặc hạ vai trò quản lý, các phân công đang hoạt động của tài khoản được vô hiệu hóa.
+
+API mới dùng prefix `/api/v1` tại Identity và `/api/identity` qua Gateway. API `/internal/identity/users/{userId}` chỉ gọi trực tiếp trong mạng riêng với `x-internal-token: <INTERNAL_SERVICE_TOKEN>` hoặc Bearer cùng secret. Gateway không forward đường dẫn nội bộ này. Booking Core tiếp tục sở hữu trường managerId của trung tâm, phân công lưu tại Identity phục vụ xác minh và quản trị tài khoản.
+
+Compose local có RabbitMQ riêng `identity-rabbitmq`. Khi đổi trạng thái hoặc role, Identity ghi audit và `identity.user-updated.v1` vào outbox trong cùng transaction. Worker gửi sự kiện persistent lên topic exchange `badminton.events` với publisher confirms, thử lại sau lỗi. Consumer cần loại trùng theo `id` vì sự kiện có thể được gửi lại sau crash. Không có binding notification thì exchange chưa có consumer để nhận, notification-service phải bind queue vào routing key này.
+
+Khi chạy ngoài Compose, cấu hình `RABBITMQ_URL`, tùy chọn `RABBITMQ_EXCHANGE` (mặc định `badminton.events`). Khi URL chưa cấu hình, outbox vẫn lưu sự kiện và đợi worker được bật. Dùng secret riêng cho `INTERNAL_SERVICE_TOKEN` và `METRICS_TOKEN`. `/health/live` trả liveness, `/health/ready` kiểm tra DB, `/metrics` yêu cầu `Authorization: Bearer <METRICS_TOKEN>` và trả Prometheus metrics. Các secret local trong Compose chỉ dùng trên máy phát triển.

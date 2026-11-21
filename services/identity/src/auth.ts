@@ -4,6 +4,7 @@ import jwt from "jsonwebtoken";
 import { compare, hash } from "bcryptjs";
 import { rateLimit } from "express-rate-limit";
 import type { IdentityConfig } from "./config/environment";
+import { requireUser } from "./access";
 
 export interface AuthUser {
   id: string; email: string; passwordHash: string | null;
@@ -15,13 +16,12 @@ type SessionUser = Pick<AuthUser, "id" | "email" | "role" | "profile">;
 export interface UserStore {
   byEmail(email: string): Promise<AuthUser | null>;
   byId(id: string): Promise<AuthUser | null>;
-  createSession(userId: string, tokenHash: string, expiresAt: Date): Promise<void>;
+  createSession(userId: string, tokenHash: string, expiresAt: Date): Promise<SessionUser | void>;
   rotateSession(tokenHash: string, replacementHash: string): Promise<{ user: SessionUser; expiresAt: Date } | null>;
   revokeSession(tokenHash: string): Promise<void>;
 }
 
 const refreshLifetimeMs = 7 * 24 * 60 * 60 * 1000;
-const roles = ["user", "center_manager", "super_admin"];
 const publicUser = (user: SessionUser) => ({
   userId: user.id, email: user.email, role: user.role,
   name: user.profile?.name || user.email,
@@ -101,8 +101,8 @@ export function authRouter(store: UserStore, config: IdentityConfig) {
     }
     const refreshToken = randomBytes(32).toString("base64url");
     const expiresAt = new Date(Date.now() + refreshLifetimeMs);
-    await store.createSession(user.id, hashRefreshToken(refreshToken), expiresAt);
-    respondWithSession(res, config, user, refreshToken, expiresAt);
+    const sessionUser = await store.createSession(user.id, hashRefreshToken(refreshToken), expiresAt);
+    respondWithSession(res, config, sessionUser ?? user, refreshToken, expiresAt);
   });
 
   router.post("/refresh", async (req, res) => {
@@ -126,26 +126,8 @@ export function authRouter(store: UserStore, config: IdentityConfig) {
     res.status(204).end();
   });
 
-  router.get("/me", async (req, res) => {
-    const authorization = req.get("authorization");
-    if (!authorization?.startsWith("Bearer ")) {
-      res.status(401).json({ message: "Cần đăng nhập" }); return;
-    }
-    let userId: string;
-    try {
-      const payload = jwt.verify(authorization.slice(7), config.jwtSecret, {
-        algorithms: ["HS256"], issuer: config.issuer, audience: config.audience,
-      });
-      if (typeof payload === "string" || typeof payload.sub !== "string" ||
-          !/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(payload.sub) ||
-          !Number.isSafeInteger(payload.exp) || !roles.includes(payload.role)) throw Error("Invalid claims");
-      userId = payload.sub;
-    } catch {
-      res.status(401).json({ message: "Phiên đăng nhập không hợp lệ hoặc đã hết hạn" }); return;
-    }
-    const user = await store.byId(userId);
-    if (!user?.isActive) { res.status(401).json({ message: "Cần đăng nhập" }); return; }
-    res.json({ profile: publicUser(user) });
+  router.get("/me", requireUser(config, store.byId), (_req, res) => {
+    res.json({ profile: publicUser(res.locals.actor) });
   });
   return router;
 }
