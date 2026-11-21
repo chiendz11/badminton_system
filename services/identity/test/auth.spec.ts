@@ -8,7 +8,7 @@ import { authRouter, type AuthUser, type UserStore } from "../src/auth";
 import { registrationRouter, type PendingRegistration } from "../src/registration";
 import { emailVerificationRouter } from "../src/email-verification";
 import { mailpitSender } from "../src/mailpit";
-const config = { port: 8084, databaseUrl: "postgresql://localhost/test", jwtSecret: "test-secret-at-least-32-characters-long", issuer: "badminton-identity", audience: "badminton-system", secureRefreshCookie: false };
+const config = { port: 8084, databaseUrl: "postgresql://localhost/test", jwtSecret: "test-secret-at-least-32-characters-long", issuer: "badminton-identity", audience: "badminton-system", secureRefreshCookie: false, trustProxy: 1 };
 let user: AuthUser;
 beforeAll(async () => { user = { id: "ba0d0000-0000-4000-8000-000000000001", email: "dung@example.com", passwordHash: await hash("example-password", 4), role: "user", isActive: true, profile: { name: "Dung" } }; });
 function app(
@@ -476,5 +476,29 @@ describe("Mailpit verification email", () => {
 
     await expect(send("customer@example.test", "test-token")).resolves.toBe(false);
     await expect(send("customer@example.test", "test-token")).resolves.toBe(false);
+  });
+});
+
+describe("identity proxy rate limiting", () => {
+  it("isolates login rate limits by X-Forwarded-For client IP behind a trusted proxy", async () => {
+    const server = app();
+    for (let i = 0; i < 20; i++) {
+      const response = await request(server)
+        .post("/api/auth/login")
+        .set("X-Forwarded-For", "198.51.100.1")
+        .send({});
+      expect(response.status).toBe(400);
+    }
+    const limited = await request(server)
+      .post("/api/auth/login")
+      .set("X-Forwarded-For", "198.51.100.1")
+      .send({});
+    expect(limited.status).toBe(429);
+
+    const otherClient = await request(server)
+      .post("/api/auth/login")
+      .set("X-Forwarded-For", "198.51.100.2")
+      .send({});
+    expect(otherClient.status).toBe(400);
   });
 });

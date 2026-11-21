@@ -1,12 +1,8 @@
-name: Build, Publish and Deploy
+name: Build and Publish Images
 
 on:
   workflow_dispatch:
     inputs:
-      target_branch:
-        description: 'Branch to update in GitOps repo'
-        required: true
-        default: 'feat/initial-implementation'
       services:
         description: 'Services to build (comma-separated or "all")'
         required: true
@@ -14,7 +10,6 @@ on:
   push:
     branches:
       - main
-      - feat/initial-implementation
     paths:
       - 'services/booking-core/**'
       - 'services/ai-service/**'
@@ -73,18 +68,24 @@ jobs:
             image: badminton-identity-service
             target: ""
             build_args: ""
+          - name: identity-service-migrations
+            context: .
+            dockerfile: services/identity/Dockerfile
+            image: badminton-identity-service-migrations
+            target: migrate
+            build_args: ""
           - name: web
             context: .
             dockerfile: apps/web/Dockerfile
             image: badminton-web
             target: ""
-            build_args: "VITE_API_GATEWAY_URL=http://127.0.0.1:18081"
+            build_args: ""
           - name: admin
             context: .
             dockerfile: apps/admin/Dockerfile
             image: badminton-admin
             target: ""
-            build_args: "VITE_API_GATEWAY_URL=http://127.0.0.1:18081"
+            build_args: ""
 
     steps:
       - name: Checkout code
@@ -123,54 +124,6 @@ jobs:
           push: true
           tags: |
             ghcr.io/${{ github.repository_owner }}/${{ matrix.image }}:sha-${{ github.sha }}
-            ghcr.io/${{ github.repository_owner }}/${{ matrix.image }}:latest
           cache-from: type=gha
           cache-to: type=gha,mode=max
-
-  update-gitops:
-    name: Update GitOps manifests and promote
-    needs: [build-and-publish]
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout App Repo
-        uses: actions/checkout@v4
-        with:
-          path: app
-
-      - name: Checkout GitOps Repo
-        uses: actions/checkout@v4
-        with:
-          repository: ${{ github.repository_owner }}/badminton-gitops
-          token: ${{ secrets.GITOPS_SYNC_TOKEN || secrets.GITHUB_TOKEN }}
-          path: gitops
-          ref: ${{ github.event.inputs.target_branch || 'feat/initial-implementation' }}
-
-      - name: Set up Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: '3.12'
-
-      - name: Install dependencies
-        run: pip install pyyaml
-
-      - name: Update image tags in GitOps
-        run: |
-          python3 app/.github/scripts/update_gitops_images.py \
-            --gitops-dir gitops \
-            --registry "ghcr.io/${{ github.repository_owner }}" \
-            --tag "sha-${{ github.sha }}"
-
-      - name: Commit and push GitOps changes
-        run: |
-          cd gitops
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          if [ -n "$(git status --porcelain)" ]; then
-            git add .
-            git commit -m "chore(gitops): promote app images to sha-${{ github.sha }}"
-            git push origin HEAD:${{ github.event.inputs.target_branch || 'feat/initial-implementation' }}
-            echo "GitOps repository updated with new image tags."
-          else
-            echo "No changes in GitOps repository."
-          fi
 

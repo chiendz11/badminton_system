@@ -127,14 +127,16 @@ export class FixedBookingsService {
           },
           include: { reservation: { include: { center: true } } },
         });
-        await this.outbox.record(
-          tx,
-          booking,
-          reservation,
-          "booking.confirmed.v1",
-        );
         bookings.push(booking);
       }
+      await this.outbox.recordSeriesConfirmed(tx, {
+        seriesId: series.id,
+        centerId: data.centerId,
+        recipientUserId: data.userId,
+        totalOccurrences: bookings.length,
+        startDate: dates[0],
+        endDate: dates[dates.length - 1],
+      });
       return { bookings, created: true };
     });
     if (result.created)

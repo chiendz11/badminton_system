@@ -13,6 +13,18 @@
         "isActive": false,
         "reason": "Phát hiện tài khoản bot spam đặt giữ chỗ ảo hàng loạt"
       }
+    },
+    {
+      "schema": "VerifyEmailRequest",
+      "value": {
+        "token": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+      }
+    },
+    {
+      "schema": "ResendVerificationRequest",
+      "value": {
+        "email": "demo@example.invalid"
+      }
     }
   ],
   "invalid": [
@@ -28,6 +40,18 @@
       "value": {
         "isActive": "false",
         "reason": "Sai kiểu boolean"
+      }
+    },
+    {
+      "schema": "VerifyEmailRequest",
+      "value": {
+        "token": "short"
+      }
+    },
+    {
+      "schema": "ResendVerificationRequest",
+      "value": {
+        "email": "not-an-email"
       }
     }
   ]

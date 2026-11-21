@@ -8,6 +8,7 @@ import { BookingsModule } from "./modules/bookings/bookings.module";
 import { CentersModule } from "./modules/centers/centers.module";
 import { CourtsModule } from "./modules/courts/courts.module";
 import { HealthModule } from "./modules/health/health.module";
+import { InternalModule } from "./modules/internal/internal.module";
 import { PricingModule } from "./modules/pricing/pricing.module";
 import { ReservationsModule } from "./modules/reservations/reservations.module";
 @Module({
@@ -15,6 +16,7 @@ import { ReservationsModule } from "./modules/reservations/reservations.module";
     ObservabilityModule,
     DatabaseModule,
     AuthModule,
+    InternalModule,
     CentersModule,
     CourtsModule,
     PricingModule,

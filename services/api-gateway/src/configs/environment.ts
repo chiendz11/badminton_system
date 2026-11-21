@@ -12,6 +12,18 @@ export interface GatewayConfig {
   origins: string[];
   metricsToken: string;
   timeout: number;
+  trustProxy?: number | false;
+}
+
+function parseTrustProxy(rawValue: string | undefined): number | false {
+  const raw = rawValue?.trim().toLowerCase();
+  if (!raw) return 1;
+  if (raw === "false" || raw === "0") return false;
+  const hops = Number(raw);
+  if (!Number.isInteger(hops) || hops < 1 || hops > 10) {
+    throw Error("TRUST_PROXY must be false or an integer between 1 and 10");
+  }
+  return hops;
 }
 
 function validateHttpOrigin(
@@ -118,6 +130,7 @@ export function configuration(): GatewayConfig {
     jwtSecret,
     metricsToken,
     timeout,
+    trustProxy: parseTrustProxy(process.env.TRUST_PROXY),
     issuer: process.env.JWT_ISSUER || "badminton-identity",
     audience: process.env.JWT_AUDIENCE || "badminton-system",
     origins: (process.env.CORS_ORIGINS || "")

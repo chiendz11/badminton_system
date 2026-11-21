@@ -985,6 +985,9 @@
     "/api/content/news/{newsId}/publication": {
       "$ref": "../content/openapi.json#/paths/~1news~1{newsId}~1publication"
     },
+    "/api/content/reviews/{reviewId}/report": {
+      "$ref": "../content/openapi.json#/paths/~1reviews~1{reviewId}~1report"
+    },
     "/api/notifications": {
       "$ref": "../notification/openapi.json#/paths/~1notifications"
     },
@@ -993,6 +996,15 @@
     },
     "/api/notifications/read-all": {
       "$ref": "../notification/openapi.json#/paths/~1notifications~1read-all"
+    },
+    "/api/notifications/unread-count": {
+      "$ref": "../notification/openapi.json#/paths/~1notifications~1unread-count"
+    },
+    "/api/notifications/broadcast": {
+      "$ref": "../notification/openapi.json#/paths/~1notifications~1broadcast"
+    },
+    "/api/notifications/urgent": {
+      "$ref": "../notification/openapi.json#/paths/~1notifications~1urgent"
     },
     "/api/storage/files": {
       "$ref": "../storage/openapi.json#/paths/~1files"
@@ -1189,6 +1201,11 @@
       "path": "/news/{newsId}/publication",
       "status": "proposed"
     },
+    "/api/content/reviews/{reviewId}/report": {
+      "service": "content-service",
+      "path": "/reviews/{reviewId}/report",
+      "status": "proposed"
+    },
     "/api/notifications": {
       "service": "notification-service",
       "path": "/notifications",
@@ -1202,6 +1219,21 @@
     "/api/notifications/read-all": {
       "service": "notification-service",
       "path": "/notifications/read-all",
+      "status": "proposed"
+    },
+    "/api/notifications/unread-count": {
+      "service": "notification-service",
+      "path": "/notifications/unread-count",
+      "status": "proposed"
+    },
+    "/api/notifications/broadcast": {
+      "service": "notification-service",
+      "path": "/notifications/broadcast",
+      "status": "proposed"
+    },
+    "/api/notifications/urgent": {
+      "service": "notification-service",
+      "path": "/notifications/urgent",
       "status": "proposed"
     },
     "/api/storage/files": {

@@ -1,4 +1,11 @@
 import { ReservationExpiryWorker } from "../../src/modules/reservations/reservation-expiry.worker";
+import { BookingReminderWorker } from "../../src/modules/bookings/booking-reminder.worker";
+import {
+  OUTBOX_PUBLISHER,
+  type OutboxPublisher,
+} from "../../src/infrastructure/outbox/outbox-publisher";
+import { OutboxRelayWorker } from "../../src/infrastructure/outbox/outbox-relay.worker";
+import type { PublishedOutboxEnvelope } from "../../src/infrastructure/outbox/outbox.service";
 import type { INestApplication } from "@nestjs/common";
 import { Test } from "@nestjs/testing";
 import {
@@ -20,6 +27,12 @@ let app: INestApplication,
   db: PrismaService,
   container: StartedPostgreSqlContainer | undefined;
 let now = new Date("2030-01-07T10:00:00Z");
+const publishedEnvelopes: PublishedOutboxEnvelope[] = [];
+const mockPublisher: OutboxPublisher = {
+  async publish(envelope) {
+    publishedEnvelopes.push(envelope);
+  },
+};
 function token(userId = "customer", role = "user") {
   return jwt.sign({ role, name: userId }, secret, {
     subject: userId,
@@ -49,6 +62,7 @@ beforeAll(async () => {
   process.env.JWT_SECRET = secret;
   process.env.RESERVATION_TTL_SECONDS = "60";
   process.env.METRICS_TOKEN = "integration-metrics";
+  process.env.INTERNAL_SERVICE_TOKEN = "integration-internal-token";
   if (process.env.DATABASE_URL) {
     const database = new URL(process.env.DATABASE_URL).pathname.slice(1);
     if (database !== "ci" && !database.endsWith("_test"))
@@ -69,6 +83,8 @@ beforeAll(async () => {
   const module = await Test.createTestingModule({ imports: [AppModule] })
     .overrideProvider(Clock)
     .useValue({ now: () => now })
+    .overrideProvider(OUTBOX_PUBLISHER)
+    .useValue(mockPublisher)
     .compile();
   app = module.createNestApplication({ logger: false });
   app.get(Telemetry).logger.level = "silent";
@@ -83,8 +99,10 @@ afterAll(async () => {
 });
 beforeEach(async () => {
   now = new Date("2030-01-07T10:00:00Z");
+  publishedEnvelopes.length = 0;
   await db.$transaction([
     db.outboxEvent.deleteMany(),
+    db.bookingReminder.deleteMany(),
     db.booking.deleteMany(),
     db.slotAllocation.deleteMany(),
     db.reservation.deleteMany(),
@@ -302,7 +320,11 @@ test("fixed booking creation is idempotent and authorization stays scoped to the
   expect(two.body.items.map((b: any) => b.id)).toEqual(
     one.body.items.map((b: any) => b.id),
   );
-  expect(await db.outboxEvent.count()).toBe(2);
+  expect(
+    await db.outboxEvent.count({
+      where: { type: "booking.series-confirmed.v1" },
+    }),
+  ).toBe(1);
 });
 test("disabling an occupied court is rejected while court has active allocations", async () => {
   const held = await hold().expect(201),
@@ -542,4 +564,103 @@ test("the extracted expiry worker releases leases once when two workers race", a
   expect(await db.slotAllocation.count()).toBe(0);
   expect(await expiredCount()).toBe(before + 1);
   await hold("after-worker-expiry", "another-customer").expect(201);
+});
+
+test("outbox relay, center assignment, reminder worker and internal APIs operate end-to-end", async () => {
+  const { default: Ajv2020 } = await import("ajv/dist/2020");
+  const { default: formats } = await import("ajv-formats");
+  const { readFileSync } = await import("node:fs");
+  const ajv = new Ajv2020({ allErrors: true });
+  formats(ajv);
+  const validateDomain = ajv.compile(
+    JSON.parse(readFileSync("../../contracts/events/domain-event.schema.json", "utf8")),
+  );
+
+  // 1. Center creation & manager/status updates emit booking.center-assigned.v1
+  const created = await request(app.getHttpServer())
+    .post("/api/v1/centers")
+    .set("Authorization", `Bearer ${token("admin-1", "super_admin")}`)
+    .send({
+      name: "Sân Mới",
+      address: "100 Cầu Giấy",
+      phone: "0901234567",
+      managerId: "manager-new",
+      totalCourts: 1,
+    })
+    .expect(201);
+  expect(created.body.isActive).toBe(false);
+  await request(app.getHttpServer())
+    .patch(`/api/v1/centers/${created.body.id}`)
+    .set("Authorization", `Bearer ${token("admin-1", "super_admin")}`)
+    .send({ isActive: true })
+    .expect(200);
+  expect(
+    await db.outboxEvent.count({
+      where: { type: "booking.center-assigned.v1" },
+    }),
+  ).toBe(2);
+
+  // 2. Reminder worker emits T-24h once, then T-2h once (no duplicates)
+  const held = await hold("reminder-hold-key", "reminder-user", "2030-01-08", [
+    1020,
+  ]).expect(201); // 17:00 VN = 10:00Z on 2030-01-08 (24h from now)
+  const confirmed = await confirm(held.body.id, "reminder-user");
+  expect(confirmed.status).toBe(200);
+
+  const reminderWorker = app.get(BookingReminderWorker);
+  expect(await reminderWorker.enqueueDueReminders()).toBe(1);
+  expect(await reminderWorker.enqueueDueReminders()).toBe(0);
+
+  now = new Date("2030-01-08T09:00:00Z"); // 1h before 10:00Z -> T-2h
+  expect(await reminderWorker.enqueueDueReminders()).toBe(1);
+  expect(await reminderWorker.enqueueDueReminders()).toBe(0);
+
+  // 3. Outbox relay worker publishes pending rows and marks publishedAt
+  const relay = app.get(OutboxRelayWorker);
+  const flushed = await relay.flushPending();
+  expect(flushed).toBeGreaterThanOrEqual(5);
+  expect(await db.outboxEvent.count({ where: { publishedAt: null } })).toBe(0);
+
+  for (const env of publishedEnvelopes.filter(
+    (e) => e.type !== "booking.confirmed.v1",
+  )) {
+    expect(validateDomain(env)).toBe(true);
+  }
+
+  // 4. Internal APIs enforce INTERNAL_SERVICE_TOKEN and return expected data
+  await request(app.getHttpServer())
+    .get(`/internal/booking/centers/${centerId}/ownership`)
+    .expect(401);
+  await request(app.getHttpServer())
+    .get(`/internal/booking/centers/${centerId}/ownership`)
+    .set("x-internal-token", "wrong-token")
+    .expect(401);
+
+  const ownership = await request(app.getHttpServer())
+    .get(`/internal/booking/centers/${centerId}/ownership?managerId=manager`)
+    .set("x-internal-token", "integration-internal-token")
+    .expect(200);
+  expect(ownership.body).toMatchObject({
+    centerId,
+    managerId: "manager",
+    isManager: true,
+  });
+
+  const customers = await request(app.getHttpServer())
+    .get(`/internal/booking/centers/${centerId}/customers?date=2030-01-08`)
+    .set("x-internal-token", "integration-internal-token")
+    .expect(200);
+  expect(customers.body.userIds).toEqual(["reminder-user"]);
+
+  const eligible = await request(app.getHttpServer())
+    .get(`/internal/booking/centers/${centerId}/eligibility?userId=reminder-user`)
+    .set("x-internal-token", "integration-internal-token")
+    .expect(200);
+  expect(eligible.body.hasConfirmedBooking).toBe(true);
+
+  const ineligible = await request(app.getHttpServer())
+    .get(`/internal/booking/centers/${centerId}/eligibility?userId=other`)
+    .set("x-internal-token", "integration-internal-token")
+    .expect(200);
+  expect(ineligible.body.hasConfirmedBooking).toBe(false);
 });

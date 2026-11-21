@@ -1,17 +1,50 @@
 import http from "./http.js";
 
-export async function login(credentials) {
-  const { data } = await http.post("/api/auth/login", credentials);
+let pendingRefresh = null;
 
+function validateSessionResponse(data, message) {
   if (
     typeof data?.accessToken !== "string" ||
     !data.accessToken ||
     typeof data?.profile?.userId !== "string"
   ) {
-    throw new Error("Kết quả đăng nhập không hợp lệ");
+    throw new Error(message);
+  }
+  return data;
+}
+
+export async function login(credentials) {
+  const { data } = await http.post("/api/auth/login", credentials, {
+    skipAuth: true,
+    skipRefresh: true,
+  });
+
+  return validateSessionResponse(data, "Kết quả đăng nhập không hợp lệ");
+}
+
+export async function refreshSession() {
+  if (!pendingRefresh) {
+    pendingRefresh = http
+      .post("/api/auth/refresh", null, {
+        skipAuth: true,
+        skipRefresh: true,
+      })
+      .then(({ data }) =>
+        validateSessionResponse(data, "Kết quả gia hạn phiên không hợp lệ"),
+      )
+      .finally(() => {
+        pendingRefresh = null;
+      });
   }
 
-  return data;
+  return pendingRefresh;
+}
+
+export async function logoutSession() {
+  await http.post("/api/auth/logout", null, {
+    skipAuth: true,
+    skipRefresh: true,
+  });
 }
 
 export async function register({ email, username, password }) {
