@@ -6,6 +6,19 @@ services:
     ports:
       - "127.0.0.1:8025:8025"
 
+  identity-rabbitmq:
+    image: rabbitmq:4-alpine
+    environment:
+      RABBITMQ_DEFAULT_USER: identity
+      RABBITMQ_DEFAULT_PASS: identity_local
+    volumes:
+      - identity-events:/var/lib/rabbitmq
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "-q", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 15
+
   identity-db:
     image: postgres:16-alpine
     environment:
@@ -44,6 +57,10 @@ services:
       JWT_ISSUER: badminton-identity
       JWT_AUDIENCE: badminton-system
       MAILPIT_URL: http://mailpit:8025
+      METRICS_TOKEN: ${IDENTITY_METRICS_TOKEN:-local-identity-monitoring-only}
+      INTERNAL_SERVICE_TOKEN: ${INTERNAL_SERVICE_TOKEN:-local-internal-service-only}
+      RABBITMQ_URL: ${RABBITMQ_URL:-amqp://identity:identity_local@identity-rabbitmq:5672}
+      RABBITMQ_EXCHANGE: ${RABBITMQ_EXCHANGE:-badminton.events}
     ports:
       - "127.0.0.1:8084:8084"
     depends_on:
@@ -51,6 +68,8 @@ services:
         condition: service_completed_successfully
       mailpit:
         condition: service_started
+      identity-rabbitmq:
+        condition: service_healthy
     healthcheck:
       test:
         [
@@ -63,4 +82,5 @@ services:
       timeout: 5s
       retries: 10
 volumes:
+  identity-events:
   identity-data:

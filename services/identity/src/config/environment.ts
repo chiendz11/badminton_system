@@ -9,6 +9,10 @@ export interface IdentityConfig {
   secureRefreshCookie: boolean;
   trustProxy: number | false;
   mailpit?: MailpitConfig;
+  metricsToken?: string;
+  internalServiceToken?: string;
+  rabbitmqUrl?: string;
+  rabbitmqExchange?: string;
 }
 
 function parseCookieSecure(env: NodeJS.ProcessEnv): boolean {
@@ -78,5 +82,9 @@ export function configuration(
     secureRefreshCookie: parseCookieSecure(env),
     trustProxy: parseTrustProxy(env.TRUST_PROXY),
     mailpit: mailpitConfiguration(env),
+    metricsToken: env.METRICS_TOKEN,
+    internalServiceToken: env.INTERNAL_SERVICE_TOKEN,
+    rabbitmqUrl: env.RABBITMQ_URL,
+    rabbitmqExchange: env.RABBITMQ_EXCHANGE,
   };
 }

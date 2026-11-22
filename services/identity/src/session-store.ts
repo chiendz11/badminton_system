@@ -14,14 +14,31 @@ type LockedSession = {
 
 export function createSessionStore(prisma: PrismaClient) {
   return {
-    createSession: async (userId: string, tokenHash: string, expiresAt: Date) => {
-      await prisma.session.create({
-        data: {
-          userId,
-          expiresAt,
-          refreshTokens: { create: { tokenHash, expiresAt } },
-        },
-        select: { id: true },
+    createSession: async (
+      userId: string,
+      tokenHash: string,
+      expiresAt: Date,
+    ) => {
+      return prisma.$transaction(async (tx) => {
+        await tx.$queryRaw`SELECT id FROM "User" WHERE id = ${userId}::uuid FOR UPDATE`;
+        const user = await tx.user.findFirst({
+          where: {
+            id: userId,
+            isActive: true,
+            ...emailVerificationEligibility,
+          },
+          include: { profile: true },
+        });
+        if (!user) throw Error("Account is unavailable");
+        await tx.session.create({
+          data: {
+            userId,
+            expiresAt,
+            refreshTokens: { create: { tokenHash, expiresAt } },
+          },
+          select: { id: true },
+        });
+        return user;
       });
     },
 

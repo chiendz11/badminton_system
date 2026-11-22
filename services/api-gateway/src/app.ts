@@ -14,7 +14,7 @@ import { bookingRoutes } from "./routes/booking.route";
 import { BookingAdapter } from "./modules/booking/booking-adapter";
 import { CenterAdapter } from "./modules/centers/center-adapter";
 import { graphqlMiddleware } from "./graphql.setup";
-import { identityRoutes } from "./routes/identity.route";
+import { identityRoutes, identityManagementRoutes } from "./routes/identity.route";
 
 export function createApp(
   config: GatewayConfig = configuration(),
@@ -69,6 +69,7 @@ export function createApp(
   app.use("/api/auth", identityRoutes(config, transport));
 
   app.use(authenticate(config));
+  app.use("/api/identity", identityManagementRoutes(config, transport));
 
   app.post(
     "/graphql",

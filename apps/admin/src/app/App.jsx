@@ -12,6 +12,7 @@ import AssistantDrawer from "../features/assistant/components/AssistantDrawer.ts
 import LoginPromptModal from "../features/assistant/components/LoginPromptModal.jsx";
 import LoginModal from "../features/assistant/components/LoginModal.jsx";
 
+const UserManagement = lazy(() => import("../features/identity/pages/UserManagement.jsx"));
 const Dashboard = lazy(
   () => import("../features/dashboard/pages/Dashboard.jsx"),
 );
@@ -41,6 +42,7 @@ export default function App() {
             <Route path="/" element={<Navigate to="/dashboard" replace />} />
             <Route element={<AdminLayout />}>
               <Route path="/dashboard" element={<Dashboard />} />
+              <Route path="/users" element={<UserManagement />} />
               <Route path="/admin-bill-list" element={<BillManage />} />
               <Route path="/center-status" element={<CenterStatus />} />
               <Route path="/center-management" element={<CenterManagement />} />
